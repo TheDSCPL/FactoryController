@@ -31,7 +31,7 @@ Alex:
   [X]  "Select called on tool when tool is not on Idle state" tool pre-selection algorithm bug (Class: Machine)
   [X]  Rework parallel cell processing algorithm: currently it is not taking advantage of parallelism as much as it should
   [X]  Order processing algorithm and distribution by the various cells (Class: Optimizer)
-  [ ]  "TODO A:" in code (Class: N/A)
+  [X]  "TODO A:" in code (Class: N/A)
 
 Unassigned:
    -

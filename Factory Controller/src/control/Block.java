@@ -59,7 +59,7 @@ public class Block {
     }
 
     /**
-     * For blocks used in MachiningOrder TODO: A: Refactor?
+     * For blocks used in MachiningOrder TO|DO: A: Refactor?
      */
     public TransformationSequence transformations;
 
@@ -91,14 +91,14 @@ public class Block {
     public void applyNextTransformation() {
         type = getNextTransformation().end;
     }
-
-    // TODO: A: experimental
+    
     public Path timeTravel(double advance) {
         Path newPath = path.copy();
         double timePosition = 0;
         Type currentBlockType = type;
 
-        while (timePosition < advance && newPath.length() > 0) {
+        while (timePosition < advance && newPath.hasNext()) {
+
             if (newPath.getCurrent() instanceof Machine) {
                 Transformation t = transformations.getNextTransformation(currentBlockType);
                 if (t != null) {
@@ -107,10 +107,7 @@ public class Block {
                 }
             }
             
-            if (newPath.length() > 2) {
-                timePosition += newPath.getNext().transferTimeEstimate(newPath.getCurrent(), newPath.get(2));
-            }
-
+            timePosition += Conveyor.transferTimeEstimate(newPath.getCurrent(), newPath.getNext());
             newPath.advance();
         }
 

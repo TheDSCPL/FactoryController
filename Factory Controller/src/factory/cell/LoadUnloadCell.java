@@ -76,13 +76,20 @@ public class LoadUnloadCell extends Cell {
 
     @Override
     protected boolean processBlockIn(Block block) {
+        block.path.push(t4);
+        
+        if (/*Block is stacked*/false) { // TODO: L: write here contidition to know if block is a stacked block
+            if (t4.roller.isFull()) {
+                block.path.push(t5);
+            }
+        }
+        else {
+            UnloadOrder order = (UnloadOrder) block.order;
 
-        // TODO: A: stacked blocks also need to be unloaded but they have no UnloadOrder
-        UnloadOrder order = (UnloadOrder) block.order;
-
-        block.path.push(t4); // Position == 1 or 2
-        if (order.position == 2) {
-            block.path.push(t5);
+            // Position == 1 or 2
+            if (order.position == 2) {
+                block.path.push(t5);
+            }
         }
 
         return true;
@@ -106,7 +113,8 @@ public class LoadUnloadCell extends Cell {
         switch (position) {
             case 1: return t4;
             case 2: return t5;
-            default: throw new IndexOutOfBoundsException("No pusher at position " + position);
+            default:
+                throw new IndexOutOfBoundsException("No pusher at position " + position);
         }
     }
 

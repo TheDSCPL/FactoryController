@@ -107,8 +107,7 @@ public final class Path {
         p.append(this);
         return p;
     }
-
-    // TODO: A: experimental
+    
     public double timeEstimate() {
         if (length() < 2) {
             return 0;
@@ -116,12 +115,8 @@ public final class Path {
 
         double time = 0;
 
-        for (int i = 1; i < length() - 1; i++) {
-            Conveyor last = path.get(i - 1);
-            Conveyor current = path.get(i);
-            Conveyor next = path.get(i + 1);
-
-            time += current.transferTimeEstimate(last, next);
+        for (int i = 0; i < length() - 1; i++) {
+            time += Conveyor.transferTimeEstimate(path.get(i), path.get(i + 1));
         }
 
         return time;

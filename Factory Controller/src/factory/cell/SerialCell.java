@@ -10,7 +10,7 @@ import transformation.*;
 
 public class SerialCell extends Cell {
 
-    private static final int MAX_BLOCKS_IN_CELL = 2; // TODO: A: three makes times worse?
+    private static final int MAX_BLOCKS_IN_CELL = 2; // TO|DO: A: decide on which optimization options to choose (Apparently, three blocks makes times worse)
 
     private final Mover t1;
     private final Rotator t2;
@@ -91,8 +91,8 @@ public class SerialCell extends Cell {
         orders.stream().filter((o) -> (o instanceof MachiningOrder)).map((o) -> (MachiningOrder) o).forEach((order) -> {
             order.possibleSequences(Machine.Type.Set.AB).stream().forEach((seq) -> {
 
-                // >>>>> Calculate entersImmediately TODO: A: using arrivalDelayEstimate
-                boolean entersImmediately = !firstConveyorsBlocked
+                // >>>>> Calculate entersImmediately
+                boolean entersImmediately = !firstConveyorsBlocked // TO|DO: A: decide on which optimization options to choose
                                             && !blocksIncoming
                         .stream()
                         .filter(b -> b.transformations.containsMachineType(Machine.Type.A))
@@ -123,9 +123,12 @@ public class SerialCell extends Cell {
                     priority = 0;
                 }
 
-                // >>>>> Calculate possibleExecutionCount
-                // If sequence only contains machine B, three blocks can enter at once TODO: A: might send more blocks than can fit in the cell
-                int possibleExecutionCount = seq.containsMachineType(Machine.Type.A) ? 1 : MAX_BLOCKS_IN_CELL;
+                // >>>>> Calculate possibleExecutionCount TO|DO: A: decide on which optimization options to choose
+                // If sequence only contains machine B, three blocks can enter at once TO|DO: A: might send more blocks than can fit in the cell
+                int possibleExecutionCount = //min(
+                        seq.containsMachineType(Machine.Type.A) ? 1 : MAX_BLOCKS_IN_CELL;
+                //        MAX_BLOCKS_IN_CELL - blocksIncoming.size() + blocksInside.size()
+                //);
 
                 // >>>>> Add possibility
                 ret.add(new OrderPossibility(

@@ -150,7 +150,7 @@ public class ParallelCell extends Cell {
         orders.stream().filter((o) -> (o instanceof MachiningOrder)).map((o) -> (MachiningOrder) o).forEach((order) -> {
             order.possibleSequences(Machine.Type.Set.BC).stream().forEach((seq) -> {
 
-                // >>>>> Calculate entersImmediately TODO: A: using arrivalDelayEstimate
+                // >>>>> Calculate entersImmediately TO|DO: A: using arrivalDelayEstimate
                 boolean entersImmediately = blocksIncoming.size() + blocksInside.size() + 1 <= MAX_BLOCKS_IN_CELL;
 
                 // >>>>> Calculate priority
@@ -173,7 +173,7 @@ public class ParallelCell extends Cell {
                 int possibleExecutionCount = 1;
 
                 // >>>>> Calculate totalDuration
-                double totalDuration = seq.totalDuration();// + blockPathEstimateForTransformationSequence(seq).timeEstimate(); // TODO: A: this makes times worse?
+                double totalDuration = seq.totalDuration();// + blockPathEstimateForTransformationSequence(seq).timeEstimate(); // TO|DO: A: this makes times worse?
 
                 // >>>>> Add possibility
                 ret.add(new OrderPossibility(
@@ -225,7 +225,7 @@ public class ParallelCell extends Cell {
 
     /*@Override
     protected Path pathEstimateForIncomingBlock(Block b) {
-        return blockPathEstimateForTransformationSequence(b.transformations); // TODO: A: this makes times worse?
+        return blockPathEstimateForTransformationSequence(b.transformations); // TO|DO: A: this makes times worse?
     }*/
 
     @Override

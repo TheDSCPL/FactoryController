@@ -41,7 +41,7 @@ public abstract class Conveyor extends Container {
     public Conveyor(String id, int length, int connectionCount) {
         super(length);
         this.id = id;
-        
+
         presenceSensors = new Sensor[length];
         connections = new Conveyor[connectionCount];
         queueWeights = new Double[connectionCount];
@@ -77,9 +77,11 @@ public abstract class Conveyor extends Container {
                         }
                     }
                 }
-                else if (transferPartner != null) {
-                    blockTransferPrepare();
-                    conveyorState = State.PrepareToReceive;
+                else {
+                    if (transferPartner != null) {
+                        blockTransferPrepare();
+                        conveyorState = State.PrepareToReceive;
+                    }
                 }
                 break;
             case PrepareToReceive:
@@ -136,8 +138,10 @@ public abstract class Conveyor extends Container {
         if (isSending()) {
             conveyorState = State.Sending;
         }
-        else if (isReceiving()) {
-            conveyorState = State.Receiving;
+        else {
+            if (isReceiving()) {
+                conveyorState = State.Receiving;
+            }
         }
     }
 
@@ -158,12 +162,14 @@ public abstract class Conveyor extends Container {
 
             Main.stats.inc(id, Statistics.Type.BlocksSent, b.type);
         }
-        else if (isReceiving()) {
-            shiftOneBlock(transferMotorDirection(transferPartner, isSending()), newBlock);
-            newBlock.path.advance();
-            blockTransferFinished();
+        else {
+            if (isReceiving()) {
+                shiftOneBlock(transferMotorDirection(transferPartner, isSending()), newBlock);
+                newBlock.path.advance();
+                blockTransferFinished();
 
-            Main.stats.inc(id, Statistics.Type.BlocksReceived, newBlock.type);
+                Main.stats.inc(id, Statistics.Type.BlocksReceived, newBlock.type);
+            }
         }
 
         transferPartner = null;
@@ -313,15 +319,17 @@ public abstract class Conveyor extends Container {
         return conveyorState == State.PrepareToReceive
                || conveyorState == State.Receiving;
     }
-
-    // TODO: A: experimental
-    public double transferTimeEstimate(Conveyor from, Conveyor to) {
-        if (!isConnectedToConveyor(from) || !isConnectedToConveyor(to)) {
-            throw new Error("Not connected to given conveyors");
+    
+    public static double transferTimeEstimate(Conveyor from, Conveyor to) {
+        if (!to.isConnectedToConveyor(from) || !from.isConnectedToConveyor(to)) {
+            throw new Error("Not connected to given conveyors " + from.id + " " + to.id);
         }
 
-        // TODO: A: not finished on subclasses
-        return length * (double) Main.config.getI("conveyor.sizeUnit") / Main.config.getD("timing.conveyor.speed") * 1000; // *1000 to convert to milliseconds
+        return from.transferTimeEstimate() + to.transferTimeEstimate();
+    }
+
+    protected double transferTimeEstimate() {
+        return length / 2.0 * Main.config.getD("conveyor.sizeUnit") / Main.config.getD("timing.conveyor.speed") * 1000; // *1000 to convert to milliseconds
     }
 
     public void setSendingFrozen(boolean sendingFrozen) {
