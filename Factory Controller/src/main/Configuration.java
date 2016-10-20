@@ -39,4 +39,12 @@ public class Configuration {
         return Integer.parseInt(general.getProperty(key));
     }
     
+    
+    public int getBaseInput(String id) {
+        return 0;
+    }
+    
+    public int getBaseOutput(String id) {
+        return 0;
+    }
 }

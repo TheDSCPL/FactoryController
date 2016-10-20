@@ -7,6 +7,7 @@ package factory.conveyor;
 
 import control.*;
 import factory.*;
+import main.*;
 
 /**
  *
@@ -26,7 +27,14 @@ public abstract class Conveyor {
         blocks = new Block[length];
         presenceSensors = new Sensor[length];
         connectedConveyors = new Conveyor[connections];
-        //transferMotor = Motor(Main.);
+        
+        transferMotor = new Motor(Main.config.getBaseOutput(id) + 0);
+        for (int i = 0; i < length; i++) {
+            presenceSensors[i] = new Sensor(Main.config.getBaseOutput(id) + i);
+        }
+        
+        
+        
     }
     
     public void update() {
