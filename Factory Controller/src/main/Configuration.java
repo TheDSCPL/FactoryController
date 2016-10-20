@@ -17,18 +17,14 @@ import java.util.logging.Logger;
 public class Configuration {
     
     private final Properties general = new Properties();
-    private final Properties inputs = new Properties();
-    private final Properties outputs = new Properties();
+    private final ??? io = ???;
     
     Configuration() {
         try { general.load(new FileInputStream(new File("src/main/config.properties"))); }
         catch (Exception ex) { Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex); }
         
-        try { inputs.load(new FileInputStream(new File("src/main/inputs.properties"))); }
-        catch (Exception ex) { Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex); }
-        
-        try { outputs.load(new FileInputStream(new File("src/main/outputs.properties"))); }
-        catch (Exception ex) { Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex); }
+        // Load io map
+        io = 
     }
     
     public String getS(String key) {
