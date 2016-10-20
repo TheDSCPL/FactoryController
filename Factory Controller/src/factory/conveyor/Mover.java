@@ -5,8 +5,6 @@
  */
 package factory.conveyor;
 
-import factory.*;
-
 /**
  *
  * @author Alex
@@ -15,6 +13,13 @@ public class Mover extends Conveyor {
 
     public Mover(String id, int length) {
         super(id, length, 2);
+    }
+    
+    @Override
+    public void update() {
+        super.update();
+        
+        transferMotor.control(presenceSensors[0].on(), true);
     }
     
     @Override

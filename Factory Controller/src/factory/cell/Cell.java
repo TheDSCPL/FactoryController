@@ -13,6 +13,7 @@ import factory.conveyor.*;
  */
 public abstract class Cell {
     public String id;
+    public Conveyor[] conveyorList;
     
     public Cell(String id) {
         this.id = id;
