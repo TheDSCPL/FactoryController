@@ -20,21 +20,6 @@ public abstract class Conveyor {
     private final Motor transferMotor;
     private final Sensor[] presenceSensors;
     public String id;
-    public Conveyor[] connectedConveyors;
-    
-    public Conveyor(String id, int length, int connections) {
-        this.id = id;
-        blocks = new Block[length];
-        presenceSensors = new Sensor[length];
-        connectedConveyors = new Conveyor[connections];
-        
-        transferMotor = new Motor(Main.config.getBaseOutput(id) + 0);
-        for (int i = 0; i < length; i++) {
-            presenceSensors[i] = new Sensor(Main.config.getBaseOutput(id) + i);
-        }
-        
-    }
-    
     public void update() {
         switch (conveyorState) {
             case Standby:
