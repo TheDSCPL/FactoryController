@@ -17,8 +17,8 @@ public abstract class Conveyor {
     public Conveyor transferPartner;
     public Block[] blocks;
     public ConveyorState conveyorState;
-    private final Motor transferMotor;
-    private final Sensor[] presenceSensors;
+    final Motor transferMotor;
+    final Sensor[] presenceSensors;
     public String id;
     public Conveyor[] connectedConveyors;
     
@@ -31,20 +31,20 @@ public abstract class Conveyor {
         //TODO: 
         transferMotor = new Motor(Main.config.getBaseOutput(id) + 0);
         for (int i = 0; i < length; i++) {
-            presenceSensors[i] = new Sensor(Main.config.getBaseOutput(id) + i);
+            presenceSensors[i] = new Sensor(Main.config.getBaseInput(id) + i);
         }
     }
     
     public void update() {
-        switch (conveyorState) {
+        /*switch (conveyorState) {
             case Standby:
-                if (/*has block to send*/ false) {
+                if (has block to send false) {
                     if (isBlockTransferPossible()) {
                         
                     }
                 }
                 else if (transferPartner != null) {
-                    if (/* can receive from transferPartner*/ false) {
+                    if ( can receive from transferPartner false) {
                         blockTransferPrepare();
                         conveyorState = ConveyorState.PrepareToReceive;
                     }
@@ -55,7 +55,7 @@ public abstract class Conveyor {
                     transferPartner.blockTransferStart();
                 }
             case Receiving:
-                if (/*sensor*/false) {
+                if (sensor false) {
                     Block newBlock = transferPartner.blockTransferStop();
                     // add newBlock to list from correct side
                     blockTransferStop();
@@ -67,7 +67,7 @@ public abstract class Conveyor {
             case ReadyToSend:
                 transferPartner.blockTransferRegister(this);
             case Sending: break;
-        }
+        }*/
     }
     
     public void blockTransferRegister(Conveyor c) {

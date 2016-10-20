@@ -19,10 +19,12 @@ public class Configuration {
     private final Properties general = new Properties();
     public final Map<String, Integer> inputIds = new HashMap<>();
     public final Map<String, Integer> outputIds = new HashMap<>();
-    private static final String CSVFileName = "io.csv";
+    
+    private static final String CSVFileName = "src/main/io.csv";
+    private static final String PropertiesFileName = "src/main/config.properties";
     
     Configuration() {
-        try { general.load(new FileInputStream(new File("src/main/config.properties"))); }
+        try { general.load(new FileInputStream(new File(PropertiesFileName))); }
         catch (Exception ex) { Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex); }
         
         List<String> errorList = new ArrayList<>();
@@ -34,17 +36,24 @@ public class Configuration {
             String line;
             for( int lineNumber=1; (line = br.readLine()) != null; lineNumber++)
             {
-                String[] values = line.split(",");
+                String[] values = line.split(";");
                 if(values.length != 3)
                     throw new Exception("Line " + lineNumber + " doesn't have 3 values.");
                 //decide if it is an input or and output
+                
+                int newValue = Integer.parseInt(values[2]);
+                
                 switch(values[1])
                 {
                     case "I":
-                        inputIds.put(values[0],Integer.parseInt(values[2]));
+                        if (newValue < inputIds.getOrDefault(values[0], Integer.MAX_VALUE)) {
+                            inputIds.put(values[0], Integer.parseInt(values[2]));
+                        }
                         break;
                     case "O":
-                        outputIds.put(values[0], Integer.parseInt(values[2]));
+                        if (newValue < outputIds.getOrDefault(values[0], Integer.MAX_VALUE)) {
+                            outputIds.put(values[0], Integer.parseInt(values[2]));
+                        }
                         break;
                     default:
                       throw new Exception("Invalid I/O classifier \"" + values[1] + "\" at line " + lineNumber);  

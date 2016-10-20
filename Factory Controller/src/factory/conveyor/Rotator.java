@@ -26,6 +26,14 @@ public class Rotator extends Conveyor {
     }
     
     @Override
+    public void update() {
+        super.update();
+        
+        if (rotateSensorMinus.on()) { rotateMotor.turnOn(false); }
+        if (rotateSensorPlus.on()) { rotateMotor.turnOn(true); }
+    }
+    
+    @Override
     public boolean transferMotorDirection() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

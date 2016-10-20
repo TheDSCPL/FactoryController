@@ -26,6 +26,14 @@ public class Rail extends Conveyor {
     }
     
     @Override
+    public void update() {
+        super.update();
+        
+        if (railSensorMinus.on()) { railMotor.turnOn(true); }
+        if (railSensorPlus.on()) { railMotor.turnOn(false); }
+    }
+    
+    @Override
     public boolean transferMotorDirection() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

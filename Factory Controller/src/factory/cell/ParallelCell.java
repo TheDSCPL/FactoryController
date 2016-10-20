@@ -38,6 +38,7 @@ public class ParallelCell extends Cell {
         t8 = new Mover(id + "T8", 1);
         t9 = new Rotator(id + "T9");
         t10 = new Mover(id + "T10", 2);
+        conveyorList = new Conveyor[] {t1, t2, t3, t4, t5, t6, t7, t8, t9, t10};
         
         // Connect conveyors
         t1.connectedConveyors = new Conveyor[] {null, t2};
@@ -65,7 +66,9 @@ public class ParallelCell extends Cell {
 
     @Override
     public void update() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        for (Conveyor conveyor : conveyorList) {
+            conveyor.update();
+        }
     }
 
     @Override

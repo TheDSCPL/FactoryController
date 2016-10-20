@@ -32,6 +32,7 @@ public class SerialCell extends Cell {
         t5 = new Machine(id + "T5", Machine.Type.B);
         t6 = new Rotator(id + "T6");
         t7 = new Mover(id + "T7", 1);
+        conveyorList = new Conveyor[] {t1, t2, t3, t4, t5, t6, t7};
         
         // Connect conveyors
         t1.connectedConveyors = new Conveyor[] {null, t2};
@@ -56,7 +57,9 @@ public class SerialCell extends Cell {
 
     @Override
     public void update() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        for (Conveyor conveyor : conveyorList) {
+            conveyor.update();
+        }
     }
 
     @Override
