@@ -32,7 +32,6 @@ public class Factory {
         
         // Connect cells
         Cell.connect(cw, c1, c2, c3, c4, ca, cb);
-        
     }
 
 }

@@ -36,7 +36,7 @@ public class SerialCell extends Cell {
         // Connect conveyors
         t1.connectedConveyors[1] = t2;
         
-        t2.connectedConveyors[1] = t1;
+        t2.connectedConveyors[0] = t1;
         t2.connectedConveyors[3] = t3;
         
         t3.connectedConveyors[0] = t2;
@@ -53,7 +53,7 @@ public class SerialCell extends Cell {
     }
 
     @Override
-    public Conveyor cornerConveyor(int position) {
+    public Conveyor getCornerConveyor(int position) {
         switch (position) {
             case 0: return t1;
             case 1: return t2;
@@ -70,14 +70,14 @@ public class SerialCell extends Cell {
 
     @Override
     public void connectWithRightCell(Cell right) {
-        t2.connectedConveyors[2] = right.cornerConveyor(0);
-        t6.connectedConveyors[2] = right.cornerConveyor(3);
+        t2.connectedConveyors[2] = right.getCornerConveyor(0);
+        t6.connectedConveyors[2] = right.getCornerConveyor(3);
     }
 
     @Override
     public void connectWithLeftCell(Cell left) {
-        t1.connectedConveyors[0] = left.cornerConveyor(1);
-        t7.connectedConveyors[0] = left.cornerConveyor(2);
+        t1.connectedConveyors[0] = left.getCornerConveyor(1);
+        t7.connectedConveyors[0] = left.getCornerConveyor(2);
     }
     
 }

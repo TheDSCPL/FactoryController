@@ -24,7 +24,7 @@ public class Assembler extends Cell {
     }
     
     @Override
-    public Conveyor cornerConveyor(int position) {
+    public Conveyor getCornerConveyor(int position) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

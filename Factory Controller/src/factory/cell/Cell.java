@@ -5,7 +5,7 @@
  */
 package factory.cell;
 
-import factory.conveyor.Conveyor;
+import factory.conveyor.*;
 
 /**
  *
@@ -18,11 +18,11 @@ public abstract class Cell {
         this.id = id;
     }
     
-    public abstract Conveyor cornerConveyor(int position); // 1= top left, turns clockwise
-    public abstract void update();
-    
+    public abstract Conveyor getCornerConveyor(int position); // 0 = top left, turns clockwise    
     public abstract void connectWithRightCell(Cell right);
     public abstract void connectWithLeftCell(Cell left);
+    
+    public abstract void update();
     
     public static void connect(Cell... cells) {
         if (cells.length == 0) { return; }

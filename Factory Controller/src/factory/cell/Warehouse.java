@@ -25,7 +25,7 @@ public class Warehouse extends Cell {
     }
 
     @Override
-    public Conveyor cornerConveyor(int position) {
+    public Conveyor getCornerConveyor(int position) {
         switch (position) {
             case 1: return out;
             case 2: return in;
