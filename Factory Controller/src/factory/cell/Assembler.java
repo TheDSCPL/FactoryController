@@ -5,7 +5,7 @@
  */
 package factory.cell;
 
-import factory.conveyor.Conveyor;
+import factory.conveyor.*;
 
 /**
  *
@@ -13,6 +13,16 @@ import factory.conveyor.Conveyor;
  */
 public class Assembler extends Cell {
 
+    public Assembler(String id) {
+        super(id);
+        
+        // Create conveyors
+        //...
+        
+        // Connect conveyors
+        //...
+    }
+    
     @Override
     public Conveyor cornerConveyor(int position) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

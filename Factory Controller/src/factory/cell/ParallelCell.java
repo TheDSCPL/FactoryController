@@ -18,7 +18,7 @@ public class ParallelCell extends Cell {
     //...
         
     public ParallelCell(String id) {
-        this.id = id;
+        super(id);
         
         // Create conveyors
         t1 = new Mover(id + "T1", 1);

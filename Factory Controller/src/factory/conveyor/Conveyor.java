@@ -6,8 +6,7 @@
 package factory.conveyor;
 
 import control.*;
-import factory.Motor;
-import factory.Sensor;
+import factory.*;
 
 /**
  *
@@ -26,7 +25,8 @@ public abstract class Conveyor {
         this.id = id;
         blocks = new Block[length];
         presenceSensors = new Sensor[length];
-        connectedConveyors = new Conveyor[2];
+        connectedConveyors = new Conveyor[connections];
+        //transferMotor = Motor(Main.);
     }
     
     public void update() {

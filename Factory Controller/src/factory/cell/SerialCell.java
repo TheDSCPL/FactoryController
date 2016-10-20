@@ -22,7 +22,7 @@ public class SerialCell extends Cell {
     private final Mover t7;
     
     public SerialCell(String id) {
-        this.id = id;
+        super(id);
         
         // Create conveyors
         t1 = new Mover(id + "T1", 1);

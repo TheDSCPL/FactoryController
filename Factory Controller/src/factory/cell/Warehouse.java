@@ -18,7 +18,7 @@ public class Warehouse extends Cell {
     private final Mover in;
     
     public Warehouse(String id) {
-        this.id = id;
+        super(id);
         
         out = new Mover(id + "T1", 1);
         in = new Mover(id + "T2", 1);

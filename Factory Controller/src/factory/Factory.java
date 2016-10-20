@@ -5,10 +5,7 @@
  */
 package factory;
 
-import factory.cell.ParallelCell;
-import factory.cell.Cell;
-import factory.cell.SerialCell;
-import factory.cell.Warehouse;
+import factory.cell.*;
 
 /**
  *
@@ -16,20 +13,25 @@ import factory.cell.Warehouse;
  */
 public class Factory {
     
+    Warehouse cw;
+    ParallelCell c1, c3;
+    SerialCell c2, c4;
+    Assembler ca;
+    LoadUnloadBay cb;
+    
     public Factory() {
         
         // Create cells
-        Warehouse w1 = new Warehouse("A");
-        
-        SerialCell c1 = new SerialCell("Sa");
-        ParallelCell c2 = new ParallelCell("Pa");
-        SerialCell c3 = new SerialCell("Sb");
+        cw = new Warehouse("A");
+        c1 = new ParallelCell("Pa");
+        c2 = new SerialCell("Sa");
+        c3 = new ParallelCell("Pb");
+        c4 = new SerialCell("Sb");
+        ca = new Assembler("M");
+        cb = new LoadUnloadBay("C");
         
         // Connect cells
-        Cell.connect(w1, c1);
-        Cell.connect(c1, c2);
-        Cell.connect(c2, c3);
-        //...
+        Cell.connect(cw, c1, c2, c3, c4, ca, cb);
         
     }
 

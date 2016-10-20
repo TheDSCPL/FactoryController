@@ -13,6 +13,16 @@ import factory.conveyor.Conveyor;
  */
 public class LoadUnloadBay extends Cell {
 
+    public LoadUnloadBay(String id) {
+        super(id);
+        
+        // Create conveyors
+        //...
+        
+        // Connect conveyors
+        //...
+    }
+    
     @Override
     public Conveyor cornerConveyor(int position) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
