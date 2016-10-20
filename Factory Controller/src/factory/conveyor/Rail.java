@@ -5,14 +5,24 @@
  */
 package factory.conveyor;
 
+import factory.*;
+import main.*;
+
 /**
  *
  * @author Alex
  */
 public class Rail extends Conveyor {
 
+    private final Motor railMotor;
+    private final Sensor railSensorLeft;
+    private final Sensor railSensorRight;
+    
     public Rail(String id) {
         super(id, 1, 4);
+        railMotor = new Motor(Main.config.getBaseOutput(id) + 2);
+        railSensorLeft = new Sensor(Main.config.getBaseInput(id) + 1);
+        railSensorRight = new Sensor(Main.config.getBaseInput(id) + 2);
     }
     
     @Override
