@@ -20,6 +20,7 @@ public abstract class Conveyor {
     private Sensor[] presenceSensors;
     public String id;
     public Conveyor[] connectedConveyors;
+    public int firstI,firstO;
     
     public Conveyor(String id, int length, int connections) {
         this.id = id;
