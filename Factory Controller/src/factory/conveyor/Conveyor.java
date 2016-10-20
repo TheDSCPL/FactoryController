@@ -17,8 +17,8 @@ public abstract class Conveyor {
     public Conveyor transferPartner;
     public Block[] blocks;
     public ConveyorState conveyorState;
-    private Motor transferMotor;
-    private Sensor[] presenceSensors;
+    private final Motor transferMotor;
+    private final Sensor[] presenceSensors;
     public String id;
     public Conveyor[] connectedConveyors;
     
@@ -32,8 +32,6 @@ public abstract class Conveyor {
         for (int i = 0; i < length; i++) {
             presenceSensors[i] = new Sensor(Main.config.getBaseOutput(id) + i);
         }
-        
-        
         
     }
     
