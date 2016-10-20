@@ -15,8 +15,6 @@ public class Mover extends Conveyor {
 
     public Mover(String id, int length) {
         super(id, length, 2);
-        
-        Motor m = new Motor(2947);
     }
     
     @Override

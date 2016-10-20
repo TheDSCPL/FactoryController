@@ -5,14 +5,24 @@
  */
 package factory.conveyor;
 
+import factory.*;
+import main.*;
+
 /**
  *
  * @author Alex
  */
 public class Rotator extends Conveyor {
 
+    private final Motor rotateMotor;
+    private final Sensor rotateSensorLeft;
+    private final Sensor rotateSensorRight;
+    
     public Rotator(String id) {
         super(id, 1, 4);
+        rotateMotor = new Motor(Main.config.getBaseOutput(id) + 2);
+        rotateSensorLeft = new Sensor(Main.config.getBaseInput(id) + 1);
+        rotateSensorRight = new Sensor(Main.config.getBaseInput(id) + 2);
     }
     
     @Override
