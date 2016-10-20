@@ -5,6 +5,9 @@
  */
 package factory.conveyor;
 
+import main.*;
+import factory.*;
+
 /**
  *
  * @author Alex
@@ -15,10 +18,15 @@ public class Machine extends Conveyor {
     
     public final Type type;
     
+    public final Sensor ZSensor,zSensor,XSensor,xSensor;
+    
     public Machine(String id, Type type) {
         super(id, 1, 2);
         this.type = type;
-        
+        XSensor = new Sensor(Main.config.getBaseInput(id)+2);
+        xSensor = new Sensor(Main.config.getBaseInput(id)+3);
+        ZSensor = new Sensor(Main.config.getBaseInput(id)+4);
+        zSensor = new Sensor(Main.config.getBaseInput(id)+5);
         
     }
     
