@@ -25,23 +25,9 @@ public class Main {
         try {
             modbus.connect();
             
-            Motor m1 = new Motor(9);
-            Sensor s11 = new Sensor(4);
-            Sensor s12 = new Sensor(5);
-            
-            Motor m2 = new Motor(196);
-            Sensor s21 = new Sensor(141);
-            Sensor s22 = new Sensor(142);
-            
             while (true) {
                 modbus.refreshInputs();
-                
-                if (s11.on()) { m1.turnOnMinus(); }
-                else if (s12.on()) { m1.turnOnPlus(); }
-                
-                if (s21.on()) { m2.turnOnMinus(); }
-                else if (s22.on()) { m2.turnOnPlus(); }
-                
+                factory.update();
                 modbus.refreshOutputs();
                 
                 Thread.sleep(100);

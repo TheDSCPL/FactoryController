@@ -34,22 +34,13 @@ public class SerialCell extends Cell {
         t7 = new Mover(id + "T7", 1);
         
         // Connect conveyors
-        t1.connectedConveyors[1] = t2;
-        
-        t2.connectedConveyors[0] = t1;
-        t2.connectedConveyors[3] = t3;
-        
-        t3.connectedConveyors[0] = t2;
-        t3.connectedConveyors[1] = t4;
-        
-        t4.connectedConveyors[0] = t3;
-        t4.connectedConveyors[1] = t5;
-        
-        t5.connectedConveyors[0] = t4;
-        t5.connectedConveyors[1] = t6;
-        
-        t6.connectedConveyors[0] = t7;
-        t6.connectedConveyors[1] = t5;
+        t1.connectedConveyors = new Conveyor[] {null, t2};
+        t2.connectedConveyors = new Conveyor[] {t1, null, null, t3};
+        t3.connectedConveyors = new Conveyor[] {t2, t4};
+        t4.connectedConveyors = new Conveyor[] {t3, t5};
+        t5.connectedConveyors = new Conveyor[] {t4, t6};
+        t6.connectedConveyors = new Conveyor[] {t7, t5, null, null};
+        t7.connectedConveyors = new Conveyor[] {null, t6};
     }
 
     @Override

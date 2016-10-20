@@ -15,14 +15,14 @@ import main.*;
 public class Rotator extends Conveyor {
 
     private final Motor rotateMotor;
-    private final Sensor rotateSensorLeft;
-    private final Sensor rotateSensorRight;
+    private final Sensor rotateSensorMinus;
+    private final Sensor rotateSensorPlus;
     
     public Rotator(String id) {
         super(id, 1, 4);
         rotateMotor = new Motor(Main.config.getBaseOutput(id) + 2);
-        rotateSensorLeft = new Sensor(Main.config.getBaseInput(id) + 1);
-        rotateSensorRight = new Sensor(Main.config.getBaseInput(id) + 2);
+        rotateSensorMinus = new Sensor(Main.config.getBaseInput(id) + 1);
+        rotateSensorPlus = new Sensor(Main.config.getBaseInput(id) + 2);
     }
     
     @Override

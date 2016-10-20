@@ -15,14 +15,14 @@ import main.*;
 public class Rail extends Conveyor {
 
     private final Motor railMotor;
-    private final Sensor railSensorLeft;
-    private final Sensor railSensorRight;
+    private final Sensor railSensorMinus;
+    private final Sensor railSensorPlus;
     
     public Rail(String id) {
         super(id, 1, 4);
         railMotor = new Motor(Main.config.getBaseOutput(id) + 2);
-        railSensorLeft = new Sensor(Main.config.getBaseInput(id) + 1);
-        railSensorRight = new Sensor(Main.config.getBaseInput(id) + 2);
+        railSensorPlus = new Sensor(Main.config.getBaseInput(id) + 1);
+        railSensorMinus = new Sensor(Main.config.getBaseInput(id) + 2);
     }
     
     @Override

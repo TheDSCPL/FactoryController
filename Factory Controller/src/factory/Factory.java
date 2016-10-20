@@ -18,6 +18,7 @@ public class Factory {
     SerialCell c2, c4;
     Assembler ca;
     LoadUnloadBay cb;
+    Cell[] cellList;
     
     public Factory() {
         
@@ -31,7 +32,14 @@ public class Factory {
         cb = new LoadUnloadBay("C");
         
         // Connect cells
-        Cell.connect(cw, c1, c2, c3, c4, ca, cb);
+        cellList = new Cell[] {cw, c1, c2, c3, c4, ca, cb};
+        Cell.connect(cellList);
+    }
+    
+    public void update() {
+        for (Cell cell : cellList) {
+            cell.update();
+        }
     }
 
 }

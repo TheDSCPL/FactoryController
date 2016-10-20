@@ -5,8 +5,7 @@
  */
 package factory.cell;
 
-import factory.conveyor.Conveyor;
-import factory.conveyor.Mover;
+import factory.conveyor.*;
 
 /**
  *
@@ -15,23 +14,53 @@ import factory.conveyor.Mover;
 public class ParallelCell extends Cell {
 
     private final Mover t1;
-    //...
+    private final Rotator t2;
+    private final Mover t3;
+    private final Rail t4;
+    private final Machine t5;
+    private final Machine t6;
+    private final Rail t7;
+    private final Mover t8;
+    private final Rotator t9;
+    private final Mover t10;
         
     public ParallelCell(String id) {
         super(id);
         
         // Create conveyors
         t1 = new Mover(id + "T1", 1);
-        //...
+        t2 = new Rotator(id + "T2");
+        t3 = new Mover(id + "T3", 2);
+        t4 = new Rail(id + "T4");
+        t5 = new Machine(id + "T5", Machine.Type.B);
+        t6 = new Machine(id + "T6", Machine.Type.C);
+        t7 = new Rail(id + "T7");
+        t8 = new Mover(id + "T8", 1);
+        t9 = new Rotator(id + "T9");
+        t10 = new Mover(id + "T10", 2);
         
         // Connect conveyors
-        //...
-        
+        t1.connectedConveyors = new Conveyor[] {null, t2};
+        t2.connectedConveyors = new Conveyor[] {t1, null, t3, t4};
+        t3.connectedConveyors = new Conveyor[] {t2, null};
+        t4.connectedConveyors = new Conveyor[] {t2, null, t5, t6};
+        t5.connectedConveyors = new Conveyor[] {t4, t7};
+        t6.connectedConveyors = new Conveyor[] {t4, t7};
+        t7.connectedConveyors = new Conveyor[] {t5, t6, t9, null};
+        t8.connectedConveyors = new Conveyor[] {null, t9};
+        t9.connectedConveyors = new Conveyor[] {t8, t7, t10, null};
+        t10.connectedConveyors = new Conveyor[] {t9, null};
     }
     
     @Override
     public Conveyor getCornerConveyor(int position) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        switch (position) {
+            case 0: return t1;
+            case 1: return t3;
+            case 2: return t10;
+            case 3: return t8;
+            default: return null;
+        }
     }
 
     @Override
@@ -41,12 +70,14 @@ public class ParallelCell extends Cell {
 
     @Override
     public void connectWithRightCell(Cell right) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        t3.connectedConveyors[1] = right.getCornerConveyor(0);
+        t10.connectedConveyors[1] = right.getCornerConveyor(3);
     }
 
     @Override
     public void connectWithLeftCell(Cell left) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        t1.connectedConveyors[0] = left.getCornerConveyor(1);
+        t8.connectedConveyors[0] = left.getCornerConveyor(2);
     }
     
 }

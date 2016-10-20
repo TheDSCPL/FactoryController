@@ -5,14 +5,24 @@
  */
 package factory.conveyor;
 
+import factory.*;
+import main.*;
+
 /**
  *
  * @author Alex
  */
 public class Pusher extends Conveyor {
     
+    private final Motor pushMotor;
+    private final Sensor pushSensorPlus;
+    private final Sensor pushSensorMinus;
+    
     public Pusher(String id) {
         super(id, 1, 2);
+        pushMotor = new Motor(Main.config.getBaseOutput(id) + 2);
+        pushSensorPlus = new Sensor(Main.config.getBaseInput(id) + 1);
+        pushSensorMinus = new Sensor(Main.config.getBaseInput(id) + 2);
     }
 
     @Override
