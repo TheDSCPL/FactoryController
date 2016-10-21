@@ -11,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * @author Luis Paulo
  * @author Alex
  */
 public class Configuration {
@@ -24,8 +24,14 @@ public class Configuration {
     private static final String PropertiesFileName = "src/main/config.properties";
     
     Configuration() {
-        try { general.load(new FileInputStream(new File(PropertiesFileName))); }
-        catch (Exception ex) { Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex); }
+        try
+        {
+            general.load(new FileInputStream(new File(PropertiesFileName)));
+        }
+        catch (Exception ex)
+        {
+            Logger.getLogger(Configuration.class.getSimpleName()).log(Level.SEVERE, null, ex);
+        }
         
         List<String> errorList = new ArrayList<>();
         
@@ -38,35 +44,57 @@ public class Configuration {
             {
                 String[] values = line.split(";");
                 if(values.length != 3)
-                    throw new Exception("Line " + lineNumber + " doesn't have 3 values.");
+                    errorList.add("Line " + lineNumber + " doesn't have 3 values.");
                 //decide if it is an input or and output
                 
                 int newValue = Integer.parseInt(values[2]);
                 
-                switch(values[1])
+                try
                 {
-                    case "I":
-                        if (newValue < inputIds.getOrDefault(values[0], Integer.MAX_VALUE)) {
-                            inputIds.put(values[0], Integer.parseInt(values[2]));
-                        }
-                        break;
-                    case "O":
-                        if (newValue < outputIds.getOrDefault(values[0], Integer.MAX_VALUE)) {
-                            outputIds.put(values[0], Integer.parseInt(values[2]));
-                        }
-                        break;
-                    default:
-                      throw new Exception("Invalid I/O classifier \"" + values[1] + "\" at line " + lineNumber);  
+                    switch(values[1])
+                    {
+                        case "I":
+                            if (newValue < inputIds.getOrDefault(values[0], Integer.MAX_VALUE))
+                                inputIds.put(values[0], Integer.parseInt(values[2]));
+                            break;
+                        case "O":
+                            if (newValue < outputIds.getOrDefault(values[0], Integer.MAX_VALUE)) //only add if it is smaller than the value that is already in that key or if it is the first value for that key
+                                outputIds.put(values[0], Integer.parseInt(values[2]));
+                            break;
+                        default:
+                            errorList.add("Invalid I/O classifier \"" + values[1] + "\" at line " + lineNumber);
+                    }
+                }
+                catch(NumberFormatException ne)
+                {
+                    errorList.add("Non-integer 3rd value on line " + lineNumber);
                 }
             }
         }
+        catch(FileNotFoundException e)
+        {
+            System.err.println( "Couldn't open file \"" + CSVFileName + "\"." + System.lineSeparator() +
+                                "Application will now exit!" );
+            try{System.in.read();}catch(Exception ignored){}
+            System.exit(9);
+        }
         catch(Exception e)
         {
-            System.err.println( "Error while opening/reading the csv file." + "\n" +
-                                "Exception msg: " + e.getMessage() + "\n" +
-                                "Program will exit now.");
+            System.err.println( "Major error occurred while opening/reading file." + System.lineSeparator() +
+                                "Application will now exit!" );
             try{System.in.read();}catch(Exception ignored){}
             System.exit(10);
+        }
+        if(errorList.size()>0)
+        {
+            System.err.println( errorList.size()==1?"An error":"Some errors" + " occurred while reading the file:" );
+            for(String s : errorList)
+                System.err.println(s);
+            System.err.print(   "It is not recommended to use the program like this." + System.lineSeparator() +
+                                "Type \"Y\" if you want to continue or type anything else if you don't: ");
+            String answer = new Scanner(System.in).next();
+            if(answer != "Y")
+                System.exit(11);
         }
     }
     
@@ -80,10 +108,16 @@ public class Configuration {
     
     
     public int getBaseInput(String id) {
-        return inputIds.getOrDefault(id, -1);
+        int ret = inputIds.getOrDefault(id, -1);
+        if( ret <0 )
+            throw new Error( "FATAL ERROR: ( getBaseInput(String) )\"" + id + "\" is an invalid id.");
+        return ret;
     }
     
     public int getBaseOutput(String id) {
-        return outputIds.getOrDefault(id, -1);
+        int ret = outputIds.getOrDefault(id, -1);
+        if( ret <0 )
+            throw new Error( "FATAL ERROR: ( getBaseOutput(String) )\"" + id + "\" is an invalid id.");
+        return ret;
     }
 }

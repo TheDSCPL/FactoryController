@@ -9,7 +9,7 @@ import main.*;
 import factory.*;
 
 /**
- *
+ * @author Luis Paulo
  * @author Alex
  */
 public class Machine extends Conveyor {
@@ -18,7 +18,15 @@ public class Machine extends Conveyor {
     
     public final Type type;
     public final Sensor ZSensor, zSensor, XSensor, xSensor;
-    public final Motor toolActivateMotor, toolSelectMotor, xMotor, zMotor;
+    /**
+     * Motor that makes the tool work
+     */
+    public final Motor toolActivateMotor;
+    /**
+     * Motor that changes the tool
+     */
+    public final Motor toolSelectMotor;
+    public final Motor xMotor, zMotor;
     
     public Machine(String id, Type type) {
         super(id, 1, 2);

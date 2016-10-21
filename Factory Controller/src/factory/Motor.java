@@ -19,6 +19,11 @@ public class Motor {
         this.baseIndex = baseIndex;
     }
     
+    /**
+     * Controls the motor.
+     * @param on represents the state of the motor. <i>true</i> if it is moving and <i>false</i> if it is stopped
+     * @param plus represents the way in which the motor is moving. <i>true</i> if moving in the positive way and <i>false</i> if moving in the negative way
+     */
     public void control(boolean on, boolean plus) {
         Main.modbus.setOutput(baseIndex, on && plus);
         Main.modbus.setOutput(baseIndex + 1, on && !plus);
