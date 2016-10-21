@@ -10,5 +10,5 @@ package main;
  * @author Alex
  */
 public class TransformationManager {
-    
+    // TODO: write class
 }

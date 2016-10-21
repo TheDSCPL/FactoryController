@@ -57,6 +57,7 @@ public abstract class Cell {
         right.connectWithLeftCell(left);
     }
     
+    // TODO: review: is this state necessary
     public enum State
     {
         Initializing, Working;

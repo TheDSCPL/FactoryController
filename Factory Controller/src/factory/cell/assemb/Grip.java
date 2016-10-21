@@ -13,7 +13,7 @@ public class Grip
      * <i>false</i> if open. <i>true</i> if closed
      */
     private boolean gripState = false;
-    private final int outputActionId;
+    private final int outputActionId; // TODO: use sensor/motor
     private final int inputSensorId;
     Grip(int inputSensorId, int outputActionId)
     {

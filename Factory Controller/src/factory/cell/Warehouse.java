@@ -22,6 +22,7 @@ public class Warehouse extends Cell {
         super(id);
         
         //TODO: decide if the warehouse needs to be initialized
+        //  >> let's not worry about initialization for now
         //state = State.
         
         out = new Mover(id + "T1", 1);

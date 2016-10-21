@@ -14,7 +14,7 @@ import main.*;
  */
 public class Gantry
 {
-    
+    // TODO: style inconsistency: other neg/pos motors are written with lower/upper case xX yY zZ
     public final Motor posXMotor, negXMotor, posYMotor, negYMotor, posZMotor, negZMotor;
     /**
      * 
@@ -22,12 +22,12 @@ public class Gantry
      */
     Gantry(String id)
     {
-        negXMotor = new Motor(Main.config.getBaseOutput(id)+0);
-        posXMotor = new Motor(Main.config.getBaseOutput(id)+1);
-        negYMotor = new Motor(Main.config.getBaseOutput(id)+2);
-        posYMotor = new Motor(Main.config.getBaseOutput(id)+3);
-        posZMotor = new Motor(Main.config.getBaseOutput(id)+4);
-        negZMotor = new Motor(Main.config.getBaseOutput(id)+5);
+        negXMotor = new Motor(Main.config.getBaseOutput(id) + 0);
+        posXMotor = new Motor(Main.config.getBaseOutput(id) + 1);
+        negYMotor = new Motor(Main.config.getBaseOutput(id) + 2);
+        posYMotor = new Motor(Main.config.getBaseOutput(id) + 3);
+        posZMotor = new Motor(Main.config.getBaseOutput(id) + 4);
+        negZMotor = new Motor(Main.config.getBaseOutput(id) + 5);
     }
     
 }

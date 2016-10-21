@@ -48,6 +48,7 @@ public abstract class Conveyor {
             transferMotor.turnOn(true);
         }
         
+        // TODO: write state machine (Alex will do that)
         
         /*switch (conveyorState)
         {
