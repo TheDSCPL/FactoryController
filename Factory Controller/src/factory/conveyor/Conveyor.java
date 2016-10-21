@@ -44,7 +44,7 @@ public abstract class Conveyor {
     
     public void update()
     {
-        switch (conveyorState)
+        /*switch (conveyorState)
         {
             case Standby:
                 if ( hasBlocks() )
@@ -92,19 +92,33 @@ public abstract class Conveyor {
             case Sending:
                 
             break;
-        }
+        }*/
     }
     
     /**
-     * Chacks if there are blocks in the conveyor
+     * Checks if there are blocks in the conveyor
      * @return <i>true</i> if there is at least one block. <i>false</i> otherwise
      */
     private boolean hasBlocks()
     {
-        for(Block b : blocks)
-            if(b != null)
+        for(Block b : blocks) {
+            if(b != null) {
                 return true;
+            }
+        }            
         return false;
+    }
+    
+    public boolean isSending()
+    {
+        return conveyorState == ConveyorState.PrepareToSend ||
+               conveyorState == ConveyorState.ReadyToSend ||
+               conveyorState == ConveyorState.Sending;
+    }
+    public boolean isReceiving()
+    {
+        return conveyorState == ConveyorState.PrepareToReceive ||
+               conveyorState == ConveyorState.Receiving;
     }
     
     public void blockTransferRegister(Conveyor c)
