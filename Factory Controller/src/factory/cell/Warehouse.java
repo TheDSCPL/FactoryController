@@ -7,6 +7,7 @@ package factory.cell;
 
 import factory.conveyor.Conveyor;
 import factory.conveyor.Mover;
+import main.*;
 
 /**
  *
@@ -40,6 +41,8 @@ public class Warehouse extends Cell {
     @Override
     public void update() {
         super.update();
+        
+        Main.modbus.setRegister(0, out.presenceSensors[0].on() ? 0 : 1);
     }
     
     @Override
