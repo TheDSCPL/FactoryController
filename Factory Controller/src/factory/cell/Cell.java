@@ -38,7 +38,7 @@ public abstract class Cell {
     public abstract void connectWithLeftCell(Cell left);
     
     /**
-     * Update the FSM of this cell
+     * Update the FSM of this cell and the FSMs of the conveyors
      */
     public void update() {
         for (Conveyor conveyor : conveyorList) {

@@ -28,8 +28,8 @@ public class Mover extends Conveyor {
     @Override
     public boolean transferMotorDirection()
     {
-        if (isSending()) return transferPartner == connectedConveyors[0];
-        else if (isReceiving()) return transferPartner == connectedConveyors[1];
+        if (isSending()) return transferPartner == connections[0];
+        else if (isReceiving()) return transferPartner == connections[1];
         else throw new Error("transferMotorDirection called when not transfering block");
     }
 

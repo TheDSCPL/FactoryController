@@ -44,16 +44,16 @@ public class ParallelCell extends Cell {
         conveyorList = new Conveyor[] {t1, t2, t3, t4, t5, t6, t7, t8, t9, t10};
         
         // Connect conveyors
-        t1.connectedConveyors = new Conveyor[] {null, t2};
-        t2.connectedConveyors = new Conveyor[] {t1, null, t3, t4};
-        t3.connectedConveyors = new Conveyor[] {t2, null};
-        t4.connectedConveyors = new Conveyor[] {t2, null, t5, t6};
-        t5.connectedConveyors = new Conveyor[] {t4, t7};
-        t6.connectedConveyors = new Conveyor[] {t4, t7};
-        t7.connectedConveyors = new Conveyor[] {t5, t6, t9, null};
-        t8.connectedConveyors = new Conveyor[] {null, t9};
-        t9.connectedConveyors = new Conveyor[] {t8, t7, t10, null};
-        t10.connectedConveyors = new Conveyor[] {t9, null};
+        t1.connections = new Conveyor[] {null, t2};
+        t2.connections = new Conveyor[] {t1, null, t3, t4};
+        t3.connections = new Conveyor[] {t2, null};
+        t4.connections = new Conveyor[] {t2, null, t5, t6};
+        t5.connections = new Conveyor[] {t4, t7};
+        t6.connections = new Conveyor[] {t4, t7};
+        t7.connections = new Conveyor[] {t5, t6, t9, null};
+        t8.connections = new Conveyor[] {null, t9};
+        t9.connections = new Conveyor[] {t8, t7, t10, null};
+        t10.connections = new Conveyor[] {t9, null};
     }
     
     @Override
@@ -74,14 +74,14 @@ public class ParallelCell extends Cell {
 
     @Override
     public void connectWithRightCell(Cell right) {
-        t3.connectedConveyors[1] = right.getCornerConveyor(0);
-        t10.connectedConveyors[1] = right.getCornerConveyor(3);
+        t3.connections[1] = right.getCornerConveyor(0);
+        t10.connections[1] = right.getCornerConveyor(3);
     }
 
     @Override
     public void connectWithLeftCell(Cell left) {
-        t1.connectedConveyors[0] = left.getCornerConveyor(1);
-        t8.connectedConveyors[0] = left.getCornerConveyor(2);
+        t1.connections[0] = left.getCornerConveyor(1);
+        t8.connections[0] = left.getCornerConveyor(2);
     }
     
 }

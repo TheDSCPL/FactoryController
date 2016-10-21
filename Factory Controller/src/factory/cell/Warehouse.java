@@ -33,7 +33,7 @@ public class Warehouse extends Cell {
         switch (position) {
             case 1: return out;
             case 2: return in;
-            default: return null;
+            default: throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
         }
     }
 
@@ -44,8 +44,8 @@ public class Warehouse extends Cell {
     
     @Override
     public void connectWithRightCell(Cell right) {
-        out.connectedConveyors[1] = right.getCornerConveyor(0);
-        in.connectedConveyors[1] = right.getCornerConveyor(3);
+        out.connections[1] = right.getCornerConveyor(0);
+        in.connections[1] = right.getCornerConveyor(3);
     }
 
     @Override

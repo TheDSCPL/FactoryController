@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package factory.cell.ass;
+package factory.cell.assemb;
 
 import factory.*;
 import main.*;

@@ -23,20 +23,20 @@ public abstract class Conveyor {
     final Motor transferMotor;
     final Sensor[] presenceSensors;
     public String id;
-    public Conveyor[] connectedConveyors;
+    public Conveyor[] connections;
     
     /**
      * Constructor of the abstract superclass
      * @param id Name of the conveyor
      * @param length Size of the conveyor
-     * @param connections Represents how many connections with other conveyors this conveyor has
+     * @param connectionCount Represents how many connections with other conveyors this conveyor has
      */
-    public Conveyor(String id, int length, int connections) {
+    public Conveyor(String id, int length, int connectionCount) {
         this.id = id;
         
         blocks = new Block[length];
         presenceSensors = new Sensor[length];
-        connectedConveyors = new Conveyor[connections];
+        connections = new Conveyor[connectionCount];
         
         transferMotor = new Motor(Main.config.getBaseOutput(id) + 0);
         for (int i = 0; i < length; i++) { presenceSensors[i] = new Sensor(Main.config.getBaseInput(id) + i); }

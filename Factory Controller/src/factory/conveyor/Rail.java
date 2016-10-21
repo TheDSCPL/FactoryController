@@ -36,8 +36,8 @@ public class Rail extends Conveyor {
     @Override
     public boolean transferMotorDirection()
     {
-        boolean top = transferPartner == connectedConveyors[0] ||
-                      transferPartner == connectedConveyors[1];
+        boolean top = transferPartner == connections[0] ||
+                      transferPartner == connections[1];
         
         if (isSending()) return top;
         else if (isReceiving()) return !top;

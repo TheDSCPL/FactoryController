@@ -5,7 +5,7 @@
  */
 package factory;
 
-import factory.cell.ass.Assembler;
+import factory.cell.assemb.Assembler;
 import factory.cell.*;
 
 /**
