@@ -16,10 +16,9 @@ public class Mover extends Conveyor {
     }
     
     @Override
-    public void update() {
+    public void update()
+    {
         super.update();
-        
-        transferMotor.control(presenceSensors[0].on(), true);
     }
     
     @Override
