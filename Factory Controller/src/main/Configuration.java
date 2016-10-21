@@ -17,86 +17,48 @@ import java.util.logging.Logger;
 public class Configuration {
     
     private final Properties general = new Properties();
-    public final Map<String, Integer> inputIds = new HashMap<>();
-    public final Map<String, Integer> outputIds = new HashMap<>();
+    public final Map<String, Integer> inputIDs = new HashMap<>();
+    public final Map<String, Integer> outputIDs = new HashMap<>();
     
     private static final String CSVFileName = "src/main/io.csv";
     private static final String PropertiesFileName = "src/main/config.properties";
     
     Configuration() {
-        try
-        {
-            general.load(new FileInputStream(new File(PropertiesFileName)));
-        }
-        catch (Exception ex)
-        {
-            Logger.getLogger(Configuration.class.getSimpleName()).log(Level.SEVERE, null, ex);
-        }
         
-        List<String> errorList = new ArrayList<>();
-        
+        // Load config file
+        try { general.load(new FileInputStream(new File(PropertiesFileName))); }
+        catch (Exception ex) { throw new Error("Could not access config file: " + ex); }
+                
         // Load io map
         try
         {
             BufferedReader br = new BufferedReader(new FileReader(CSVFileName));
             String line;
-            for( int lineNumber=1; (line = br.readLine()) != null; lineNumber++)
+            
+            for (int lineNumber = 1; (line = br.readLine()) != null; lineNumber++)
             {
                 String[] values = line.split(";");
-                if(values.length != 3)
-                    errorList.add("Line " + lineNumber + " doesn't have 3 values.");
-                //decide if it is an input or and output
+                int newValue;
                 
-                int newValue = Integer.parseInt(values[2]);
+                if (values.length != 3) throw new Error("Line " + lineNumber + " doesn't have 3 values.");                
                 
-                try
+                try { newValue = Integer.parseInt(values[2]); }
+                catch(NumberFormatException ne) { throw new Error("Non-integer 3rd value on line " + lineNumber); }
+                
+                switch(values[1])
                 {
-                    switch(values[1])
-                    {
-                        case "I":
-                            if (newValue < inputIds.getOrDefault(values[0], Integer.MAX_VALUE))
-                                inputIds.put(values[0], Integer.parseInt(values[2]));
-                            break;
-                        case "O":
-                            if (newValue < outputIds.getOrDefault(values[0], Integer.MAX_VALUE)) //only add if it is smaller than the value that is already in that key or if it is the first value for that key
-                                outputIds.put(values[0], Integer.parseInt(values[2]));
-                            break;
-                        default:
-                            errorList.add("Invalid I/O classifier \"" + values[1] + "\" at line " + lineNumber);
-                    }
-                }
-                catch(NumberFormatException ne)
-                {
-                    errorList.add("Non-integer 3rd value on line " + lineNumber);
+                    case "I":
+                        if (newValue < inputIDs.getOrDefault(values[0], Integer.MAX_VALUE)) inputIDs.put(values[0], newValue);
+                        break;
+                    case "O":
+                        if (newValue < outputIDs.getOrDefault(values[0], Integer.MAX_VALUE)) outputIDs.put(values[0], newValue);
+                        break;
+                    default:
+                        throw new Error("Invalid I/O classifier \"" + values[1] + "\" at line " + lineNumber);
                 }
             }
         }
-        catch(FileNotFoundException e)
-        {
-            System.err.println( "Couldn't open file \"" + CSVFileName + "\"." + System.lineSeparator() +
-                                "Application will now exit!" );
-            try{System.in.read();}catch(Exception ignored){}
-            System.exit(9);
-        }
-        catch(Exception e)
-        {
-            System.err.println( "Major error occurred while opening/reading file." + System.lineSeparator() +
-                                "Application will now exit!" );
-            try{System.in.read();}catch(Exception ignored){}
-            System.exit(10);
-        }
-        
-        if(errorList.size()>0)
-        {
-            System.err.println( errorList.size()==1?"An error":"Some errors" + " occurred while reading the file:" );
-            for(String s : errorList)
-                System.err.println(s);
-            System.err.print(   "It is not recommended to use the program like this." + System.lineSeparator() +
-                                "Type \"Y\" if you want to continue or type anything else if you don't: ");
-            String answer = new Scanner(System.in).next();
-            if(answer != "Y")
-                System.exit(11);
-        }
+        catch(Exception ex) { throw new Error("Could not access IO file" + ex); }
     }
     
     public String getS(String key) {
@@ -109,16 +71,14 @@ public class Configuration {
     
     
     public int getBaseInput(String id) {
-        int ret = inputIds.getOrDefault(id, -1);
-        if( ret <0 )
-            throw new Error( "FATAL ERROR: ( getBaseInput(String) )\"" + id + "\" is an invalid id.");
+        int ret = inputIDs.getOrDefault(id, -1);
+        if (ret < 0) throw new Error(id + " is an invalid id.");
         return ret;
     }
     
     public int getBaseOutput(String id) {
-        int ret = outputIds.getOrDefault(id, -1);
-        if( ret <0 )
-            throw new Error( "FATAL ERROR: ( getBaseOutput(String) )\"" + id + "\" is an invalid id.");
+        int ret = outputIDs.getOrDefault(id, -1);
+        if (ret < 0) throw new Error(id + " is an invalid id.");
         return ret;
     }
 }

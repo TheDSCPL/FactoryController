@@ -30,7 +30,7 @@ public class Mover extends Conveyor {
     {
         if (isSending()) return transferPartner == connectedConveyors[0];
         else if (isReceiving()) return transferPartner == connectedConveyors[1];
-        else throw new Error("FATAL ERROR: transferMotorDirection called when not transfering block");
+        else throw new Error("transferMotorDirection called when not transfering block");
     }
 
     @Override

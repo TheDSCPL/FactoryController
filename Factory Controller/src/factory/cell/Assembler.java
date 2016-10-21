@@ -25,7 +25,7 @@ public class Assembler extends Cell {
         
         t1 = new Mover( id + "T1" , 1 );    //top right mover
         t2 = new Rotator(id + "T2");        //top rotator
-        t3 = new Mover( id + "T3" , 1 );    //...
+        t3 = new Mover( id + "T3" , 1 );    //... não precisas de estes comentários todos...
         t4 = new Mover( id + "T4" , 2 );
         t5 = new Rotator(id + "T5");
         t6 = new Mover( id + "T6" , 1 );
