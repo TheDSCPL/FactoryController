@@ -17,13 +17,13 @@ public class Path {
     
     public void push(Conveyor c)
     {
-        if(c == null)
+        if (c == null)
             return;
         //adds only if the last conveyor in the path is connected to the conveyor that we are trying to add
-        if(!path.isEmpty())
+        if (!path.isEmpty())
         {
-            for(Conveyor ci : path.get(path.size()-1).connectedConveyors) //checks all of the conveyors connected to the last element of the list
-                if(c == ci)
+            for (Conveyor ci : path.get(path.size() - 1).connectedConveyors) //checks all of the conveyors connected to the last element of the list
+                if (c == ci)
                 {
                     path.add(c);
                     return;
