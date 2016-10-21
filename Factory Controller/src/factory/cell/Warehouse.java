@@ -35,17 +35,19 @@ public class Warehouse extends Cell {
 
     @Override
     public void update() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        out.update();
+        in.update();
     }
-
+    
     @Override
     public void connectWithRightCell(Cell right) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        out.connectedConveyors[1] = right.getCornerConveyor(0);
+        in.connectedConveyors[1] = right.getCornerConveyor(3);
     }
 
     @Override
     public void connectWithLeftCell(Cell left) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return;
     }
     
 }

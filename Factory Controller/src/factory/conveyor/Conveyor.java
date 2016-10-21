@@ -24,15 +24,13 @@ public abstract class Conveyor {
     
     public Conveyor(String id, int length, int connections) {
         this.id = id;
+        
         blocks = new Block[length];
         presenceSensors = new Sensor[length];
         connectedConveyors = new Conveyor[connections];
         
-        //TODO: 
         transferMotor = new Motor(Main.config.getBaseOutput(id) + 0);
-        for (int i = 0; i < length; i++) {
-            presenceSensors[i] = new Sensor(Main.config.getBaseInput(id) + i);
-        }
+        for (int i = 0; i < length; i++) { presenceSensors[i] = new Sensor(Main.config.getBaseInput(id) + i); }
     }
     
     public void update() {

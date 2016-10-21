@@ -23,16 +23,16 @@ public class Factory {
     public Factory() {
         
         // Create cells
-        //cw = new Warehouse("A");
+        cw = new Warehouse("A");
         c1 = new ParallelCell("Pa");
         c2 = new SerialCell("Sa");
         c3 = new ParallelCell("Pb");
         c4 = new SerialCell("Sb");
         //ca = new Assembler("M");
-        //cb = new LoadUnloadBay("C");
+        cb = new LoadUnloadBay("C");
         
         // Connect cells
-        cellList = new Cell[] {/*cw, */c1, c2, c3, c4/*, ca, cb*/};
+        cellList = new Cell[] {cw, c1, c2, c3, c4/*, ca*/, cb};
         Cell.connect(cellList);
     }
     

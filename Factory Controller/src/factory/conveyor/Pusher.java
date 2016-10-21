@@ -24,6 +24,14 @@ public class Pusher extends Conveyor {
         pushSensorPlus = new Sensor(Main.config.getBaseInput(id) + 1);
         pushSensorMinus = new Sensor(Main.config.getBaseInput(id) + 2);
     }
+    
+    @Override
+    public void update() {
+        super.update();
+        
+        if (pushSensorMinus.on()) { pushMotor.turnOn(true); }
+        if (pushSensorPlus.on()) { pushMotor.turnOn(false); }
+    }
 
     @Override
     public boolean transferMotorDirection() {

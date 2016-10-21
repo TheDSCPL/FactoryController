@@ -23,7 +23,6 @@ public class Configuration {
     private static final String CSVFileName = "src/main/io.csv";
     private static final String PropertiesFileName = "src/main/config.properties";
     
-    
     Configuration() {
         try { general.load(new FileInputStream(new File(PropertiesFileName))); }
         catch (Exception ex) { Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex); }

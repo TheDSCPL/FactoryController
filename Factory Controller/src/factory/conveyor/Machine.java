@@ -33,7 +33,25 @@ public class Machine extends Conveyor {
         xSensor = new Sensor(Main.config.getBaseInput(id) + 3);
         ZSensor = new Sensor(Main.config.getBaseInput(id) + 4);
         zSensor = new Sensor(Main.config.getBaseInput(id) + 5);
+    }
+    
+    boolean last1 = false;
+    boolean last2 = false;
+    boolean last3 = false;
+    
+    @Override
+    public void update() {
+        super.update();
         
+        if (xSensor.on()) { last1 = false; }
+        if (XSensor.on()) { last1 = true; }
+        xMotor.turnOn(last1);
+        
+        if (zSensor.on()) { last2 = true; }
+        if (ZSensor.on()) { last2 = false; }
+        zMotor.turnOn(last2);
+        
+        toolSelectMotor.turnOn(true);
     }
     
     @Override
@@ -60,9 +78,5 @@ public class Machine extends Conveyor {
     public boolean isBlockTransferReady() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
-    
-    
     
 }
