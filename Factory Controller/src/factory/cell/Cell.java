@@ -19,10 +19,16 @@ public abstract class Cell {
         this.id = id;
     }
     
-    public abstract Conveyor getCornerConveyor(int position); // 0 = top left, turns clockwise    
+    /**
+     * @param position 0 = top left, turns clockwise
+     */
+    public abstract Conveyor getCornerConveyor(int position);
     public abstract void connectWithRightCell(Cell right);
     public abstract void connectWithLeftCell(Cell left);
     
+    /**
+     * Update the FSM of this cell
+     */
     public abstract void update();
     
     public static void connect(Cell... cells) {
