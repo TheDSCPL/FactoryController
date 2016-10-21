@@ -63,7 +63,7 @@ public class ParallelCell extends Cell {
             case 1: return t3;
             case 2: return t10;
             case 3: return t8;
-            default: return null;
+            default: throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
         }
     }
 

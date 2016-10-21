@@ -26,7 +26,15 @@ public abstract class Cell {
      * @throws Error if the position is invalid
      */
     public abstract Conveyor getCornerConveyor(int position);
+    /**
+     * This cell will be connected to a cell on its right
+     * @param right Cell on the right side of this
+     */
     public abstract void connectWithRightCell(Cell right);
+    /**
+     * This cell will be connected to a cell on its left
+     * @param left Cell on the left side of this
+     */
     public abstract void connectWithLeftCell(Cell left);
     
     /**

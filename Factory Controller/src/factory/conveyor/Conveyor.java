@@ -29,7 +29,7 @@ public abstract class Conveyor {
     /**
      * Constructor of the abstract superclass
      * @param id Name of the conveyor
-     * @param length Size fo the conveyor
+     * @param length Size of the conveyor
      * @param connections Represents how many connections with other conveyors this conveyor has
      */
     public Conveyor(String id, int length, int connections) {
@@ -45,6 +45,11 @@ public abstract class Conveyor {
     
     public void update()
     {
+        if (presenceSensors[0].on()) {
+            transferMotor.turnOn(true);
+        }
+        
+        
         /*switch (conveyorState)
         {
             case Standby:

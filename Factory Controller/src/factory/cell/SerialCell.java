@@ -54,7 +54,7 @@ public class SerialCell extends Cell {
             case 1: return t2;
             case 2: return t6;
             case 3: return t7;
-            default: return null;
+            default: throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
         }
     }
 
