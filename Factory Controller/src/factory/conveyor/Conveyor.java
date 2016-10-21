@@ -10,7 +10,6 @@ import factory.*;
 import main.*;
 
 /**
- *
  * @author Alex
  * @author Luis Paulo
  */

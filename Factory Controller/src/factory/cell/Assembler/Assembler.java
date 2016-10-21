@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package factory.cell;
+package factory.cell.Assembler;
 
+import factory.cell.Cell;
 import factory.conveyor.*;
 
 /**
@@ -81,5 +82,5 @@ public class Assembler extends Cell {
         t1.connectedConveyors[0] = left.getCornerConveyor(1);
         t6.connectedConveyors[0] = left.getCornerConveyor(2);
     }
-    
+
 }

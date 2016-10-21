@@ -5,6 +5,7 @@
  */
 package factory;
 
+import factory.cell.Assembler.Assembler;
 import factory.cell.*;
 
 /**
@@ -28,11 +29,11 @@ public class Factory {
         c2 = new SerialCell("Sa");
         c3 = new ParallelCell("Pb");
         c4 = new SerialCell("Sb");
-        //ca = new Assembler("M");
+        ca = new Assembler("M");
         cb = new LoadUnloadBay("C");
         
         // Connect cells
-        cellList = new Cell[] {cw, c1, c2, c3, c4/*, ca*/, cb};
+        cellList = new Cell[] {cw, c1, c2, c3, c4, ca, cb};
         Cell.connect(cellList);
     }
     
