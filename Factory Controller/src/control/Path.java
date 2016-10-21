@@ -6,23 +6,39 @@
 package control;
 
 import java.util.*;
+import factory.conveyor.*;
 
 /**
  *
  * @author Alex
  */
 public class Path {
-    public List<String> path = new ArrayList<>();
+    public List<Conveyor> path = new ArrayList<>();
     
-    public void push(String id) {
-        path.add(id);
+    public void push(Conveyor c)
+    {
+        if(c == null)
+            return;
+        //adds only if the last conveyor in the path is connected to the conveyor that we are trying to add
+        if(!path.isEmpty())
+        {
+            for(Conveyor ci : path.get(path.size()-1).connectedConveyors) //checks all of the conveyors connected to the last element of the list
+                if(c == ci)
+                {
+                    path.add(c);
+                    return;
+                }
+            throw new Error("Path has a bug!");
+        }
+        else
+            path.add(c);
     }
     
-    public String current() {
+    public Conveyor current() {
         return path.isEmpty() ? null : path.get(0);
     }
     
-    public String next() {
+    public Conveyor next() {
         return path.size() < 2 ? null : path.get(1);
     }
     
