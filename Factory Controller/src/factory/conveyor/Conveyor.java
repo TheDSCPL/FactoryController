@@ -14,6 +14,9 @@ import main.*;
  * @author Alex
  */
 public abstract class Conveyor {
+    /**
+     * Contains a conveyor that is to transfer a block to this conveyor when both are ready
+     */
     public Conveyor transferPartner;
     public Block[] blocks;
     public ConveyorState conveyorState;
@@ -22,6 +25,12 @@ public abstract class Conveyor {
     public String id;
     public Conveyor[] connectedConveyors;
     
+    /**
+     * Constructor of the abstract superclass
+     * @param id Name of the conveyor
+     * @param length Size fo the conveyor
+     * @param connections Represents how many connections with other conveyors this conveyor has
+     */
     public Conveyor(String id, int length, int connections) {
         this.id = id;
         blocks = new Block[length];
@@ -35,50 +44,83 @@ public abstract class Conveyor {
         }
     }
     
-    public void update() {
-        /*switch (conveyorState) {
+    public void update()
+    {
+        switch (conveyorState)
+        {
             case Standby:
-                if (has block to send false) {
-                    if (isBlockTransferPossible()) {
+                if ( hasBlocks() )
+                {
+                    if (isBlockTransferPossible())
+                    {
                         
+                        blockTransferPrepare();
+                        conveyorState = ConveyorState.PrepareToSend;
                     }
                 }
-                else if (transferPartner != null) {
-                    if ( can receive from transferPartner false) {
+                else if (transferPartner != null)
+                {
+                    if (transferPartner.conveyorState == ConveyorState.PrepareToSend) //can receive from transferPartner
+                    {
                         blockTransferPrepare();
                         conveyorState = ConveyorState.PrepareToReceive;
                     }
                 }
+            break;
             case PrepareToReceive:
-                if (isBlockTransferReady()) {
+                if (isBlockTransferReady())
+                {
                     blockTransferStart();
                     transferPartner.blockTransferStart();
                 }
+            break;
             case Receiving:
-                if (sensor false) {
+                if (sensor false)
+                {
                     Block newBlock = transferPartner.blockTransferStop();
                     // add newBlock to list from correct side
                     blockTransferStop();
                 }
+            break;
             case PrepareToSend:
-                if (isBlockTransferReady()) {
+                if (isBlockTransferReady())
+                {
                     conveyorState = ConveyorState.ReadyToSend;
                 }
+            break;
             case ReadyToSend:
                 transferPartner.blockTransferRegister(this);
-            case Sending: break;
-        }*/
+            break;
+            case Sending:
+                
+            break;
+        }
     }
     
-    public void blockTransferRegister(Conveyor c) {
+    /**
+     * Chacks if there are blocks in the conveyor
+     * @return <i>true</i> if there is at least one block. <i>false</i> otherwise
+     */
+    private boolean hasBlocks()
+    {
+        for(Block b : blocks)
+            if(b != null)
+                return true;
+        return false;
+    }
+    
+    public void blockTransferRegister(Conveyor c)
+    {
         transferPartner = c;
     }
-    public void blockTransferStart() {
+    public void blockTransferStart()
+    {
         transferMotor.turnOn(transferMotorDirection());
         if (conveyorState == ConveyorState.ReadyToSend) { conveyorState = ConveyorState.Sending; }
         else if (conveyorState == ConveyorState.PrepareToReceive) { conveyorState = ConveyorState.Receiving; }
     }
-    public Block blockTransferStop() {
+    public Block blockTransferStop()
+    {
         transferMotor.turnOff();
         
         Block b = null;
@@ -101,6 +143,6 @@ public abstract class Conveyor {
     
     public enum ConveyorState {
         Standby, PrepareToReceive, Receiving,
-        PrepareToSend, ReadyToSend, Sending
+        PrepareToSend, ReadyToSend, Sending;
     }
 }

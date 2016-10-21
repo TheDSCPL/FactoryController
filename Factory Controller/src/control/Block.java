@@ -5,10 +5,31 @@
  */
 package control;
 
+import factory.conveyor.Conveyor;
+
 /**
- *
- * @author Alex
+ * Represents a block.
+ * @author Luis Paulo
+ * @auhor Alex
  */
-public class Block {
+public class Block
+{
+    Block(Block.Type type)
+    {
+        this.type=type;
+    }
     
+    public enum Type
+    {
+        P1,P2,P3,P4,P5,P6,P7,P8,P9;
+    }
+    
+    public Type type;
+    public Path path = new Path();
+    
+    public Conveyor getNextConveyor()
+    {
+        //use Path somehow
+        return null;
+    }
 }

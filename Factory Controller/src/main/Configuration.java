@@ -109,10 +109,16 @@ public class Configuration {
     
     
     public int getBaseInput(String id) {
-        return inputIds.getOrDefault(id, -1);
+        int ret = inputIds.getOrDefault(id, -1);
+        if( ret <0 )
+            throw new Error( "FATAL ERROR: ( getBaseInput(String) )\"" + id + "\" is an invalid id.");
+        return ret;
     }
     
     public int getBaseOutput(String id) {
-        return outputIds.getOrDefault(id, -1);
+        int ret = outputIds.getOrDefault(id, -1);
+        if( ret <0 )
+            throw new Error( "FATAL ERROR: ( getBaseOutput(String) )\"" + id + "\" is an invalid id.");
+        return ret;
     }
 }
