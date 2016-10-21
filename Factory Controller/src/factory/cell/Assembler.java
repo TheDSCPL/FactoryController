@@ -13,11 +13,22 @@ import factory.conveyor.*;
  */
 public class Assembler extends Cell {
 
+    private final Mover t1;
+    private final Rotator t2;
+    private final Mover t3;
+    private final Mover t4;
+    private final Rotator t5;
+    private final Mover t6;
+    
     public Assembler(String id) {
         super(id);
         
-        // Create conveyors
-        //...
+        t1 = new Mover( id + "T1" , 1 );    //top right mover
+        t2 = new Rotator(id + "T2");        //top rotator
+        t3 = new Mover( id + "T3" , 1 );    //...
+        t4 = new Mover( id + "T4" , 2 );
+        t5 = new Rotator(id + "T5");
+        t6 = new Mover( id + "T6" , 1 );
         
         // Connect conveyors
         //...

@@ -14,6 +14,7 @@ import factory.conveyor.*;
 public abstract class Cell {
     public String id;
     public Conveyor[] conveyorList;
+    public State state = State.Initializing;
     
     public Cell(String id) {
         this.id = id;
@@ -21,6 +22,8 @@ public abstract class Cell {
     
     /**
      * @param position 0 = top left, turns clockwise
+     * @return The conveyor in that position
+     * @throws Error if the position is invalid
      */
     public abstract Conveyor getCornerConveyor(int position);
     public abstract void connectWithRightCell(Cell right);
@@ -40,5 +43,10 @@ public abstract class Cell {
     public static void connect(Cell left, Cell right) {
         left.connectWithRightCell(right);
         right.connectWithLeftCell(left);
+    }
+    
+    public enum State
+    {
+        Initializing, Working;
     }
 }

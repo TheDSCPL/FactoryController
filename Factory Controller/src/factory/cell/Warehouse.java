@@ -20,6 +20,9 @@ public class Warehouse extends Cell {
     public Warehouse(String id) {
         super(id);
         
+        //TODO: decide if the warehouse needs to be initialized
+        //state = State.
+        
         out = new Mover(id + "T1", 1);
         in = new Mover(id + "T2", 1);
     }

@@ -11,6 +11,10 @@ package factory.conveyor;
  */
 public class Mover extends Conveyor {
 
+    /**
+     * @param id name/id of the mover
+     * @param length Length of the mover
+     */
     public Mover(String id, int length) {
         super(id, length, 2);
     }
