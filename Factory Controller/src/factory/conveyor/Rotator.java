@@ -34,8 +34,14 @@ public class Rotator extends Conveyor {
     }
     
     @Override
-    public boolean transferMotorDirection() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean transferMotorDirection()
+    {
+        boolean leftOrTop = transferPartner == connectedConveyors[0] ||
+                            transferPartner == connectedConveyors[1];
+        
+        if (isSending()) return leftOrTop;
+        else if (isReceiving()) return !leftOrTop;
+        else throw new Error("FATAL ERROR: transferMotorDirection called when not transfering block");
     }
 
     @Override

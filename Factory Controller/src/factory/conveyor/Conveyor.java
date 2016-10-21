@@ -99,7 +99,7 @@ public abstract class Conveyor {
      * Checks if there are blocks in the conveyor
      * @return <i>true</i> if there is at least one block. <i>false</i> otherwise
      */
-    private boolean hasBlocks()
+    private boolean hasBlock()
     {
         for(Block b : blocks) {
             if(b != null) {

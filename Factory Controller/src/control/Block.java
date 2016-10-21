@@ -10,16 +10,15 @@ package control;
  * @author Luis Paulo
  * @auhor Alex
  */
-public class Block
-{
-    Block(Block.Type type)
-    {
-        this.type=type;
+public class Block {
+    
+    Block(Block.Type type) {
+        this.type = type;
     }
     
-    public enum Type
-    {
-        P1,P2,P3,P4,P5,P6,P7,P8,P9,Stacked;
+    public enum Type {
+        P1, P2, P3, P4, P5,
+        P6, P7, P8, P9, Stacked;
     }
     
     public Type type;

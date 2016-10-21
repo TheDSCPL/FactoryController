@@ -85,6 +85,7 @@ public class Configuration {
             try{System.in.read();}catch(Exception ignored){}
             System.exit(10);
         }
+        
         if(errorList.size()>0)
         {
             System.err.println( errorList.size()==1?"An error":"Some errors" + " occurred while reading the file:" );
