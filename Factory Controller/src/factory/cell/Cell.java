@@ -40,7 +40,11 @@ public abstract class Cell {
     /**
      * Update the FSM of this cell
      */
-    public abstract void update();
+    public void update() {
+        for (Conveyor conveyor : conveyorList) {
+            conveyor.update();
+        }
+    }
     
     public static void connect(Cell... cells) {
         if (cells.length == 0) { return; }

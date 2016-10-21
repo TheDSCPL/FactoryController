@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package factory.cell.Assembler;
+package factory.cell.ass;
 
+import factory.cell.Cell;
+import factory.cell.Cell;
 import factory.cell.Cell;
 import factory.conveyor.*;
 
@@ -30,7 +32,6 @@ public class Assembler extends Cell {
         t4 = new Mover( id + "T4" , 1 );
         t5 = new Rotator(id + "T5");
         t6 = new Mover( id + "T6" , 1 );
-        
         conveyorList = new Conveyor[] {t1, t2, t3, t4, t5, t6};
         
         t1.connectedConveyors = new Conveyor[] {null,t2};
@@ -56,6 +57,8 @@ public class Assembler extends Cell {
     @Override
     public void update()
     {
+        super.update();
+        
         switch(state)
         {
             case Initializing:

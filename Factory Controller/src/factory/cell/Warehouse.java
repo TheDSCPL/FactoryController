@@ -25,6 +25,7 @@ public class Warehouse extends Cell {
         
         out = new Mover(id + "T1", 1);
         in = new Mover(id + "T2", 1);
+        conveyorList = new Conveyor[] {in, out};
     }
 
     @Override
@@ -38,8 +39,7 @@ public class Warehouse extends Cell {
 
     @Override
     public void update() {
-        out.update();
-        in.update();
+        super.update();
     }
     
     @Override

@@ -54,9 +54,7 @@ public class LoadUnloadBay extends Cell {
 
     @Override
     public void update() {
-        for (Conveyor conveyor : conveyorList) {
-            conveyor.update();
-        }
+        super.update();
     }
 
     @Override
