@@ -7,8 +7,6 @@ package main;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Luis Paulo
@@ -58,7 +56,7 @@ public class Configuration {
                 }
             }
         }
-        catch(Exception ex) { throw new Error("Could not access IO file" + ex); }
+        catch(Exception ex) { throw new Error("Could not access IO file: " + ex); }
     }
     
     public String getS(String key) {

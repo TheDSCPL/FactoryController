@@ -63,8 +63,11 @@ public class Machine extends Conveyor {
     }
     
     @Override
-    public boolean transferMotorDirection() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean transferMotorDirection()
+    {
+        if (isSending()) return transferPartner == connectedConveyors[0];
+        else if (isReceiving()) return transferPartner == connectedConveyors[1];
+        else throw new Error("transferMotorDirection called when not transfering block");
     }
 
     @Override

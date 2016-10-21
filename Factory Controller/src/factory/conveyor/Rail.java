@@ -34,8 +34,14 @@ public class Rail extends Conveyor {
     }
     
     @Override
-    public boolean transferMotorDirection() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean transferMotorDirection()
+    {
+        boolean top = transferPartner == connectedConveyors[0] ||
+                      transferPartner == connectedConveyors[1];
+        
+        if (isSending()) return top;
+        else if (isReceiving()) return !top;
+        else throw new Error("transferMotorDirection called when not transfering block");
     }
 
     @Override
