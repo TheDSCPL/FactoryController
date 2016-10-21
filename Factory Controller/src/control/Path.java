@@ -39,7 +39,7 @@ public class Path {
     }
     
     public Conveyor next() {
-        return path.size() < 2 ? null : path.get(1);
+        return path.size() <= 1 ? null : path.get(1);
     }
     
     public void pop() {
