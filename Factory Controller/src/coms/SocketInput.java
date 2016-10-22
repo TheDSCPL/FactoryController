@@ -47,7 +47,7 @@ public class SocketInput {
     
     private void threadMethod() {
         try {
-            try (Socket socket = new Socket(host, port);
+            try (Socket socket = new Socket(host, port); // TODO dunno if this is the correct way to implement a client for the UDP protocol, probably not
                  BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())))
             {
                 System.out.println("Connected to socket server on " + host + ":" + port);

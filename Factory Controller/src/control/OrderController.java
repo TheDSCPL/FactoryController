@@ -6,6 +6,7 @@
 package control;
 
 import coms.*;
+import java.nio.charset.*;
 import java.util.*;
 import main.*;
 
@@ -25,9 +26,21 @@ public class OrderController {
     }
     
     public void update() {
+        
+        // Get new orders from socket
         if (socket.hasNewLines()) {
             List<String> lines = socket.getNewLines();
-            System.out.println("Got new lines: " + lines);
+            for (String line : lines) {
+                processNewOrder(line);
+            }
         }
+    }
+    
+    private void processNewOrder(String line) {
+        byte[] bytes = line.getBytes(StandardCharsets.UTF_8);
+        
+        byte type = bytes[0];
+        int orderN = Integer.parseString(new String(bytes[1:3], StandardCharsets.UTF_8));
+        int type = bytes[4];
     }
 }
