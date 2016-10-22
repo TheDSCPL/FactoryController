@@ -17,6 +17,7 @@ public class Main {
     public static final Configuration config = new Configuration();
     public static final ModbusMaster modbus = new ModbusMaster();
     public static final Factory factory = new Factory();
+    public static final TransformationManager transfm = new TransformationManager();
 
     /**
      * @param args the command line arguments

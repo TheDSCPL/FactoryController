@@ -15,6 +15,7 @@ import factory.*;
 public class Machine extends Conveyor {
 
     public enum Type { A, B, C }
+    public enum Tool { T1, T2, T3 }
     
     public final Type type;
     public final Sensor ZSensor, zSensor, XSensor, xSensor;
