@@ -23,9 +23,11 @@ public class Assembler extends Cell {
     private final Rotator t5;
     private final Mover t6;
     
-    private final Sensor table1;
-    private final Sensor table2;
-    private final Sensor table3;
+    public final Sensor table1;
+    public final Sensor table2;
+    public final Sensor table3;
+    
+    public final Gantry gantry;
     
     public Assembler(String id) {
         super(id);
@@ -45,9 +47,11 @@ public class Assembler extends Cell {
         t5.connections = new Conveyor[] {t6, t4, null, null};
         t6.connections = new Conveyor[] {null, t5};
         
-        table1 = new Sensor(Main.config.getBaseInput(id + "M") + 0);
-        table2 = new Sensor(Main.config.getBaseInput(id + "M") + 1);
-        table3 = new Sensor(Main.config.getBaseInput(id + "M") + 2);
+        table1 = new Sensor(Main.config.getBaseInput("M" + "M") + 0);
+        table2 = new Sensor(Main.config.getBaseInput("M" + "M") + 1);
+        table3 = new Sensor(Main.config.getBaseInput("M" + "M") + 2);
+        
+        gantry = new Gantry(id);
     }
     
     @Override
@@ -66,16 +70,50 @@ public class Assembler extends Cell {
     {
         super.update();
         
-        switch(state)
+        if (gantry.Ysensors[0].on() && gantry.minX.on()) //canto sup esquerdo
         {
-            case Initializing:
-                
-            break;
-            case Working:
-                
-            break;
-            default:
-                throw new IllegalStateException("Cell " + id + " reached invalid state!");
+            gantry.YMotor.turnOnPlus();
+            gantry.XMotor.turnOff();
+        }
+        else if (gantry.Ysensors[4].on() && gantry.minX.on()) //canto inf esquerdo
+        {
+            gantry.YMotor.turnOff();
+            gantry.XMotor.turnOnPlus();
+        }
+        else if (gantry.Ysensors[4].on() && gantry.maxX.on()) //canto inf direito
+        {
+            gantry.YMotor.turnOnMinus();
+            gantry.XMotor.turnOff();
+        }
+        else if (gantry.Ysensors[0].on() && gantry.maxX.on()) //canto sup direito
+        {
+            gantry.YMotor.turnOff();
+            gantry.XMotor.turnOnMinus();
+        }
+        else if (gantry.Ysensors[0].on()) //no limite superior
+        {
+            gantry.YMotor.turnOff();
+            gantry.XMotor.turnOnMinus();
+        }
+        else if (gantry.Ysensors[4].on()) //no limite inferior
+        {
+            gantry.YMotor.turnOff();
+            gantry.XMotor.turnOnPlus();
+        }
+        else if (gantry.maxX.on())    //no lado direito
+        {
+            gantry.YMotor.turnOnMinus();
+            gantry.XMotor.turnOff();
+        }
+        else if (gantry.minX.on())    //no lado esquerdo
+        {
+            gantry.YMotor.turnOnPlus();
+            gantry.XMotor.turnOff();
+        }
+        else                        //no meio - INITIALIZATION CODE
+        {
+            gantry.XMotor.turnOnMinus();
+            gantry.YMotor.turnOnMinus();
         }
     }
 
