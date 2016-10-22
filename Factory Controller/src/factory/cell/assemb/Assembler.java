@@ -32,9 +32,9 @@ public class Assembler extends Cell {
     public Assembler(String id) {
         super(id);
         
-        t1 = new Mover(id + "T1", 1);    //top left mover
-        t2 = new Rotator(id + "T2");        //top rotator
-        t3 = new Mover(id + "T3", 2);    //...
+        t1 = new Mover(id + "T1", 1);
+        t2 = new Rotator(id + "T2");
+        t3 = new Mover(id + "T3", 2);
         t4 = new Mover(id + "T4", 1);
         t5 = new Rotator(id + "T6");
         t6 = new Mover(id + "T5", 1);

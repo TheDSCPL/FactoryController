@@ -41,6 +41,8 @@ public class Factory {
         for (Cell cell : cellList) {
             cell.update();
         }
+        
+        // TODO: write control logic
     }
 
 }

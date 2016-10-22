@@ -10,5 +10,5 @@ package coms;
  * @author Alex
  */
 public class SocketInput {
-    
+    // TODO: write class
 }

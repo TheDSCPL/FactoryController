@@ -51,8 +51,8 @@ public class LoadUnloadBay extends Cell {
     public Conveyor getCornerConveyor(int position) {
         switch (position) {
             case 0: return t1;
-            case 1: return null;
-            case 2: return null;
+            case 1: return t3;
+            case 2: return t8;
             case 3: return t6;
             default: throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
         }

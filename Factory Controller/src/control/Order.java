@@ -10,5 +10,5 @@ package control;
  * @author Alex
  */
 public class Order {
-    
+    // TODO: write class
 }

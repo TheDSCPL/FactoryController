@@ -19,9 +19,9 @@ public abstract class Conveyor {
      */
     public Conveyor transferPartner;
     public Block[] blocks;
-    public ConveyorState conveyorState;
+    public State conveyorState;
     final Motor transferMotor;
-    final Sensor[] presenceSensors;
+    public final Sensor[] presenceSensors;
     public String id;
     public Conveyor[] connections;
     
@@ -48,6 +48,7 @@ public abstract class Conveyor {
             transferMotor.turnOn(true);
         }
         
+        // TODO: write state machine (Alex will do that)
         
         /*switch (conveyorState)
         {
@@ -58,15 +59,15 @@ public abstract class Conveyor {
                     {
                         
                         blockTransferPrepare();
-                        conveyorState = ConveyorState.PrepareToSend;
+                        conveyorState = State.PrepareToSend;
                     }
                 }
                 else if (transferPartner != null)
                 {
-                    if (transferPartner.conveyorState == ConveyorState.PrepareToSend) //can receive from transferPartner
+                    if (transferPartner.conveyorState == State.PrepareToSend) //can receive from transferPartner
                     {
                         blockTransferPrepare();
-                        conveyorState = ConveyorState.PrepareToReceive;
+                        conveyorState = State.PrepareToReceive;
                     }
                 }
             break;
@@ -88,7 +89,7 @@ public abstract class Conveyor {
             case PrepareToSend:
                 if (isBlockTransferReady())
                 {
-                    conveyorState = ConveyorState.ReadyToSend;
+                    conveyorState = State.ReadyToSend;
                 }
             break;
             case ReadyToSend:
@@ -106,24 +107,22 @@ public abstract class Conveyor {
      */
     private boolean hasBlock()
     {
-        for(Block b : blocks) {
-            if(b != null) {
-                return true;
-            }
+        for (Block b : blocks) {
+            if (b != null) return true;
         }            
         return false;
     }
     
     public boolean isSending()
     {
-        return conveyorState == ConveyorState.PrepareToSend ||
-               conveyorState == ConveyorState.ReadyToSend ||
-               conveyorState == ConveyorState.Sending;
+        return conveyorState == State.PrepareToSend ||
+               conveyorState == State.ReadyToSend ||
+               conveyorState == State.Sending;
     }
     public boolean isReceiving()
     {
-        return conveyorState == ConveyorState.PrepareToReceive ||
-               conveyorState == ConveyorState.Receiving;
+        return conveyorState == State.PrepareToReceive ||
+               conveyorState == State.Receiving;
     }
     
     public void blockTransferRegister(Conveyor c)
@@ -133,20 +132,20 @@ public abstract class Conveyor {
     public void blockTransferStart()
     {
         transferMotor.turnOn(transferMotorDirection());
-        if (conveyorState == ConveyorState.ReadyToSend) { conveyorState = ConveyorState.Sending; }
-        else if (conveyorState == ConveyorState.PrepareToReceive) { conveyorState = ConveyorState.Receiving; }
+        if (conveyorState == State.ReadyToSend) { conveyorState = State.Sending; }
+        else if (conveyorState == State.PrepareToReceive) { conveyorState = State.Receiving; }
     }
     public Block blockTransferStop()
     {
         transferMotor.turnOff();
         
         Block b = null;
-        if (conveyorState == ConveyorState.Sending) {
+        if (conveyorState == State.Sending) {
             // remove block from list from correct side
             // b = ...;
         }
         
-        conveyorState = ConveyorState.Standby;
+        conveyorState = State.Standby;
                 
         transferPartner = null;
         return b;
@@ -158,7 +157,7 @@ public abstract class Conveyor {
     public abstract void blockTransferPrepare();
     public abstract boolean isBlockTransferReady();
     
-    public enum ConveyorState {
+    public enum State {
         Standby, PrepareToReceive, Receiving,
         PrepareToSend, ReadyToSend, Sending;
     }

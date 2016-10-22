@@ -11,6 +11,7 @@ import net.wimpi.modbus.*;
 import net.wimpi.modbus.msg.*;
 import net.wimpi.modbus.io.*;
 import net.wimpi.modbus.net.*;
+import net.wimpi.modbus.procimg.*;
 import net.wimpi.modbus.util.*;
 
 /**
@@ -22,12 +23,12 @@ public class ModbusMaster {
     private TCPMasterConnection conn;
     private BitVector inputs;
     private final BitVector outputs;
-    //private Register[] registers;
+    private Register[] registers;
     
     public ModbusMaster() {
-        this.inputCount = Main.config.getI("modbus.inputCount");
-        this.outputCount = Main.config.getI("modbus.outputCount");
-        this.registerCount = Main.config.getI("modbus.registerCount");
+        inputCount = Main.config.getI("modbus.inputCount");
+        outputCount = Main.config.getI("modbus.outputCount");
+        registerCount = Main.config.getI("modbus.registerCount");
         inputs = new BitVector(inputCount);
         outputs = new BitVector(outputCount);
     }
@@ -50,13 +51,13 @@ public class ModbusMaster {
         
         inputs = ((ReadInputDiscretesResponse)trans1.getResponse()).getDiscretes();
         
-        /*ReadMultipleRegistersRequest req2 = new ReadMultipleRegistersRequest(0, registerCount);
+        ReadMultipleRegistersRequest req2 = new ReadMultipleRegistersRequest(0, registerCount);
         
         ModbusTCPTransaction trans2 = new ModbusTCPTransaction(conn);
         trans2.setRequest(req2);
         trans2.execute();
         
-        registers = ((ReadMultipleRegistersResponse)trans2.getResponse()).getRegisters();*/
+        registers = ((ReadMultipleRegistersResponse)trans2.getResponse()).getRegisters();
     }
     public void refreshOutputs() throws ModbusException {
         WriteMultipleCoilsRequest req1 = new WriteMultipleCoilsRequest(0, outputs);
@@ -65,11 +66,11 @@ public class ModbusMaster {
         trans1.setRequest(req1);    
         trans1.execute();  
         
-        /*WriteMultipleRegistersRequest req2 = new WriteMultipleRegistersRequest(0, registers);
+        WriteMultipleRegistersRequest req2 = new WriteMultipleRegistersRequest(0, registers);
         
         ModbusTCPTransaction trans2 = new ModbusTCPTransaction(conn);
         trans2.setRequest(req2);    
-        trans2.execute();*/
+        trans2.execute();
     }
     
     public boolean getInput(int index) {
@@ -78,10 +79,10 @@ public class ModbusMaster {
     public void setOutput(int index, boolean value) {
         outputs.setBit(index, value);
     }    
-    /*public int getRegister(int index) {
+    public int getRegister(int index) {
         return registers[index].getValue();
     }
     public void setRegister(int index, int value) {
         registers[index].setValue(value);
-    }*/
+    }
 }
