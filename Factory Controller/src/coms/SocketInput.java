@@ -5,10 +5,70 @@
  */
 package coms;
 
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
 /**
  *
  * @author Alex
  */
-public class SocketInput {
-    // TODO: write class
+public class SocketInput {    
+    public final String host;
+    public final int port;
+    private final List<String> lines = new ArrayList<>();
+        
+    public SocketInput(String host, int port) {
+        this.host = host;
+        this.port = port;
+    }
+    
+    public void start() {
+        Thread thread = new Thread() {
+            public void run() {
+                threadMethod();
+            }
+        };
+        
+        thread.start();
+    }
+    public boolean hasNewLines() {
+        synchronized(lines) {
+            return lines.size() > 0;
+        }
+    }    
+    public List<String> getNewLines() {
+        synchronized(lines) {
+            List<String> ret = new ArrayList(lines);
+            lines.clear();
+            return ret;
+        }
+    }
+    
+    private void threadMethod() {
+        try {
+            try (Socket socket = new Socket(host, port);
+                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())))
+            {
+                System.out.println("Connected to socket server on " + host + ":" + port);
+                
+                String line;
+                while ((line = in.readLine()) != null) {
+                    addLine(line);
+                }
+                
+            }
+            
+            System.out.println("Socket server closed on " + host + ":" + port);
+        }
+        catch (Exception ex) {
+            throw new Error("Could not connect to socket on " + host + ":" + port);
+        }
+    }
+    private void addLine(String line) {
+        synchronized(lines) {
+            lines.add(line);
+        }
+    }
+    
 }
