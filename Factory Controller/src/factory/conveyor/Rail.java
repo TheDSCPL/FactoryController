@@ -47,7 +47,6 @@ public class Rail extends Conveyor {
 
     @Override
     public void blockTransferPrepare() {
-        System.out.println("Rail blockTransferPrepare " + railMotorDirection());
         railMotor.turnOn(railMotorDirection());
     }
 
@@ -56,12 +55,7 @@ public class Rail extends Conveyor {
         boolean ready = 
                 (railMotorDirection() && railSensorPlus.on()) ||
                 (!railMotorDirection() && railSensorMinus.on());
-        
-        System.out.println("----");
-        System.out.println("Rail " + railMotorDirection() + " " + railSensorPlus.on() + " " + railSensorMinus.on());
-        System.out.println(transferPartner);
-        System.out.println(Arrays.toString(connections));
-        
+                
         if (ready) railMotor.turnOff();
         return ready;
     }

@@ -29,8 +29,9 @@ public class Pusher extends Conveyor {
     public void update() {
         super.update();
         
-        if (pushSensorMinus.on()) { pushMotor.turnOn(true); }
-        if (pushSensorPlus.on()) { pushMotor.turnOn(false); }
+        // DEMO
+        //if (pushSensorMinus.on()) { pushMotor.turnOn(true); }
+        //if (pushSensorPlus.on()) { pushMotor.turnOn(false); }
     }
 
     @Override
@@ -42,23 +43,15 @@ public class Pusher extends Conveyor {
     }
 
     @Override
-    public void blockTransferFinished() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public void blockTransferFinished() {} // TODO: push if necessary
 
     @Override
-    public boolean isBlockTransferPossible() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public boolean isBlockTransferPossible() { return true; } // TODO: see if pusching has ended
 
     @Override
-    public void blockTransferPrepare() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public void blockTransferPrepare() {}
 
     @Override
-    public boolean isBlockTransferReady() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public boolean isBlockTransferReady() { return true; }
     
 }

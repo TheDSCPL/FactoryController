@@ -40,15 +40,19 @@ public class Warehouse extends Cell {
         }
     }
     
+    int p = 1;
+    
     @Override
     public void update() {
         super.update();
         
-        Main.modbus.setRegister(0, out.presenceSensors[0].on() ? 0 : 1);
+        // DEMO
+        Main.modbus.setRegister(0, out.presenceSensors[0].on() ? 0 : p);
+        
         if (out.presenceSensors[0].on() && !out.hasBlock()) {
             Block b = new Block(Block.Type.P1);
             
-            int[] n = {1,1,3,2,1,3,2,1};
+            int[] n = {1,1,3,2,1,3,2,1,1,1,0,0,0,2,1,2,1,1,2,1,3,1,1,2,1,1,0,0,2};
             Conveyor last = out;
             
             b.path.push(last);
@@ -56,10 +60,10 @@ public class Warehouse extends Cell {
                 b.path.push(last.connections[i]);
                 last = last.connections[i];
             }
-            
-            System.out.println(b.path.path);
-            
+                        
             out.blocks[0] = b;
+            
+            p++; if (p == 10) p = 1;
         }
     }
     
