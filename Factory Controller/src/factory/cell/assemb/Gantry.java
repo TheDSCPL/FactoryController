@@ -32,16 +32,16 @@ public class Gantry
     public final Sensor presenceSensor;
     Gantry(String id)
     {
-        this.id=id;
+        this.id = id;
         inputSensorId  = Main.config.getBaseInput (id + "R");
         outputActionId = Main.config.getBaseOutput(id + "R");
         
-        //initialize outputs
+        // initialize outputs
         XMotor   = new Motor(outputActionId + 0);
         YMotor   = new Motor(outputActionId + 2);
         ZMotor   = new Motor(outputActionId + 4);
         
-        //initialize inputs
+        // initialize inputs
         Sensor y0, y1, y2, y3, y4;
         minX  = new Sensor(inputSensorId + 0);
         maxX  = new Sensor(inputSensorId + 1);
@@ -60,7 +60,6 @@ public class Gantry
     public boolean hasBlock()
     {
         return presenceSensor.on();
-        //return Main.modbus.getInput(inputSensorId);
     }
     
     public void open()

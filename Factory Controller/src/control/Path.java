@@ -17,21 +17,20 @@ public class Path {
     
     public void push(Conveyor c)
     {
-        if (c == null)
-            return;
-        //adds only if the last conveyor in the path is connected to the conveyor that we are trying to add
+        if (c == null) return;
+        
+        // Adds only if the last conveyor in the path is connected to the conveyor that we are trying to add
         if (!path.isEmpty())
         {
-            for (Conveyor ci : path.get(path.size() - 1).connections) //checks all of the conveyors connected to the last element of the list
-                if (c == ci)
-                {
+            for (Conveyor ci : getLast().connections) { // checks all of the conveyors connected to the last element of the list
+                if (c == ci) {
                     path.add(c);
                     return;
                 }
+            }
             throw new Error("Path has a bug!");
         }
-        else
-            path.add(c);
+        else path.add(c);
     }
     
     public Conveyor getCurrent() {
@@ -40,6 +39,10 @@ public class Path {
     
     public Conveyor getNext() {
         return hasNext() ? path.get(1) : null;
+    }
+    
+    public Conveyor getLast() {
+        return path.isEmpty() ? null : path.get(path.size() - 1);
     }
     
     public boolean hasNext() {

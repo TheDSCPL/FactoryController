@@ -11,4 +11,6 @@ package control;
  */
 public class OrderExecution {
     // TODO: write class
+    
+    public Block[] blocks;
 }

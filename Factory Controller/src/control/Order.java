@@ -11,4 +11,10 @@ package control;
  */
 public class Order {
     // TODO: write class
+    
+    public OrderExecution[] executions;
+    
+    public void execute() {
+        
+    }
 }

@@ -11,4 +11,10 @@ package control;
  */
 public class OrderController {
     // TODO: write class
+
+    public Order[] orders;
+    
+    public void update() {
+        
+    }
 }

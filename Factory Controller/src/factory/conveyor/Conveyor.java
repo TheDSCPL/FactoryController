@@ -25,6 +25,11 @@ public abstract class Conveyor {
     public String id;
     public Conveyor[] connections;
     
+    public enum State {
+        Standby, PrepareToReceive, Receiving,
+        PrepareToSend, ReadyToSend, Sending;
+    }
+    
     /**
      * Constructor of the abstract superclass
      * @param id Name of the conveyor
@@ -102,7 +107,6 @@ public abstract class Conveyor {
         }            
         return false;
     }
-    
     public boolean isSending()
     {
         return conveyorState == State.PrepareToSend ||
@@ -115,19 +119,25 @@ public abstract class Conveyor {
                conveyorState == State.Receiving;
     }
     
-    public void blockTransferRegister(Conveyor c)
+    private void blockTransferRegister(Conveyor c)
     {
         if (!isSending() && !isReceiving()) {
             transferPartner = c;
         }
     }
-    public void blockTransferStart()
+    private void blockTransferStart()
     {
         transferMotor.turnOn(transferMotorDirection());
         if (isSending()) { conveyorState = State.Sending; }
         else if (isReceiving()) { conveyorState = State.Receiving; }
     }
-    public Block blockTransferStop(Block newBlock)
+    /**
+     * 
+     * @param newBlock If receiving, expects the new block object to be
+     * passed. If sending, parameter is null
+     * @return If sending, returns the block sent
+     */
+    private Block blockTransferStop(Block newBlock)
     {
         transferMotor.turnOff();
         
@@ -147,19 +157,8 @@ public abstract class Conveyor {
         conveyorState = State.Standby;
         return b;
     }
-    
-    public abstract boolean transferMotorDirection();
-    public abstract void blockTransferFinished();
-    public abstract boolean isBlockTransferPossible();
-    public abstract void blockTransferPrepare();
-    public abstract boolean isBlockTransferReady();
-    
-    public enum State {
-        Standby, PrepareToReceive, Receiving,
-        PrepareToSend, ReadyToSend, Sending;
-    }
-    
-    private Block shiftOneBlock(boolean shiftRight, Block insert) {
+    private Block shiftOneBlock(boolean shiftRight, Block insert)
+    {
         Block ret = null;
         
         if (shiftRight) {
@@ -183,4 +182,10 @@ public abstract class Conveyor {
         
         return ret;
     }
+    
+    public abstract boolean transferMotorDirection();
+    public abstract void blockTransferFinished();
+    public abstract boolean isBlockTransferPossible();
+    public abstract void blockTransferPrepare();
+    public abstract boolean isBlockTransferReady();
 }
