@@ -5,8 +5,8 @@
  */
 package factory.cell;
 
-import factory.conveyor.Conveyor;
-import factory.conveyor.Mover;
+import control.*;
+import factory.conveyor.*;
 import main.*;
 
 /**
@@ -21,7 +21,7 @@ public class Warehouse extends Cell {
     public Warehouse(String id) {
         super(id);
         
-        //TODO: decide if the warehouse needs to be initialized
+        // TODO: decide if the warehouse needs to be initialized
         //  >> let's not worry about initialization for now
         //state = State.
         
@@ -31,30 +31,47 @@ public class Warehouse extends Cell {
     }
 
     @Override
-    public Conveyor getCornerConveyor(int position) {
+    public Conveyor getCornerConveyor(int position)
+    {
         switch (position) {
             case 1: return out;
             case 2: return in;
             default: throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
         }
     }
-
+    
     @Override
     public void update() {
         super.update();
         
         Main.modbus.setRegister(0, out.presenceSensors[0].on() ? 0 : 1);
+        if (out.presenceSensors[0].on() && !out.hasBlock()) {
+            Block b = new Block(Block.Type.P1);
+            
+            int[] n = {1,1,3,2,1,3,2,1};
+            Conveyor last = out;
+            
+            b.path.push(last);
+            for (int i : n) {
+                b.path.push(last.connections[i]);
+                last = last.connections[i];
+            }
+            
+            System.out.println(b.path.path);
+            
+            out.blocks[0] = b;
+        }
     }
     
     @Override
-    public void connectWithRightCell(Cell right) {
+    public void connectWithRightCell(Cell right)
+    {
         out.connections[1] = right.getCornerConveyor(0);
         in.connections[1] = right.getCornerConveyor(3);
     }
 
     @Override
-    public void connectWithLeftCell(Cell left) {
-        return;
-    }
+    public void connectWithLeftCell(Cell left)
+    {}
     
 }

@@ -34,15 +34,19 @@ public class Path {
             path.add(c);
     }
     
-    public Conveyor current() {
+    public Conveyor getCurrent() {
         return path.isEmpty() ? null : path.get(0);
     }
     
-    public Conveyor next() {
-        return path.size() <= 1 ? null : path.get(1);
+    public Conveyor getNext() {
+        return hasNext() ? path.get(1) : null;
     }
     
-    public void pop() {
+    public boolean hasNext() {
+        return path.size() > 1;
+    }
+    
+    public void advance() {
         if (!path.isEmpty()) path.remove(0);
     }
 }

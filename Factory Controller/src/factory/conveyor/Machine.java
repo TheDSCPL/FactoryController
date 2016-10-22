@@ -71,23 +71,15 @@ public class Machine extends Conveyor {
     }
 
     @Override
-    public void blockTransferFinished() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public void blockTransferFinished() {} // TODO: start machining
 
     @Override
-    public boolean isBlockTransferPossible() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public boolean isBlockTransferPossible() { return true; } // TODO: has machining ended
 
     @Override
-    public void blockTransferPrepare() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public void blockTransferPrepare() {}
 
     @Override
-    public boolean isBlockTransferReady() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public boolean isBlockTransferReady() { return true; }
     
 }

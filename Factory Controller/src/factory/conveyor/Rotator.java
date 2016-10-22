@@ -21,16 +21,13 @@ public class Rotator extends Conveyor {
     public Rotator(String id) {
         super(id, 1, 4);
         rotateMotor = new Motor(Main.config.getBaseOutput(id) + 2);
-        rotateSensorMinus = new Sensor(Main.config.getBaseInput(id) + 1);
-        rotateSensorPlus = new Sensor(Main.config.getBaseInput(id) + 2);
+        rotateSensorPlus = new Sensor(Main.config.getBaseInput(id) + 1);
+        rotateSensorMinus = new Sensor(Main.config.getBaseInput(id) + 2);
     }
     
     @Override
     public void update() {
         super.update();
-        
-        if (rotateSensorMinus.on()) { rotateMotor.turnOn(false); }
-        if (rotateSensorPlus.on()) { rotateMotor.turnOn(true); }
     }
     
     @Override
@@ -41,27 +38,34 @@ public class Rotator extends Conveyor {
         
         if (isSending()) return leftOrTop;
         else if (isReceiving()) return !leftOrTop;
-        else throw new Error("FATAL ERROR: transferMotorDirection called when not transfering block");
+        else throw new Error("transferMotorDirection called when not transfering block");
     }
 
     @Override
-    public void blockTransferFinished() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public void blockTransferFinished() {}
 
     @Override
     public boolean isBlockTransferPossible() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return true;
     }
 
     @Override
     public void blockTransferPrepare() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        rotateMotor.turnOn(rotateMotorDirection());
     }
 
     @Override
     public boolean isBlockTransferReady() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        boolean ready = 
+                (rotateMotorDirection() && rotateSensorPlus.on()) ||
+                (!rotateMotorDirection() && rotateSensorMinus.on());
+        
+        if (ready) rotateMotor.turnOff();
+        return ready;
+    }
+    
+    private boolean rotateMotorDirection() {
+        return transferPartner == connections[0] || transferPartner == connections[2];
     }
     
 }

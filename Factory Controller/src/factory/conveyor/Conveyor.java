@@ -40,72 +40,62 @@ public abstract class Conveyor {
         
         transferMotor = new Motor(Main.config.getBaseOutput(id) + 0);
         for (int i = 0; i < length; i++) { presenceSensors[i] = new Sensor(Main.config.getBaseInput(id) + i); }
+        
+        conveyorState = State.Standby;
     }
     
     public void update()
-    {
-        if (presenceSensors[0].on()) {
-            transferMotor.turnOn(true);
-        }
-        
-        // TODO: write state machine (Alex will do that)
-        
-        /*switch (conveyorState)
+    {           
+        switch (conveyorState)
         {
             case Standby:
-                if ( hasBlocks() )
-                {
-                    if (isBlockTransferPossible())
-                    {
-                        
-                        blockTransferPrepare();
-                        conveyorState = State.PrepareToSend;
+                if (hasBlock()) {
+                    
+                    Block block = null;
+                    for (Block b : blocks) if (b != null) block = b;
+                    
+                    if (block.path.hasNext()) {
+                        if (isBlockTransferPossible()) {
+                            transferPartner = block.path.getNext();
+                            conveyorState = State.PrepareToSend;
+                            blockTransferPrepare();
+                        }
                     }
                 }
-                else if (transferPartner != null)
-                {
-                    if (transferPartner.conveyorState == State.PrepareToSend) //can receive from transferPartner
-                    {
-                        blockTransferPrepare();
-                        conveyorState = State.PrepareToReceive;
-                    }
+                else if (transferPartner != null) {
+                    blockTransferPrepare();
+                    conveyorState = State.PrepareToReceive;
                 }
-            break;
+                break;
             case PrepareToReceive:
-                if (isBlockTransferReady())
-                {
+                if (isBlockTransferReady()) {
                     blockTransferStart();
                     transferPartner.blockTransferStart();
                 }
-            break;
+                break;
             case Receiving:
-                if (sensor false)
-                {
-                    Block newBlock = transferPartner.blockTransferStop();
-                    // add newBlock to list from correct side
-                    blockTransferStop();
+                Sensor s = presenceSensors[0]; // TODO
+                if (s.on()) {
+                    blockTransferStop(transferPartner.blockTransferStop(null));
                 }
-            break;
+                break;
             case PrepareToSend:
-                if (isBlockTransferReady())
-                {
+                if (isBlockTransferReady()) {
                     conveyorState = State.ReadyToSend;
                 }
-            break;
+                break;
             case ReadyToSend:
                 transferPartner.blockTransferRegister(this);
-            break;
-            case Sending:
-                
-            break;
-        }*/
+                break;
+            case Sending: break;
+        }
     }
     
     /**
      * Checks if there are blocks in the conveyor
      * @return <i>true</i> if there is at least one block. <i>false</i> otherwise
      */
-    private boolean hasBlock()
+    public boolean hasBlock()
     {
         for (Block b : blocks) {
             if (b != null) return true;
@@ -127,27 +117,34 @@ public abstract class Conveyor {
     
     public void blockTransferRegister(Conveyor c)
     {
-        transferPartner = c;
+        if (!isSending() && !isReceiving()) {
+            transferPartner = c;
+        }
     }
     public void blockTransferStart()
     {
         transferMotor.turnOn(transferMotorDirection());
-        if (conveyorState == State.ReadyToSend) { conveyorState = State.Sending; }
-        else if (conveyorState == State.PrepareToReceive) { conveyorState = State.Receiving; }
+        if (isSending()) { conveyorState = State.Sending; }
+        else if (isReceiving()) { conveyorState = State.Receiving; }
     }
-    public Block blockTransferStop()
+    public Block blockTransferStop(Block newBlock)
     {
         transferMotor.turnOff();
         
         Block b = null;
-        if (conveyorState == State.Sending) {
-            // remove block from list from correct side
-            // b = ...;
+        if (isSending()) {
+            while (b == null) {
+                b = shiftOneBlock(!transferMotorDirection(), null);
+            }
+        }
+        else if (isReceiving()) {
+            shiftOneBlock(!transferMotorDirection(), newBlock);
+            newBlock.path.advance();
+            blockTransferFinished();
         }
         
-        conveyorState = State.Standby;
-                
         transferPartner = null;
+        conveyorState = State.Standby;
         return b;
     }
     
@@ -160,5 +157,30 @@ public abstract class Conveyor {
     public enum State {
         Standby, PrepareToReceive, Receiving,
         PrepareToSend, ReadyToSend, Sending;
+    }
+    
+    private Block shiftOneBlock(boolean shiftRight, Block insert) {
+        Block ret = null;
+        
+        if (shiftRight) {
+            ret = blocks[blocks.length - 1];
+            
+            for (int i = 0; i < blocks.length - 1; i++) {
+                blocks[i + 1] = blocks[i];
+            }
+            
+            blocks[0] = insert;
+        }
+        else {
+            ret = blocks[0];
+            
+            for (int i = blocks.length - 1; i > 0; i--) {
+                blocks[i - 1] = blocks[i];
+            }
+            
+            blocks[blocks.length - 1] = insert;
+        }
+        
+        return ret;
     }
 }

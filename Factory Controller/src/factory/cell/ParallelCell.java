@@ -47,10 +47,10 @@ public class ParallelCell extends Cell {
         t1.connections = new Conveyor[] {null, t2};
         t2.connections = new Conveyor[] {t1, null, t3, t4};
         t3.connections = new Conveyor[] {t2, null};
-        t4.connections = new Conveyor[] {t2, null, t5, t6};
+        t4.connections = new Conveyor[] {t2, null, t6, t5};
         t5.connections = new Conveyor[] {t4, t7};
         t6.connections = new Conveyor[] {t4, t7};
-        t7.connections = new Conveyor[] {t5, t6, t9, null};
+        t7.connections = new Conveyor[] {t5, t6, null, t9};
         t8.connections = new Conveyor[] {null, t9};
         t9.connections = new Conveyor[] {t8, t7, t10, null};
         t10.connections = new Conveyor[] {t9, null};

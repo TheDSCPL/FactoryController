@@ -12,7 +12,7 @@ package control;
  */
 public class Block {
     
-    Block(Block.Type type) {
+    public Block(Block.Type type) {
         this.type = type;
     }
     

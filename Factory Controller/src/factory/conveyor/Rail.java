@@ -6,6 +6,7 @@
 package factory.conveyor;
 
 import factory.*;
+import java.util.Arrays;
 import main.*;
 
 /**
@@ -26,14 +27,6 @@ public class Rail extends Conveyor {
     }
     
     @Override
-    public void update() {
-        super.update();
-        
-        if (railSensorMinus.on()) { railMotor.turnOn(true); }
-        if (railSensorPlus.on()) { railMotor.turnOn(false); }
-    }
-    
-    @Override
     public boolean transferMotorDirection()
     {
         boolean top = transferPartner == connections[0] ||
@@ -45,23 +38,36 @@ public class Rail extends Conveyor {
     }
 
     @Override
-    public void blockTransferFinished() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public void blockTransferFinished() {}
 
     @Override
     public boolean isBlockTransferPossible() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return true;
     }
 
     @Override
     public void blockTransferPrepare() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        System.out.println("Rail blockTransferPrepare " + railMotorDirection());
+        railMotor.turnOn(railMotorDirection());
     }
 
     @Override
     public boolean isBlockTransferReady() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        boolean ready = 
+                (railMotorDirection() && railSensorPlus.on()) ||
+                (!railMotorDirection() && railSensorMinus.on());
+        
+        System.out.println("----");
+        System.out.println("Rail " + railMotorDirection() + " " + railSensorPlus.on() + " " + railSensorMinus.on());
+        System.out.println(transferPartner);
+        System.out.println(Arrays.toString(connections));
+        
+        if (ready) railMotor.turnOff();
+        return ready;
+    }
+    
+    private boolean railMotorDirection() {
+        return transferPartner == connections[0] || transferPartner == connections[3];
     }
     
 }
