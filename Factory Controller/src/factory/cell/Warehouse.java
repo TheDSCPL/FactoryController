@@ -40,7 +40,7 @@ public class Warehouse extends Cell {
         }
     }
     
-    int p = 1;
+    int p = 1; // DEMO
     
     @Override
     public void update() {
@@ -77,5 +77,10 @@ public class Warehouse extends Cell {
     @Override
     public void connectWithLeftCell(Cell left)
     {}
+
+    @Override
+    public void registerNewIncomingBlock(Block b) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

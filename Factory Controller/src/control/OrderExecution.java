@@ -5,6 +5,8 @@
  */
 package control;
 
+import control.order.*;
+
 /**
  *
  * @author Alex
@@ -13,4 +15,10 @@ public class OrderExecution {
     // TODO: write class
     
     public Block[] blocks;
+    private final Order order;
+    
+    public OrderExecution(Order order) {
+        this.order = order;
+    }
+    
 }

@@ -119,6 +119,18 @@ public abstract class Conveyor {
                conveyorState == State.Receiving;
     }
     
+    /**
+     * Indicates if the conveyor is not doing anything
+     * Should be overridden by subclasses for subclasses that
+     * process blocks, for example:
+     *     return super.isIdle() && machiningStopped
+     * @return 
+     */
+    public boolean isIdle()
+    {
+        return conveyorState == State.Standby;
+    }
+    
     private void blockTransferRegister(Conveyor c)
     {
         if (!isSending() && !isReceiving()) {

@@ -5,6 +5,7 @@
  */
 package factory.cell.assemb;
 
+import control.*;
 import factory.*;
 import factory.cell.*;
 import factory.conveyor.*;
@@ -47,9 +48,9 @@ public class Assembler extends Cell {
         t5.connections = new Conveyor[] {t6, t4, null, null};
         t6.connections = new Conveyor[] {null, t5};
         
-        table1 = new Sensor(Main.config.getBaseInput("M" + "M") + 0);
-        table2 = new Sensor(Main.config.getBaseInput("M" + "M") + 1);
-        table3 = new Sensor(Main.config.getBaseInput("M" + "M") + 2);
+        table1 = new Sensor(Main.config.getBaseInput(id + "M") + 0);
+        table2 = new Sensor(Main.config.getBaseInput(id + "M") + 1);
+        table3 = new Sensor(Main.config.getBaseInput(id + "M") + 2);
         
         gantry = new Gantry(id);
     }
@@ -129,6 +130,11 @@ public class Assembler extends Cell {
     {
         t1.connections[0] = left.getCornerConveyor(1);
         t6.connections[0] = left.getCornerConveyor(2);
+    }
+
+    @Override
+    public void registerNewIncomingBlock(Block b) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

@@ -5,6 +5,7 @@
  */
 package factory.cell;
 
+import control.*;
 import factory.conveyor.*;
 
 /**
@@ -73,6 +74,11 @@ public class SerialCell extends Cell {
     public void connectWithLeftCell(Cell left) {
         t1.connections[0] = left.getCornerConveyor(1);
         t7.connections[0] = left.getCornerConveyor(2);
+    }
+
+    @Override
+    public void registerNewIncomingBlock(Block b) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

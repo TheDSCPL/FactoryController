@@ -16,7 +16,7 @@ public class Path {
     public List<Conveyor> path = new ArrayList<>();
     
     public void push(Conveyor c)
-    {
+    {   
         if (c == null) return;
         
         // Adds only if the last conveyor in the path is connected to the conveyor that we are trying to add
