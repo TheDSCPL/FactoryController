@@ -14,13 +14,13 @@ import java.util.*;
  * @author Alex
  */
 public class SocketInput {    
-    public final String host;
+    public final int packetSize;
     public final int port;
-    private final List<String> lines = new ArrayList<>();
+    private final List<byte[]> packets = new ArrayList<>();
         
-    public SocketInput(String host, int port) {
-        this.host = host;
+    public SocketInput(int port, int packetSize) {
         this.port = port;
+        this.packetSize = packetSize;
     }
     
     public void start() {
@@ -32,42 +32,42 @@ public class SocketInput {
         
         thread.start();
     }
-    public boolean hasNewLines() {
-        synchronized(lines) {
-            return lines.size() > 0;
+    public boolean hasNewPackets() {
+        synchronized(packets) {
+            return packets.size() > 0;
         }
     }    
-    public List<String> getNewLines() {
-        synchronized(lines) {
-            List<String> ret = new ArrayList(lines);
-            lines.clear();
+    public List<byte[]> getNewPackets() {
+        synchronized(packets) {
+            List<byte[]> ret = new ArrayList(packets);
+            packets.clear();
             return ret;
         }
     }
     
     private void threadMethod() {
         try {
-            try (Socket socket = new Socket(host, port); // TODO dunno if this is the correct way to implement a client for the UDP protocol, probably not
-                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())))
+            try (DatagramSocket socket = new DatagramSocket(port))
             {
-                System.out.println("Connected to socket server on " + host + ":" + port);
+                byte[] buffer = new byte[packetSize];
+                DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
                 
-                String line;
-                while ((line = in.readLine()) != null) {
-                    addLine(line);
+                System.out.println("Listening to UDP packages on " + port);
+
+                while (true) {
+                    socket.receive(incoming);
+                    addPacket(incoming.getData());
+                    //System.out.println(incoming.getAddress().getHostAddress() + " : " + incoming.getPort() + " - " + new String(incoming.getData(), 0, incoming.getLength()));
                 }
-                
-            }
-            
-            System.out.println("Socket server closed on " + host + ":" + port);
+            }            
         }
         catch (Exception ex) {
-            throw new Error("Could not connect to socket on " + host + ":" + port);
+            throw new Error("Error ocurred while listening on " + port + ": " + ex);
         }
     }
-    private void addLine(String line) {
-        synchronized(lines) {
-            lines.add(line);
+    private void addPacket(byte[] packet) {
+        synchronized(packets) {
+            packets.add(packet);
         }
     }
     

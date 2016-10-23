@@ -5,8 +5,9 @@
  */
 package control;
 
+import control.order.Order;
 import coms.*;
-import java.nio.charset.*;
+import control.order.*;
 import java.util.*;
 import main.*;
 
@@ -17,30 +18,32 @@ import main.*;
 public class OrderController {
     // TODO: write class
 
-    public Order[] orders;
-    private SocketInput socket;
+    public List<Order> orders = new ArrayList<>();
+    private final SocketInput socket;
     
     public OrderController() {
-        socket = new SocketInput(Main.config.getS("socket.host"), Main.config.getI("socket.port"));
+        socket = new SocketInput(Main.config.getI("socket.port"), 20);
         socket.start();
     }
     
     public void update() {
         
-        // Get new orders from socket
-        if (socket.hasNewLines()) {
-            List<String> lines = socket.getNewLines();
-            for (String line : lines) {
-                processNewOrder(line);
-            }
+        // Get new orders from socket and process them
+        if (socket.hasNewPackets()) {
+            socket.getNewPackets().stream().forEach(this::processNewOrder);
         }
     }
     
-    private void processNewOrder(String line) {
-        byte[] bytes = line.getBytes(StandardCharsets.UTF_8);
+    private void processNewOrder(byte[] packet) {
+        System.out.println("processNewOrder: " + new String(packet, 0, packet.length));
         
-        byte type = bytes[0];
-        int orderN = Integer.parseString(new String(bytes[1:3], StandardCharsets.UTF_8));
-        int type = bytes[4];
+        // TODO unsure about how to process the bytes - we have to confirm with our teacher
+        //byte type = packet[0];
+        //int orderN = Integer.parseString(new String(packet[1:3], StandardCharsets.UTF_8));
+        //int s = packet[4];
+        
+        // Example:
+        Order order = new MachiningOrder(1, 5, Block.Type.P1, Block.Type.P3);
+        orders.add(order);
     }
 }

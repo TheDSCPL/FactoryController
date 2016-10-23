@@ -3,18 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package control;
+package control.order;
 
 /**
  *
  * @author Alex
  */
-public class Order {
-    // TODO: write class
+public class LoadOrder extends Order {
     
-    public OrderExecution[] executions;
+    public final int position;
     
-    public void execute() {
-        
+    public LoadOrder(int id, int count, int position) {
+        super(id, count);
+        this.position = position;
     }
+    
 }
