@@ -17,8 +17,9 @@ public class MachiningOrder extends Order {
     public final Block.Type endType;
     
     public MachiningOrder(int id, int count, Block.Type startType, Block.Type endType) {
-        super(id, count);
+        super(id, count); 
         this.startType = startType;
         this.endType = endType;
     }
+    
 }
