@@ -5,17 +5,24 @@
  */
 package control.order;
 
+import control.*;
+
 /**
  *
  * @author Alex
  */
-public class LoadOrder extends Order {
+public class LoadOrder extends Order { // TODO
     
     public final int position;
     
     public LoadOrder(int id, int count, int position) {
         super(id, count);
         this.position = position;
+    }
+
+    @Override
+    public OrderExecution startExecution(Path path) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

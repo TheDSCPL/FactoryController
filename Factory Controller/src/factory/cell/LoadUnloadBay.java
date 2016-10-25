@@ -5,6 +5,7 @@
  */
 package factory.cell;
 
+import control.*;
 import factory.conveyor.*;
 
 /**
@@ -73,6 +74,11 @@ public class LoadUnloadBay extends Cell {
     public void connectWithLeftCell(Cell left) {
         t1.connections[0] = left.getCornerConveyor(1);
         t6.connections[0] = left.getCornerConveyor(2);
+    }
+
+    @Override
+    public Rotator getEntryConveyor() {
+        return t2;
     }
     
 }

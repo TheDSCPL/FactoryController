@@ -32,16 +32,12 @@ public class SocketInput {
         
         thread.start();
     }
-    public boolean hasNewPackets() {
-        synchronized(packets) {
-            return packets.size() > 0;
-        }
-    }    
+       
     public List<byte[]> getNewPackets() {
         synchronized(packets) {
-            List<byte[]> ret = new ArrayList(packets);
+            List<byte[]> copy = new ArrayList(packets);
             packets.clear();
-            return ret;
+            return copy;
         }
     }
     

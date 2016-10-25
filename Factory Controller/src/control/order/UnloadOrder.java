@@ -11,7 +11,7 @@ import control.*;
  *
  * @author Alex
  */
-public class UnloadOrder extends Order {
+public class UnloadOrder extends Order { // TODO
     
     public final int position;
     public final Block.Type blockType;
@@ -20,6 +20,11 @@ public class UnloadOrder extends Order {
         super(id, count);
         this.position = position;
         this.blockType = blockType;
+    }
+
+    @Override
+    public OrderExecution startExecution(Path blockPath) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

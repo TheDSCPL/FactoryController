@@ -5,9 +5,9 @@
  */
 package control;
 
+import control.order.MachiningOrder;
 import control.order.Order;
 import coms.*;
-import control.order.*;
 import java.util.*;
 import main.*;
 
@@ -18,7 +18,8 @@ import main.*;
 public class OrderController {
     // TODO: write class
 
-    public List<Order> orders = new ArrayList<>();
+    public Set<Order> pendingOrders = new HashSet<>();
+    public Set<Order> completedOrders = new HashSet<>();
     private final SocketInput socket;
     
     public OrderController() {
@@ -29,9 +30,7 @@ public class OrderController {
     public void update() {
         
         // Get new orders from socket and process them
-        if (socket.hasNewPackets()) {
-            socket.getNewPackets().stream().forEach(this::processNewOrder);
-        }
+        socket.getNewPackets().stream().forEach(this::processNewOrder);
     }
     
     private void processNewOrder(byte[] packet) {
@@ -44,6 +43,11 @@ public class OrderController {
         
         // Example:
         Order order = new MachiningOrder(1, 5, Block.Type.P1, Block.Type.P3);
-        orders.add(order);
+        pendingOrders.add(order);
+    }
+    
+    void completeOrder(Order o) {
+        pendingOrders.remove(o);
+        completedOrders.add(o);
     }
 }

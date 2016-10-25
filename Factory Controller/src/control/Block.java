@@ -18,7 +18,16 @@ public class Block {
     
     public enum Type {
         P1, P2, P3, P4, P5,
-        P6, P7, P8, P9, Stacked;
+        P6, P7, P8, P9,
+        /**
+         * For blocks that have two pieces one on top of the other
+         */
+        Stacked,
+        /**
+         * For blocks whose piece type is unknown, for example, when a block is
+         * manually placed on the simulator by some person
+         */
+        Unknown;
     }
     
     public Type type;

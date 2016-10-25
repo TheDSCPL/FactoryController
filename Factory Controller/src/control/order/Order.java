@@ -11,17 +11,15 @@ import control.*;
  *
  * @author Alex
  */
-public abstract class Order {
-    // TODO: write class
-    
+public abstract class Order { // TODO    
     public final int id;
     public final int count;
-    public OrderExecution[] executions;
+    protected OrderExecution[] executions;
     
     public Order(int id, int count) {
         this.id = id;
         this.count = count;
     }
     
-    //public abstract void execute();
+    public abstract OrderExecution startExecution(Path blockPath);
 }
