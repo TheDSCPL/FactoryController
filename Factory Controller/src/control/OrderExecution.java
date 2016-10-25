@@ -5,7 +5,7 @@
  */
 package control;
 
-import control.order.*;
+import control.order.Order;
 
 /**
  *

@@ -11,7 +11,7 @@ import control.*;
  *
  * @author Alex
  */
-public class MachiningOrder extends Order {
+public class MachiningOrder extends Order { // TODO
     
     public final Block.Type startType;
     public final Block.Type endType;
@@ -20,6 +20,11 @@ public class MachiningOrder extends Order {
         super(id, count); 
         this.startType = startType;
         this.endType = endType;
+    }
+
+    @Override
+    public OrderExecution startExecution(Path path) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

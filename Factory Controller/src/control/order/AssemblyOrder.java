@@ -11,7 +11,7 @@ import control.*;
  *
  * @author Alex
  */
-public class AssemblyOrder extends Order {
+public class AssemblyOrder extends Order { // TODO
     
     public final Block.Type bottomType;
     public final Block.Type topType;
@@ -21,6 +21,11 @@ public class AssemblyOrder extends Order {
         super(id, count);
         this.bottomType = bottomType;
         this.topType = topType;
+    }
+
+    @Override
+    public OrderExecution startExecution(Path path) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

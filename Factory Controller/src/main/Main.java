@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main; // PULL -> WORK -> PULL -> PUSH
+package main; // PULL -> WORK -> ADD -> COMMIT -> PULL -> PUSH
 
 import coms.*;
 import control.*;
@@ -34,10 +34,9 @@ public class Main {
                 orderc.update();
                 modbus.refreshOutputs();
                 
-                Thread.sleep(100);
+                Thread.sleep(1);
             }
 
         } catch (Exception ex) { ex.printStackTrace(); } 
     }
-    
 }

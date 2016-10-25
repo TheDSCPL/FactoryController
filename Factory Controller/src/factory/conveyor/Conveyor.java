@@ -19,11 +19,13 @@ public abstract class Conveyor {
      * Contains a conveyor that is to transfer a block to this conveyor when
      * both are ready
      */
-    public Conveyor transferPartner;
-    public Block[] blocks;
-    public State conveyorState;
-    final Motor transferMotor;
-    public final Sensor[] presenceSensors;
+    Conveyor transferPartner;
+    private Block[] blocks;
+    private State conveyorState;
+    private final Motor transferMotor;
+    public final Sensor[] presenceSensors; // TODO public for demo purposes only, should be protected
+    private final int length;
+    
     public String id;
     public Conveyor[] connections;
 
@@ -43,11 +45,13 @@ public abstract class Conveyor {
     public Conveyor(String id, int length, int connectionCount) {
         this.id = id;
 
+        this.length = length;
         blocks = new Block[length];
         presenceSensors = new Sensor[length];
         connections = new Conveyor[connectionCount];
 
         transferMotor = new Motor(Main.config.getBaseOutput(id) + 0);
+
         for (int i = 0; i < length; i++) {
             presenceSensors[i] = new Sensor(Main.config.getBaseInput(id) + i);
         }
@@ -59,7 +63,8 @@ public abstract class Conveyor {
         switch (conveyorState) {
             case Standby:
                 if (hasBlock()) {
-
+                    // TODO deciding which block is transfered next should be
+                    // better - right now only works for conveyors of length 1
                     Block block = null;
                     for (Block b : blocks) {
                         if (b != null) {
@@ -74,10 +79,12 @@ public abstract class Conveyor {
                             blockTransferPrepare();
                         }
                     }
-                } else if (transferPartner != null) {
+                }
+                else if (transferPartner != null) {
                     blockTransferPrepare();
                     conveyorState = State.PrepareToReceive;
                 }
+
                 break;
             case PrepareToReceive:
                 if (isBlockTransferReady()) {
@@ -86,7 +93,7 @@ public abstract class Conveyor {
                 }
                 break;
             case Receiving:
-                Sensor s = presenceSensors[0]; // TODO
+                Sensor s = presenceSensors[0]; // TODO only works for conveyors of lenght 1
                 if (s.on()) {
                     blockTransferStop(transferPartner.blockTransferStop(null));
                 }
@@ -119,19 +126,65 @@ public abstract class Conveyor {
         return false;
     }
 
+    /**
+     * Get block at position <i>position</i> in this conveyor
+     *
+     * @param position
+     * @return Block, or null if no block is present
+     */
+    public Block getBlock(int position) {
+        if (position >= length) {
+            throw new IndexOutOfBoundsException("XXX"); // TODO exception text
+        }
+        return blocks[position];
+    }
+
+    /**
+     * Places a block object on the conveyor
+     *
+     * @param b the block to place
+     * @param position the index (from 0 to length-1) of where to place
+     * @return <i>true</i> if there was no other block on that position and the
+     * block was placed. <i>false</i> otherwise
+     */
+    public boolean placeBlock(Block b, int position) {
+        if (position >= length) {
+            throw new IndexOutOfBoundsException("XXX"); // TODO exception text
+        }
+        if (blocks[position] == null) {
+            blocks[position] = b;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Removes a block object from the conveyor
+     *
+     * @param position the position where to remove the block
+     * @return the block that was removed, or null if no block was there
+     */
+    public Block removeBlock(int position) {
+        Block ret = blocks[position];
+        blocks[position] = null;
+        return ret;
+    }
+
     public boolean isSending() {
         return conveyorState == State.PrepareToSend
-                || conveyorState == State.ReadyToSend
-                || conveyorState == State.Sending;
+               || conveyorState == State.ReadyToSend
+               || conveyorState == State.Sending;
     }
 
     public boolean isReceiving() {
         return conveyorState == State.PrepareToReceive
-                || conveyorState == State.Receiving;
+               || conveyorState == State.Receiving;
     }
 
     /**
-     * Indicates if the conveyor is not doing anything Should be overridden by
+     * Indicates if the conveyor is not doing anything and is ok with an
+     * external class changing the variable `blocks`. Should be overridden by
      * subclasses for subclasses that process blocks, for example: return
      * super.isIdle() && machiningStopped
      *
@@ -151,7 +204,8 @@ public abstract class Conveyor {
         transferMotor.turnOn(transferMotorDirection());
         if (isSending()) {
             conveyorState = State.Sending;
-        } else if (isReceiving()) {
+        }
+        else if (isReceiving()) {
             conveyorState = State.Receiving;
         }
     }
@@ -170,7 +224,8 @@ public abstract class Conveyor {
             while (b == null) {
                 b = shiftOneBlock(!transferMotorDirection(), null);
             }
-        } else if (isReceiving()) {
+        }
+        else if (isReceiving()) {
             shiftOneBlock(!transferMotorDirection(), newBlock);
             newBlock.path.advance();
             blockTransferFinished();
@@ -178,6 +233,7 @@ public abstract class Conveyor {
 
         transferPartner = null;
         conveyorState = State.Standby;
+
         return b;
     }
 
@@ -192,7 +248,8 @@ public abstract class Conveyor {
             }
 
             blocks[0] = insert;
-        } else {
+        }
+        else {
             ret = blocks[0];
 
             for (int i = blocks.length - 1; i > 0; i--) {

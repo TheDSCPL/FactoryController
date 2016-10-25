@@ -5,6 +5,7 @@
  */
 package factory.conveyor;
 
+import control.*;
 import factory.*;
 import main.*;
 
@@ -17,21 +18,44 @@ public class Pusher extends Conveyor {
     private final Motor pushMotor;
     private final Sensor pushSensorPlus;
     private final Sensor pushSensorMinus;
+    private boolean lastUpdateWasIdle;
     
     public Pusher(String id) {
         super(id, 1, 2);
         pushMotor = new Motor(Main.config.getBaseOutput(id) + 2);
         pushSensorPlus = new Sensor(Main.config.getBaseInput(id) + 1);
         pushSensorMinus = new Sensor(Main.config.getBaseInput(id) + 2);
+        lastUpdateWasIdle = true;
     }
     
     @Override
     public void update() {
         super.update();
         
-        // DEMO
-        //if (pushSensorMinus.on()) { pushMotor.turnOn(true); }
-        //if (pushSensorPlus.on()) { pushMotor.turnOn(false); }
+        // Detect if block has been placed manually by a person
+        if (lastUpdateWasIdle && isIdle()) {
+            if (!hasBlock() && presenceSensors[0].on()) {
+                // New block has been placed                
+                Block block = new Block(Block.Type.Unknown);
+                placeBlock(block, 0);
+                
+                
+                // TODO OrderController needs to know that a block has been placed
+                // This is a load order
+                System.out.println("New block!!");
+            }
+        }
+        
+        lastUpdateWasIdle = isIdle();
+        
+        // DEMO ONLY
+        if (pushSensorMinus.on()) { pushMotor.turnOn(true); }
+        if (pushSensorPlus.on()) {
+            pushMotor.turnOn(false);
+            removeBlock(0);
+        }
+        
+        
     }
 
     @Override

@@ -28,9 +28,6 @@ public class ParallelCell extends Cell {
     public ParallelCell(String id) {
         super(id);
         
-        //this cell doesn't need initialization
-        state=State.Working;
-        
         // Create conveyors
         t1 = new Mover(id + "T1", 1);
         t2 = new Rotator(id + "T2");
@@ -86,8 +83,8 @@ public class ParallelCell extends Cell {
     }
 
     @Override
-    public void registerNewIncomingBlock(Block b) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Rotator getEntryConveyor() {
+        return t2;
     }
     
 }

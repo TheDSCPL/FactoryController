@@ -15,6 +15,11 @@ import factory.conveyor.*;
 public class Path {
     public List<Conveyor> path = new ArrayList<>();
     
+    
+    /**
+     * Pushes the conveyor to the end of the FIFO queue
+     * @param c conveyor to be added to the queue
+     */
     public void push(Conveyor c)
     {   
         if (c == null) return;
@@ -22,13 +27,14 @@ public class Path {
         // Adds only if the last conveyor in the path is connected to the conveyor that we are trying to add
         if (!path.isEmpty())
         {
-            for (Conveyor ci : getLast().connections) { // checks all of the conveyors connected to the last element of the list
+            // Checks all of the conveyors connected to the last element of the list
+            for (Conveyor ci : getLast().connections) {
                 if (c == ci) {
                     path.add(c);
                     return;
                 }
             }
-            throw new Error("Path has a bug!");
+            throw new Error("Invalid path!");
         }
         else path.add(c);
     }

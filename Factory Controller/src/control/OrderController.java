@@ -5,9 +5,9 @@
  */
 package control;
 
+import control.order.MachiningOrder;
 import control.order.Order;
 import coms.*;
-import control.order.*;
 import java.util.*;
 import main.*;
 

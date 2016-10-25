@@ -77,8 +77,8 @@ public class LoadUnloadBay extends Cell {
     }
 
     @Override
-    public void registerNewIncomingBlock(Block b) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Rotator getEntryConveyor() {
+        return t2;
     }
     
 }

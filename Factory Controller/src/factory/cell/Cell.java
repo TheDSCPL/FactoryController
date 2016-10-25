@@ -14,10 +14,14 @@ import factory.conveyor.*;
  */
 public abstract class Cell {
 
-    public String id;
-    public Conveyor[] conveyorList;
-    public Conveyor entryConveyor;
-    public State state = State.Initializing;
+    public final String id;
+    protected Conveyor[] conveyorList;
+
+    /**
+     * Not null whenever there is a block present in this cell's entryConveyor
+     * that wants to get in the cell for processing
+     */
+    protected Block incomingBlock;
 
     public Cell(String id) {
         this.id = id;
@@ -29,6 +33,12 @@ public abstract class Cell {
      * @throws Error if the position is invalid
      */
     public abstract Conveyor getCornerConveyor(int position);
+
+    /**
+     * @return The Rotator that is the entry point for blocks on this cell
+     * (normally, the rotator on the top)
+     */
+    public abstract Rotator getEntryConveyor();
 
     /**
      * This cell will be connected to a cell on its right
@@ -48,22 +58,26 @@ public abstract class Cell {
      * Update the FSM of this cell and the FSMs of the conveyors
      */
     public void update() {
+        // Update all conveyors in the cell
         for (Conveyor conveyor : conveyorList) {
             conveyor.update();
         }
-        
+
+        // See if there is any block waiting to get in the cell
+        incomingBlock = null;
+        Conveyor entryConveyor = getEntryConveyor();
         if (entryConveyor != null) {
             if (entryConveyor.isIdle() && entryConveyor.hasBlock()) {
-                Block b = entryConveyor.blocks[0]; // TODO access block in a safer way
-                
+
+                // Note: since entry conveyors are always length = 1, position = 0 is always correct
+                Block b = entryConveyor.getBlock(0);
+
                 if (!b.path.hasNext()) {
-                    registerNewIncomingBlock(b);
+                    incomingBlock = b;
                 }
             }
         }
     }
-    
-    public abstract void registerNewIncomingBlock(Block b);
 
     public static void connect(Cell... cells) {
         if (cells.length == 0) {
@@ -77,10 +91,5 @@ public abstract class Cell {
     public static void connect(Cell left, Cell right) {
         left.connectWithRightCell(right);
         right.connectWithLeftCell(left);
-    }
-
-    // TODO: review: is this state necessary
-    public enum State {
-        Initializing, Working;
     }
 }
