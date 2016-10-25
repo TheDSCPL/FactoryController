@@ -34,7 +34,7 @@ public class Main {
                 orderc.update();
                 modbus.refreshOutputs();
                 
-                Thread.sleep(100);
+                
             }
 
         } catch (Exception ex) { ex.printStackTrace(); } 

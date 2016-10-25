@@ -5,7 +5,6 @@
  */
 package factory.cell.assemb;
 
-import factory.*;
 import factory.cell.*;
 import factory.conveyor.*;
 import main.*;
@@ -23,9 +22,9 @@ public class Assembler extends Cell {
     private final Rotator t5;
     private final Mover t6;
     
-    public final Sensor table1;
-    public final Sensor table2;
-    public final Sensor table3;
+    public final Table table1;
+    public final Table table2;
+    public final Table table3;
     
     public final Gantry gantry;
     
@@ -47,9 +46,9 @@ public class Assembler extends Cell {
         t5.connections = new Conveyor[] {t6, t4, null, null};
         t6.connections = new Conveyor[] {null, t5};
         
-        table1 = new Sensor(Main.config.getBaseInput("M" + "M") + 0);
-        table2 = new Sensor(Main.config.getBaseInput("M" + "M") + 1);
-        table3 = new Sensor(Main.config.getBaseInput("M" + "M") + 2);
+        table1 = new Table(Main.config.getBaseInput("M" + "M") + 0);
+        table2 = new Table(Main.config.getBaseInput("M" + "M") + 1);
+        table3 = new Table(Main.config.getBaseInput("M" + "M") + 2);
         
         gantry = new Gantry(id);
     }

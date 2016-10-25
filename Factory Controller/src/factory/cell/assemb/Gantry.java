@@ -22,21 +22,22 @@ public class Gantry
     public final Sensor maxX,minX,upZ,downZ;
     public final Sensor[] Ysensors;
     
+    public final String id;
     /**
      * <i>false</i> if open. <i>true</i> if closed
      */
     private boolean gripState = false;
-    public final String id;
-    private final int outputActionId;
-    private final int inputSensorId;
+    private final int gripOutputId;
     public final Sensor presenceSensor;
+    
     Gantry(String id)
     {
         this.id = id;
-        inputSensorId  = Main.config.getBaseInput (id + "R");
-        outputActionId = Main.config.getBaseOutput(id + "R");
+        int inputSensorId  = Main.config.getBaseInput (id + "R");
+        int outputActionId = Main.config.getBaseOutput(id + "R");
         
         // initialize outputs
+        gripOutputId = outputActionId;
         XMotor   = new Motor(outputActionId + 0);
         YMotor   = new Motor(outputActionId + 2);
         ZMotor   = new Motor(outputActionId + 4);
@@ -64,12 +65,12 @@ public class Gantry
     
     public void open()
     {
-        Main.modbus.setOutput(outputActionId, gripState = false);
+        Main.modbus.setOutput(gripOutputId, gripState = false);
     }
     
     public void close()
     {
-        Main.modbus.setOutput(outputActionId, gripState = true);
+        Main.modbus.setOutput(gripOutputId, gripState = true);
     }
     
     public boolean isOpen()
