@@ -12,12 +12,9 @@ import control.*;
  * @author Alex
  */
 public class LoadOrder extends Order { // TODO
-    
-    public final int position;
-    
-    public LoadOrder(int id, int count, int position) {
-        super(id, count);
-        this.position = position;
+        
+    public LoadOrder(int id, Block block) {
+        super(id, 1);
     }
 
     @Override

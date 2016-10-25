@@ -20,7 +20,7 @@ public abstract class Conveyor {
      * both are ready
      */
     Conveyor transferPartner;
-    private Block[] blocks;
+    private final Block[] blocks;
     private State conveyorState;
     private final Motor transferMotor;
     public final Sensor[] presenceSensors; // TODO public for demo purposes only, should be protected
@@ -196,7 +196,14 @@ public abstract class Conveyor {
 
     private void blockTransferRegister(Conveyor c) {
         if (!isSending() && !isReceiving()) {
+            //if (transferPartner != null) {
+            // TODO it is possible that this may be called twice in the same loop
+            // for two different conveyors. Needs way of
+            // identifying best transferpartner
+            //}
+            //else {
             transferPartner = c;
+            //}
         }
     }
 
@@ -238,27 +245,31 @@ public abstract class Conveyor {
     }
 
     private Block shiftOneBlock(boolean shiftRight, Block insert) {
-        Block ret = null;
+        Block ret;
 
         if (shiftRight) {
             ret = blocks[blocks.length - 1];
 
-            for (int i = 0; i < blocks.length - 1; i++) {
-                blocks[i + 1] = blocks[i];
-            }
-
+            System.arraycopy(blocks, 0, blocks, 1, blocks.length - 1);
+            // Equivalent to: TODO verify
+            //for (int i = 0; i < blocks.length - 1; i++) {
+            //    blocks[i + 1] = blocks[i];
+            //}
+            
             blocks[0] = insert;
         }
         else {
             ret = blocks[0];
 
-            for (int i = blocks.length - 1; i > 0; i--) {
-                blocks[i - 1] = blocks[i];
-            }
-
+            System.arraycopy(blocks, 1, blocks, 0, blocks.length - 1);
+            // Equivalent to: TODO verify
+            //for (int i = blocks.length - 1; i > 0; i--) {
+            //    blocks[i - 1] = blocks[i];
+            //}
+            
             blocks[blocks.length - 1] = insert;
         }
-
+        
         return ret;
     }
 

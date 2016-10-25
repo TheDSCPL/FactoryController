@@ -14,12 +14,12 @@ import main.*;
  * @author Alex
  */
 public class Pusher extends Conveyor {
-    
+
     private final Motor pushMotor;
     private final Sensor pushSensorPlus;
     private final Sensor pushSensorMinus;
     private boolean lastUpdateWasIdle;
-    
+
     public Pusher(String id) {
         super(id, 1, 2);
         pushMotor = new Motor(Main.config.getBaseOutput(id) + 2);
@@ -27,55 +27,65 @@ public class Pusher extends Conveyor {
         pushSensorMinus = new Sensor(Main.config.getBaseInput(id) + 2);
         lastUpdateWasIdle = true;
     }
-    
+
     @Override
     public void update() {
         super.update();
-        
+
         // Detect if block has been placed manually by a person
         if (lastUpdateWasIdle && isIdle()) {
-            if (!hasBlock() && presenceSensors[0].on()) {
-                // New block has been placed                
+            if (!hasBlock() && presenceSensors[0].on()) { // New block has been placed
+                // Create block
                 Block block = new Block(Block.Type.Unknown);
+                block.path.push(this);
+                
+                // Place block on this conveyor
                 placeBlock(block, 0);
                 
-                
-                // TODO OrderController needs to know that a block has been placed
-                // This is a load order
-                System.out.println("New block!!");
+                // Notify order controller
+                Main.orderc.addNewLoadOrder(block);
             }
         }
-        
+
         lastUpdateWasIdle = isIdle();
-        
+
         // DEMO ONLY
-        if (pushSensorMinus.on()) { pushMotor.turnOn(true); }
-        if (pushSensorPlus.on()) {
-            pushMotor.turnOn(false);
-            removeBlock(0);
+        //if (pushSensorMinus.on()) { pushMotor.turnOn(true); }
+        //if (pushSensorPlus.on()) {
+        //    pushMotor.turnOn(false);
+        //    removeBlock(0);
+        //}
+    }
+
+    @Override
+    public boolean transferMotorDirection() {
+        if (isSending()) {
+            return transferPartner == connections[0];
         }
-        
-        
+        else if (isReceiving()) {
+            return transferPartner == connections[1];
+        }
+        else {
+            throw new Error("transferMotorDirection called when not transfering block");
+        }
     }
 
     @Override
-    public boolean transferMotorDirection()
-    {
-        if (isSending()) return transferPartner == connections[0];
-        else if (isReceiving()) return transferPartner == connections[1];
-        else throw new Error("transferMotorDirection called when not transfering block");
+    public void blockTransferFinished() {
+    } // TODO: push if necessary
+
+    @Override
+    public boolean isBlockTransferPossible() {
+        return true;
+    } // TODO: see if pusching has ended
+
+    @Override
+    public void blockTransferPrepare() {
     }
 
     @Override
-    public void blockTransferFinished() {} // TODO: push if necessary
+    public boolean isBlockTransferReady() {
+        return true;
+    }
 
-    @Override
-    public boolean isBlockTransferPossible() { return true; } // TODO: see if pusching has ended
-
-    @Override
-    public void blockTransferPrepare() {}
-
-    @Override
-    public boolean isBlockTransferReady() { return true; }
-    
 }
