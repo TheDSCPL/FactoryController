@@ -35,10 +35,16 @@ public abstract class Cell {
     public abstract Conveyor getCornerConveyor(int position);
 
     /**
-     * @return The Rotator that is the entry point for blocks on this cell
+     * @return The Conveyor that is the entry point for blocks on this cell
      * (normally, the rotator on the top)
      */
-    public abstract Rotator getEntryConveyor();
+    public abstract Conveyor getEntryConveyor();
+    
+    /**
+     * @return The Conveyor that is the exit point for blocks on this cell
+     * (normally, the rotator on the bottom)
+     */
+    public abstract Conveyor getExitConveyor();
 
     /**
      * This cell will be connected to a cell on its right

@@ -14,7 +14,7 @@ import factory.conveyor.*;
  */
 public class Path {
 
-    private final List<Conveyor> path = new ArrayList<>();
+    public final List<Conveyor> path = new ArrayList<>();
 
     /**
      * Pushes the conveyor to the end of the FIFO queue
@@ -28,18 +28,38 @@ public class Path {
 
         // Adds only if the last conveyor in the path is connected to the conveyor that we are trying to add
         if (!path.isEmpty()) {
-            // Checks all of the conveyors connected to the last element of the list
-            for (Conveyor ci : getLast().connections) {
-                if (c == ci) {
-                    path.add(c);
-                    return;
-                }
+            if (!getLast().isConnectedToConveyor(c)) {
+                throw new Error("Invalid path");
             }
-            throw new Error("Invalid path!");
         }
-        else {
-            path.add(c);
+
+        path.add(c);
+
+    }
+
+    /**
+     * Appends newPath to the end of this path
+     *
+     * @param newPath the path to add to the end
+     */
+    public void append(Path newPath) {
+        if (path == null) {
+            return;
         }
+        
+        if (!path.isEmpty() && !newPath.path.isEmpty()) {
+            // If next path starts on the same conveyor this stops, remove one
+            // of the conveyors, so that it doesn't repeat
+            if (getLast() == newPath.getCurrent()) {
+                newPath.advance();
+            }
+
+            if (!getLast().isConnectedToConveyor(newPath.getCurrent())) {
+                throw new Error("Trying to append a path but the two paths are not connected");
+            }
+        }
+
+        path.addAll(newPath.path);
     }
 
     public Conveyor getCurrent() {

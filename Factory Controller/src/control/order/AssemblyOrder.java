@@ -24,7 +24,7 @@ public class AssemblyOrder extends Order { // TODO
     }
 
     @Override
-    public OrderExecution startExecution(Path path) {
+    public void startExecution(Path path) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

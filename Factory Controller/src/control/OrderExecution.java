@@ -11,7 +11,7 @@ import control.order.Order;
  *
  * @author Alex
  */
-public class OrderExecution {
+/*public class OrderExecution {
     // TODO: write class
     
     public Block[] blocks;
@@ -21,4 +21,4 @@ public class OrderExecution {
         this.order = order;
     }
     
-}
+}*/

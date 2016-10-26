@@ -22,10 +22,10 @@ public abstract class Conveyor {
     Conveyor transferPartner;
     private final Block[] blocks;
     private State conveyorState;
-    private final Motor transferMotor;
+    /*private*/ public final Motor transferMotor;
     public final Sensor[] presenceSensors; // TODO public for demo purposes only, should be protected
     private final int length;
-    
+
     public String id;
     public Conveyor[] connections;
 
@@ -171,6 +171,23 @@ public abstract class Conveyor {
         return ret;
     }
 
+    /**
+     * Loops for all the conveyors connected to this conveyor and returns true
+     * if the given conveyor is on that list
+     *
+     * @param c the conveyor to search for
+     * @return true if <code>c</code> is on <code>connections</code>
+     */
+    public boolean isConnectedToConveyor(Conveyor c) {
+        for (Conveyor c2 : connections) {
+            if (c == c2) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
     public boolean isSending() {
         return conveyorState == State.PrepareToSend
                || conveyorState == State.ReadyToSend
@@ -255,7 +272,7 @@ public abstract class Conveyor {
             //for (int i = 0; i < blocks.length - 1; i++) {
             //    blocks[i + 1] = blocks[i];
             //}
-            
+
             blocks[0] = insert;
         }
         else {
@@ -266,10 +283,10 @@ public abstract class Conveyor {
             //for (int i = blocks.length - 1; i > 0; i--) {
             //    blocks[i - 1] = blocks[i];
             //}
-            
+
             blocks[blocks.length - 1] = insert;
         }
-        
+
         return ret;
     }
 

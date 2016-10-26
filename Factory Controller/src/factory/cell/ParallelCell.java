@@ -87,4 +87,9 @@ public class ParallelCell extends Cell {
         return t2;
     }
     
+    @Override
+    public Conveyor getExitConveyor() {
+        return t9;
+    }
+    
 }

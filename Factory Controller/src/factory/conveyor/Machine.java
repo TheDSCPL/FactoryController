@@ -52,6 +52,7 @@ public class Machine extends Conveyor {
     public void update() {
         super.update();
         
+        // DEMO
         if (xSensor.on()) { last1 = false; }
         if (XSensor.on()) { last1 = true; }
         xMotor.turnOn(last1);

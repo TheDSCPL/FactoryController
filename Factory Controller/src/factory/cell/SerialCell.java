@@ -78,4 +78,9 @@ public class SerialCell extends Cell {
         return t2;
     }
     
+    @Override
+    public Rotator getExitConveyor() {
+        return t6;
+    }
+    
 }

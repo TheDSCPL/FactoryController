@@ -19,6 +19,7 @@ public class Pusher extends Conveyor {
     private final Sensor pushSensorPlus;
     private final Sensor pushSensorMinus;
     private boolean lastUpdateWasIdle;
+    public boolean blockPlacedManually;
 
     public Pusher(String id) {
         super(id, 1, 2);
@@ -33,20 +34,19 @@ public class Pusher extends Conveyor {
         super.update();
 
         // Detect if block has been placed manually by a person
-        if (lastUpdateWasIdle && isIdle()) {
-            if (!hasBlock() && presenceSensors[0].on()) { // New block has been placed
-                // Create block
-                Block block = new Block(Block.Type.Unknown);
-                block.path.push(this);
-                
-                // Place block on this conveyor
-                placeBlock(block, 0);
-                
-                // Notify order controller
-                Main.orderc.addNewLoadOrder(block);
-            }
-        }
+        if (lastUpdateWasIdle && isIdle() && !hasBlock() && presenceSensors[0].on()) {
+            // Create block
+            Block block = new Block(Block.Type.Unknown);
+            block.path.push(this);
 
+            // Place block on this conveyor
+            placeBlock(block, 0);
+            blockPlacedManually = true;
+        }
+        else {
+            blockPlacedManually = false;
+        }
+        
         lastUpdateWasIdle = isIdle();
 
         // DEMO ONLY

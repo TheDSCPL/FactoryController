@@ -5,10 +5,11 @@
  */
 package factory;
 
-import factory.cell.assemb.Assembler;
-import control.order.Order;
+import factory.cell.assemb.*;
+import control.order.*;
 import control.*;
 import factory.cell.*;
+import factory.conveyor.*;
 import main.*;
 import java.util.*;
 
@@ -47,26 +48,72 @@ public class Factory {
         for (Cell cell : cellList) {
             cell.update();
         }
-
-        // Decide next order to be executed
+        
+        // Get all orders
         Set<Order> orders = Main.orderc.pendingOrders;
+        
+        /*
         if (!orders.isEmpty()) {
 
             Order order = chooseNextOrder(orders);
             Path blockPath = choosePathForOrder(order);
             OrderExecution exec = order.startExecution(blockPath);
 
-            if (/*block starts by exiting warehouse*/false) {
+            if (block starts by exiting warehouse) {
                 for (Block b : exec.blocks) {
                     cw.addPendingOutBlock(b);
                 }
             }
-            else if (/*block starts on pusher (load order)*/false) {
-
-            }
         }
+        */
     }
-
+    
+    public Path entryPathFromWarehouse(Cell cell) {
+        Path path = new Path();
+        
+        path.push(cw.getExitConveyor());
+        
+        while (path.getLast() != cell.getEntryConveyor()) {
+            Conveyor c;
+            
+            // Get conveyor on the right
+            if (path.getLast() instanceof Mover) {
+                c = path.getLast().connections[1];
+            }
+            else if (path.getLast() instanceof Rotator) {
+                c = path.getLast().connections[2];
+            }
+            else throw new Error("Invalid conveyor type on top distribution path");
+            
+            path.push(c);
+        }
+        
+        return path;
+    }
+    
+    public Path exitPathToWarehouse(Cell cell) {
+        Path path = new Path();
+        
+        path.push(cell.getExitConveyor());
+        
+        while (path.getLast() != cw.getEntryConveyor()) {
+            Conveyor c;
+            
+            // Get conveyor on the right
+            if (path.getLast() instanceof Mover) {
+                c = path.getLast().connections[0];
+            }
+            else if (path.getLast() instanceof Rotator) {
+                c = path.getLast().connections[0];
+            }
+            else throw new Error("Invalid conveyor type on bottom return path");
+            
+            path.push(c);
+        }
+        
+        return path;
+    }
+    
     private Order chooseNextOrder(Set<Order> orders) {
         return orders.iterator().next(); // TODO
     }
