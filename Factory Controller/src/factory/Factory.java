@@ -57,7 +57,6 @@ public class Factory {
 
             Order order = chooseNextOrder(orders);
             Path blockPath = choosePathForOrder(order);
-            OrderExecution exec = order.startExecution(blockPath);
 
             if (block starts by exiting warehouse) {
                 for (Block b : exec.blocks) {
