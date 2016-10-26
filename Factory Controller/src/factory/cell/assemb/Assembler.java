@@ -69,7 +69,8 @@ public class Assembler extends Cell {
     public void update() {
         super.update();
 
-        if (gantry.Ysensors[0].on() && gantry.minX.on()) //canto sup esquerdo
+        gantry.update();
+        /*if (gantry.Ysensors[0].on() && gantry.minX.on()) //canto sup esquerdo
         {
             gantry.YMotor.turnOnPlus();
             gantry.XMotor.turnOff();
@@ -113,7 +114,7 @@ public class Assembler extends Cell {
         {
             gantry.XMotor.turnOnMinus();
             gantry.YMotor.turnOnMinus();
-        }
+        }*/
     }
 
     @Override
