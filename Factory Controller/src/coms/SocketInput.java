@@ -25,11 +25,13 @@ public class SocketInput {
     
     public void start() {
         Thread thread = new Thread() {
+            @Override
             public void run() {
                 threadMethod();
             }
         };
         
+        thread.setDaemon(true);
         thread.start();
     }
        

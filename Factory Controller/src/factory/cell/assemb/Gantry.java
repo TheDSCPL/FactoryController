@@ -42,8 +42,8 @@ public class Gantry
      */
     private int isAtY;
     
-    private XYSTATE XState = XYSTATE.INITIALIZING1ST,
-                    YState = XYSTATE.INITIALIZING1ST;
+    private MOVEMENTSTATE XState = MOVEMENTSTATE.INITIALIZING1ST,
+                    YState = MOVEMENTSTATE.INITIALIZING1ST;
     
     Gantry(String id)
     {
@@ -98,9 +98,14 @@ public class Gantry
         return -1;
     }
      
-    private enum XYSTATE
+    private enum MOVEMENTSTATE
     {
         INITIALIZING1ST, INITIALIZING2ND, IDLE, MOVINGPLUS, MOVINGMINUS;
+    }
+    
+    private enum TRANSFERSTATE
+    {
+        IDLE, MOVING_TO_ORIGIN, MOVING_TO_DESTINATION;  //TODO: Finish the enum with the states in my notepad
     }
     
     /**
@@ -111,14 +116,14 @@ public class Gantry
     private boolean updateIsAt()
     {
         //I want the return to depend only at the previous state so I evaluate it here (at the start)
-        boolean ret = (XState == XYSTATE.INITIALIZING1ST || XState == XYSTATE.INITIALIZING2ND || YState == XYSTATE.INITIALIZING1ST || YState == XYSTATE.INITIALIZING2ND);
+        boolean ret = (XState == MOVEMENTSTATE.INITIALIZING1ST || XState == MOVEMENTSTATE.INITIALIZING2ND || YState == MOVEMENTSTATE.INITIALIZING1ST || YState == MOVEMENTSTATE.INITIALIZING2ND);
         //---------------UPDATE isAtX-----------------
         if(getActiveXSensor() != -1)    //is at a sensor
-            if( XState == XYSTATE.INITIALIZING1ST || XState == XYSTATE.INITIALIZING2ND /*isAtX == -1*/) //i'm initializing and found a sensor
+            if( XState == MOVEMENTSTATE.INITIALIZING1ST || XState == MOVEMENTSTATE.INITIALIZING2ND /*isAtX == -1*/) //i'm initializing and found a sensor
             {
                 isAtX = getActiveXSensor()*2+1 ; //for example, sensor 1 is at position 3
                 XMotor.turnOff();
-                XState = XYSTATE.IDLE;
+                XState = MOVEMENTSTATE.IDLE;
             }
             else
             {
@@ -135,7 +140,7 @@ public class Gantry
                     }
                     else if(System.currentTimeMillis() - initXTimer >= initializationTimeoutMillis)
                     {
-                        XState = XYSTATE.INITIALIZING2ND;
+                        XState = MOVEMENTSTATE.INITIALIZING2ND;
                         initXTimer = System.currentTimeMillis();
                         XMotor.turnOff();
                     }
@@ -153,17 +158,17 @@ public class Gantry
                 break;
                 default:
                     if( isAtX % 2 != 0 ) //previous state was a sensor, we have to decide which space it went to
-                        isAtX = isAtX + ( XState == XYSTATE.MOVINGPLUS ? 1 : -1); //if moving in the positive direction, to go the next space, else go to the previous space
+                        isAtX = isAtX + ( XState == MOVEMENTSTATE.MOVINGPLUS ? 1 : -1); //if moving in the positive direction, to go the next space, else go to the previous space
             }
         
         
         //---------------UPDATE isAtX-----------------
         if(getActiveYSensor() != -1)    //is at a sensor
-            if( YState == XYSTATE.INITIALIZING1ST || YState == XYSTATE.INITIALIZING2ND /*isAtX == -1*/) //i'm initializing and found a sensor
+            if( YState == MOVEMENTSTATE.INITIALIZING1ST || YState == MOVEMENTSTATE.INITIALIZING2ND /*isAtX == -1*/) //i'm initializing and found a sensor
             {
                 isAtY = getActiveYSensor()*2+1 ; //for example, sensor 1 is at position 3
                 YMotor.turnOff();
-                YState = XYSTATE.IDLE;
+                YState = MOVEMENTSTATE.IDLE;
             }
             else
             {
@@ -180,7 +185,7 @@ public class Gantry
                     }
                     else if(System.currentTimeMillis() - initYTimer >= initializationTimeoutMillis)
                     {
-                        YState = XYSTATE.INITIALIZING2ND;
+                        YState = MOVEMENTSTATE.INITIALIZING2ND;
                         initYTimer = System.currentTimeMillis();
                         YMotor.turnOff();
                     }
@@ -198,7 +203,7 @@ public class Gantry
                 break;
                 default:
                     if( isAtY % 2 != 0 ) //previous state was a sensor, we have to decide which space it went to
-                        isAtY = isAtY + ( YState == XYSTATE.MOVINGPLUS ? 1 : -1); //if moving in the positive direction, to go the next space, else go to the previous space
+                        isAtY = isAtY + ( YState == MOVEMENTSTATE.MOVINGPLUS ? 1 : -1); //if moving in the positive direction, to go the next space, else go to the previous space
             }
         return ret;
     }
