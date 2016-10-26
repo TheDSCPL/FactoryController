@@ -38,7 +38,22 @@ public class Main {
     }
     
     private static Process sfs = null;
-    private static Thread killSFS = null;
+    
+    private static void tryToOpenSFS()
+    {
+        System.err.println("Simulator not running. Trying to start it.");
+        try {
+            sfs = Runtime.getRuntime().exec("java -jar sfs.jar");
+
+            if (!sfs.isAlive()) {
+                throw new Error("Error starting simulator. Check permissions and if all of the simulation's files are present.");
+            }
+            Thread.sleep(100);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(31);
+        }
+    }
     
     /**
      * @param args the command line arguments
@@ -47,32 +62,11 @@ public class Main {
         try { connectAndRun(); }
         catch (java.net.ConnectException ex)    //if simulator not running try to start it
         {
-            System.err.println("Simulator not running. Trying to start it.");
-            try
-            {
-                sfs = Runtime.getRuntime().exec("java -jar sfs.jar");
-                
-                if(!sfs.isAlive())
-                    throw new Error("Error starting simulator. Check permissions and if all of the simulation's files are present.");
-                Thread.sleep(100);
-                connectAndRun();
-            }
-            catch(Error e)
-            {
-                e.printStackTrace();
-                return;
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-                throw new Error("Error starting simulator. Check permissions and if all of the simulation's files are present.");
-            }
-        }
-        catch(Error e)
-        {
-            e.printStackTrace();
+            tryToOpenSFS();
+            try { connectAndRun(); } catch(Exception e) {e.printStackTrace(); System.exit(32);}
         }
         catch (Exception ex)
-        { ex.printStackTrace(); } 
+        { ex.printStackTrace();}
+        System.exit(33);
     }
 }
