@@ -58,8 +58,8 @@ public class Assembler extends Cell {
         switch (position) {
             case 0: return t1;
             case 1: return t2;
-            case 2: return t6;
-            case 3: return t5;
+            case 2: return t5;
+            case 3: return t6;
             default:
                 throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
         }
@@ -132,6 +132,11 @@ public class Assembler extends Cell {
     @Override
     public Rotator getEntryConveyor() {
         return t2;
+    }
+    
+    @Override
+    public Rotator getExitConveyor() {
+        return t5;
     }
 
 }

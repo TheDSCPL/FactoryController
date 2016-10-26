@@ -6,7 +6,6 @@
 package factory.conveyor;
 
 import factory.*;
-import java.util.Arrays;
 import main.*;
 
 /**

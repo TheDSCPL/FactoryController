@@ -6,6 +6,7 @@
 package control.order;
 
 import control.*;
+import java.util.*;
 
 /**
  *
@@ -14,12 +15,18 @@ import control.*;
 public abstract class Order { // TODO    
     public final int id;
     public final int count;
-    protected OrderExecution[] executions;
+    public Set<Block> blocks = new HashSet<>();
+    private int completedCount = 0;
     
     public Order(int id, int count) {
         this.id = id;
         this.count = count;
     }
     
-    public abstract OrderExecution startExecution(Path blockPath);
+    public abstract void startExecution(Path blockPath);
+    
+    public void complete(Block block) {
+        blocks.remove(block);
+        completedCount++;
+    }
 }

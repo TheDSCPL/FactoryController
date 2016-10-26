@@ -17,26 +17,59 @@ public class Warehouse extends Cell {
 
     private final Mover out;
     private final Mover in;
+    private final int warehouseInID = Main.config.getBaseOutput(id + "T2") + 2;
+    private final int warehouseOutRegister = 0;
 
     public Warehouse(String id) {
         super(id);
-
-        // TODO: decide if the warehouse needs to be initialized
-        //  >> let's not worry about initialization for now
-        //state = State.
+        
         out = new Mover(id + "T1", 1);
         in = new Mover(id + "T2", 1);
         conveyorList = new Conveyor[]{in, out};
     }
+    
+    private Block blockOut;
+    private boolean waitingForOut = false;
+    private boolean waitingForIn = false;
+    
+    public void setBlockOut(Block block) {
+        Main.modbus.setRegister(warehouseOutRegister, block.type.id);
+        waitingForOut = true;
+        blockOut = block;
+    }
+    
+    public boolean canOutputBlock() {
+        return out.isIdle() && !out.hasBlock() && !waitingForOut;
+    }
 
-    int p = 1; // DEMO
+    //int p = 1; // DEMO
 
     @Override
     public void update() {
         super.update();
 
+        // Remove block in entry conveyor for warehouse
+        if (in.isIdle() && in.hasBlock()) {
+            Main.modbus.setOutput(warehouseInID, true);
+            waitingForIn = true;
+        }
+        
+        if (waitingForIn && in.isIdle() && !in.presenceSensors[0].on()) {
+            Main.modbus.setOutput(warehouseInID, false);
+            in.getBlock(0).completeOrder();
+            in.removeBlock(0);
+            waitingForIn = false;
+        }
+        
+        if (waitingForOut && out.isIdle() && out.presenceSensors[0].on()) {
+            Main.modbus.setRegister(warehouseOutRegister, 0);
+            out.placeBlock(blockOut, 0);
+            waitingForOut = false;
+            blockOut = null;
+        }
+        
         // DEMO
-        Main.modbus.setRegister(0, out.presenceSensors[0].on() ? 0 : p);
+        /*Main.modbus.setRegister(0, out.presenceSensors[0].on() ? 0 : p);
 
         if (out.presenceSensors[0].on() && !out.hasBlock()) {
             Block b = new Block(Block.Type.P1);
@@ -56,7 +89,9 @@ public class Warehouse extends Cell {
             if (p == 10) {
                 p = 1;
             }
-        }
+        }*/
+        
+        
     }
 
     public void addPendingOutBlock(Block block) {
@@ -84,7 +119,12 @@ public class Warehouse extends Cell {
     }
 
     @Override
-    public Rotator getEntryConveyor() {
-        return null; // Does not apply to Warehouses
+    public Conveyor getEntryConveyor() {
+        return in;
+    }
+    
+    @Override
+    public Conveyor getExitConveyor() {
+        return out;
     }
 }

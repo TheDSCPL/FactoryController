@@ -5,8 +5,9 @@
  */
 package factory.cell;
 
-import control.*;
 import factory.conveyor.*;
+import control.*;
+import main.*;
 
 /**
  *
@@ -22,10 +23,10 @@ public class LoadUnloadBay extends Cell {
     private final Mover t6;
     private final Rotator t7;
     private final Mover t8;
-    
+
     public LoadUnloadBay(String id) {
         super(id);
-        
+
         // Create conveyors
         t1 = new Mover(id + "T1", 1);
         t2 = new Rotator(id + "T2");
@@ -35,19 +36,19 @@ public class LoadUnloadBay extends Cell {
         t6 = new Mover(id + "T6", 1);
         t7 = new Rotator(id + "T7");
         t8 = new Mover(id + "T8", 1);
-        conveyorList = new Conveyor[] {t1, t2, t3, t4, t5, t6, t7, t8};
-        
+        conveyorList = new Conveyor[]{t1, t2, t3, t4, t5, t6, t7, t8};
+
         // Connect conveyors
-        t1.connections = new Conveyor[] {null, t2};
-        t2.connections = new Conveyor[] {t1, null, t3, t4};
-        t3.connections = new Conveyor[] {t2, null};
-        t4.connections = new Conveyor[] {t2, t5};
-        t5.connections = new Conveyor[] {t4, t7};
-        t6.connections = new Conveyor[] {null, t7};
-        t7.connections = new Conveyor[] {t6, t5, t8, null};
-        t8.connections = new Conveyor[] {t7, null};
+        t1.connections = new Conveyor[]{null, t2};
+        t2.connections = new Conveyor[]{t1, null, t3, t4};
+        t3.connections = new Conveyor[]{t2, null};
+        t4.connections = new Conveyor[]{t2, t5};
+        t5.connections = new Conveyor[]{t4, t7};
+        t6.connections = new Conveyor[]{null, t7};
+        t7.connections = new Conveyor[]{t6, t5, t8, null};
+        t8.connections = new Conveyor[]{t7, null};
     }
-    
+
     @Override
     public Conveyor getCornerConveyor(int position) {
         switch (position) {
@@ -55,21 +56,39 @@ public class LoadUnloadBay extends Cell {
             case 1: return t3;
             case 2: return t8;
             case 3: return t6;
-            default: throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
+            default:
+                throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
         }
     }
 
     @Override
     public void update() {
         super.update();
-    }
 
+        if (t4.blockPlacedManually) {
+            Block b = t4.getBlock(0);
+            b.path.push(t5);
+            b.path.push(t7);
+            b.path.append(Main.factory.exitPathToWarehouse(this));
+
+            t4.blockPlacedManually = false;
+        }
+
+        if (t5.blockPlacedManually) {
+            Block b = t5.getBlock(0);
+            b.path.push(t7);
+            b.path.append(Main.factory.exitPathToWarehouse(this));
+            
+            t5.blockPlacedManually = false;
+        }
+    }
+    
     @Override
     public void connectWithRightCell(Cell right) {
         t3.connections[1] = right.getCornerConveyor(0);
         t8.connections[1] = right.getCornerConveyor(3);
     }
-    
+
     @Override
     public void connectWithLeftCell(Cell left) {
         t1.connections[0] = left.getCornerConveyor(1);
@@ -80,5 +99,10 @@ public class LoadUnloadBay extends Cell {
     public Rotator getEntryConveyor() {
         return t2;
     }
-    
+
+    @Override
+    public Rotator getExitConveyor() {
+        return t7;
+    }
+
 }

@@ -9,21 +9,20 @@ import main.*;
 import factory.*;
 
 /**
- * 
+ *
  * @author luisp
  */
-public class Gantry
-{
-    
+public class Gantry {
+
     //Outputs
     public final Motor XMotor, YMotor, ZMotor;
-    
+
     //Inputs
-    public final Sensor maxX,minX,upZ,downZ;
+    public final Sensor maxX, minX, upZ, downZ;
     public final Sensor[] Xsensors, Ysensors;
 
     private final long initializationTimeoutMillis = 1500;
-    
+
     public final String id;
     /**
      * <i>false</i> if open. <i>true</i> if closed
@@ -32,218 +31,216 @@ public class Gantry
     private final int gripOutputId;
     public final Sensor presenceSensor;
     /**
-     * including spaces between sensors (space above sensor 0 at position 0, sensor 0 at position 1, space between sensor 0 and sensor 1 at position 2, sensor 1 at position 3, ...)
-     * -1 means undefined position
+     * including spaces between sensors (space above sensor 0 at position 0,
+     * sensor 0 at position 1, space between sensor 0 and sensor 1 at position
+     * 2, sensor 1 at position 3, ...) -1 means undefined position
      */
     private int isAtX;
     /**
-     * including spaces between sensors (space above sensor 0 at position 0, sensor 0 at position 1, space between sensor 0 and sensor 1 at position 2, sensor 1 at position 3, ...)
-     * -1 means undefined position
+     * including spaces between sensors (space above sensor 0 at position 0,
+     * sensor 0 at position 1, space between sensor 0 and sensor 1 at position
+     * 2, sensor 1 at position 3, ...) -1 means undefined position
      */
     private int isAtY;
-    
+
     private MOVEMENTSTATE XState = MOVEMENTSTATE.INITIALIZING1ST,
-                    YState = MOVEMENTSTATE.INITIALIZING1ST;
-    
-    Gantry(String id)
-    {
+            YState = MOVEMENTSTATE.INITIALIZING1ST;
+
+    Gantry(String id) {
         this.id = id;
-        int inputSensorId  = Main.config.getBaseInput (id + "R");
+        int inputSensorId = Main.config.getBaseInput(id + "R");
         int outputActionId = Main.config.getBaseOutput(id + "R");
-        
+
         // initialize outputs
         gripOutputId = outputActionId;
-        XMotor   = new Motor(outputActionId + 0);
-        YMotor   = new Motor(outputActionId + 2);
-        ZMotor   = new Motor(outputActionId + 4);
-        
+        XMotor = new Motor(outputActionId + 0);
+        YMotor = new Motor(outputActionId + 2);
+        ZMotor = new Motor(outputActionId + 4);
+
         // initialize inputs
         Sensor y0, y1, y2, y3, y4;
-        minX  = new Sensor(inputSensorId + 0);
-        maxX  = new Sensor(inputSensorId + 1);
-        Xsensors = new Sensor[] {minX,maxX};
-        y0    = new Sensor(inputSensorId + 2);
-        y1    = new Sensor(inputSensorId + 3);
-        y2    = new Sensor(inputSensorId + 4);
-        y3    = new Sensor(inputSensorId + 5);
-        y4    = new Sensor(inputSensorId + 6);
-        Ysensors = new Sensor[] {y0, y1, y2, y3, y4};
+        minX = new Sensor(inputSensorId + 0);
+        maxX = new Sensor(inputSensorId + 1);
+        Xsensors = new Sensor[]{minX, maxX};
+        y0 = new Sensor(inputSensorId + 2);
+        y1 = new Sensor(inputSensorId + 3);
+        y2 = new Sensor(inputSensorId + 4);
+        y3 = new Sensor(inputSensorId + 5);
+        y4 = new Sensor(inputSensorId + 6);
+        Ysensors = new Sensor[]{y0, y1, y2, y3, y4};
         downZ = new Sensor(inputSensorId + 7);
-        upZ   = new Sensor(inputSensorId + 8);
-        
+        upZ = new Sensor(inputSensorId + 8);
+
         presenceSensor = new Sensor(inputSensorId);
     }
-    
+
     private long initXTimer = -1, initYTimer = -1;
-    
+
     /**
      * @return The Xsensor that is active or -1 if none are active
      */
-    private int getActiveXSensor()
-    {
-        for(int s = 0; s < Xsensors.length; s++)
-            if(Xsensors[s].on())
+    private int getActiveXSensor() {
+        for (int s = 0; s < Xsensors.length; s++) {
+            if (Xsensors[s].on()) {
                 return s;
+            }
+        }
         return -1;
     }
-    
+
     /**
      * @return The Ysensor that is active or -1 if none are active
      */
-    private int getActiveYSensor()
-    {
-        for(int s = 0; s < Ysensors.length; s++)
-            if(Ysensors[s].on())
+    private int getActiveYSensor() {
+        for (int s = 0; s < Ysensors.length; s++) {
+            if (Ysensors[s].on()) {
                 return s;
+            }
+        }
         return -1;
     }
-     
-    private enum MOVEMENTSTATE
-    {
+
+    private enum MOVEMENTSTATE {
         INITIALIZING1ST, INITIALIZING2ND, IDLE, MOVINGPLUS, MOVINGMINUS;
     }
-    
-    private enum TRANSFERSTATE
-    {
+
+    private enum TRANSFERSTATE {
         IDLE, MOVING_TO_ORIGIN, MOVING_TO_DESTINATION;  //TODO: Finish the enum with the states in my notepad
     }
-    
+
     /**
      * Updates <i>isAtX</i> and <i>isAtY</i> variables.
-     * <b>It's asured that this method only changes the XY state machines if they are initializing.</b> (so you don't have to worry about this changing the states after the initialization is done)
-     * @return wether (or not) the gantry is initializing at the start of this update cycle
+     * <b>It's asured that this method only changes the XY state machines if
+     * they are initializing.</b> (so you don't have to worry about this
+     * changing the states after the initialization is done)
+     *
+     * @return wether (or not) the gantry is initializing at the start of this
+     * update cycle
      */
-    private boolean updateIsAt()
-    {
+    private boolean updateIsAt() {
         //I want the return to depend only at the previous state so I evaluate it here (at the start)
         boolean ret = (XState == MOVEMENTSTATE.INITIALIZING1ST || XState == MOVEMENTSTATE.INITIALIZING2ND || YState == MOVEMENTSTATE.INITIALIZING1ST || YState == MOVEMENTSTATE.INITIALIZING2ND);
         //---------------UPDATE isAtX-----------------
-        if(getActiveXSensor() != -1)    //is at a sensor
-            if( XState == MOVEMENTSTATE.INITIALIZING1ST || XState == MOVEMENTSTATE.INITIALIZING2ND /*isAtX == -1*/) //i'm initializing and found a sensor
+        if (getActiveXSensor() != -1) //is at a sensor
+        {
+            if (XState == MOVEMENTSTATE.INITIALIZING1ST || XState == MOVEMENTSTATE.INITIALIZING2ND /*isAtX == -1*/) //i'm initializing and found a sensor
             {
-                isAtX = getActiveXSensor()*2+1 ; //for example, sensor 1 is at position 3
+                isAtX = getActiveXSensor() * 2 + 1; //for example, sensor 1 is at position 3
                 XMotor.turnOff();
                 XState = MOVEMENTSTATE.IDLE;
             }
-            else
-            {
-                isAtX = getActiveXSensor()*2+1 ; //for example, sensor 1 is at position 3
+            else {
+                isAtX = getActiveXSensor() * 2 + 1; //for example, sensor 1 is at position 3
             }
-        else    //is in a space
-            switch(XState)   //evaluates last cycle's isAtX
+        }
+        else //is in a space
+        {
+            switch (XState) //evaluates last cycle's isAtX
             {
-                case INITIALIZING1ST:    //if undefined position; 1st attempt
-                    if(initXTimer == -1)
-                    {
+                case INITIALIZING1ST: //if undefined position; 1st attempt
+                    if (initXTimer == -1) {
                         initXTimer = System.currentTimeMillis();
                         XMotor.turnOnMinus();
                     }
-                    else if(System.currentTimeMillis() - initXTimer >= initializationTimeoutMillis)
-                    {
+                    else if (System.currentTimeMillis() - initXTimer >= initializationTimeoutMillis) {
                         XState = MOVEMENTSTATE.INITIALIZING2ND;
                         initXTimer = System.currentTimeMillis();
                         XMotor.turnOff();
                     }
-                break;
+                    break;
                 case INITIALIZING2ND:    //if undefined position; 2nd attempt
-                    if(System.currentTimeMillis() - initXTimer >= initializationTimeoutMillis)
-                    {
+                    if (System.currentTimeMillis() - initXTimer >= initializationTimeoutMillis) {
                         //If the gatry is now trying to initialize in the other direction (second attempt) and it times out, then it's an error
                         throw new Error("Gantry initialization timed out");
                     }
                     XMotor.turnOnPlus();
-                break;
+                    break;
                 case IDLE:
                     XMotor.turnOff();
-                break;
+                    break;
                 default:
-                    if( isAtX % 2 != 0 ) //previous state was a sensor, we have to decide which space it went to
-                        isAtX = isAtX + ( XState == MOVEMENTSTATE.MOVINGPLUS ? 1 : -1); //if moving in the positive direction, to go the next space, else go to the previous space
+                    if (isAtX % 2 != 0) //previous state was a sensor, we have to decide which space it went to
+                    {
+                        isAtX = isAtX + (XState == MOVEMENTSTATE.MOVINGPLUS ? 1 : -1); //if moving in the positive direction, to go the next space, else go to the previous space
+                    }
             }
-        
-        
+        }
+
         //---------------UPDATE isAtX-----------------
-        if(getActiveYSensor() != -1)    //is at a sensor
-            if( YState == MOVEMENTSTATE.INITIALIZING1ST || YState == MOVEMENTSTATE.INITIALIZING2ND /*isAtX == -1*/) //i'm initializing and found a sensor
+        if (getActiveYSensor() != -1) //is at a sensor
+        {
+            if (YState == MOVEMENTSTATE.INITIALIZING1ST || YState == MOVEMENTSTATE.INITIALIZING2ND /*isAtX == -1*/) //i'm initializing and found a sensor
             {
-                isAtY = getActiveYSensor()*2+1 ; //for example, sensor 1 is at position 3
+                isAtY = getActiveYSensor() * 2 + 1; //for example, sensor 1 is at position 3
                 YMotor.turnOff();
                 YState = MOVEMENTSTATE.IDLE;
             }
-            else
-            {
-                isAtY = getActiveYSensor()*2+1 ; //for example, sensor 1 is at position 3
+            else {
+                isAtY = getActiveYSensor() * 2 + 1; //for example, sensor 1 is at position 3
             }
-        else    //is in a space
-            switch(YState)   //evaluates last cycle's isAtX
+        }
+        else //is in a space
+        {
+            switch (YState) //evaluates last cycle's isAtX
             {
-                case INITIALIZING1ST:    //if undefined position; 1st attempt
-                    if(initYTimer == -1)
-                    {
+                case INITIALIZING1ST: //if undefined position; 1st attempt
+                    if (initYTimer == -1) {
                         initYTimer = System.currentTimeMillis();
                         YMotor.turnOnMinus();
                     }
-                    else if(System.currentTimeMillis() - initYTimer >= initializationTimeoutMillis)
-                    {
+                    else if (System.currentTimeMillis() - initYTimer >= initializationTimeoutMillis) {
                         YState = MOVEMENTSTATE.INITIALIZING2ND;
                         initYTimer = System.currentTimeMillis();
                         YMotor.turnOff();
                     }
-                break;
+                    break;
                 case INITIALIZING2ND:    //if undefined position; 2nd attempt
-                    if(System.currentTimeMillis() - initYTimer >= initializationTimeoutMillis)
-                    {
+                    if (System.currentTimeMillis() - initYTimer >= initializationTimeoutMillis) {
                         //If the gatry is now trying to initialize in the other direction (second attempt) and it times out, then it's an error
                         throw new Error("Gantry initialization timed out");
                     }
                     YMotor.turnOnPlus();
-                break;
+                    break;
                 case IDLE:
                     YMotor.turnOff();
-                break;
+                    break;
                 default:
-                    if( isAtY % 2 != 0 ) //previous state was a sensor, we have to decide which space it went to
-                        isAtY = isAtY + ( YState == MOVEMENTSTATE.MOVINGPLUS ? 1 : -1); //if moving in the positive direction, to go the next space, else go to the previous space
+                    if (isAtY % 2 != 0) //previous state was a sensor, we have to decide which space it went to
+                    {
+                        isAtY = isAtY + (YState == MOVEMENTSTATE.MOVINGPLUS ? 1 : -1); //if moving in the positive direction, to go the next space, else go to the previous space
+                    }
             }
+        }
         return ret;
     }
-    
-    void update()
-    {
+
+    void update() {
         //Just updates the isAtX/Y variables
-        try{if(updateIsAt())
-            return;}
-        finally
-        {
-            System.out.println("Gantry: XState = " + XState.name() + " YState = " + YState.name());
+        if (updateIsAt()) {
+            return;
         }
-        
     }
-    
-    public boolean hasBlock()
-    {
+
+    public boolean hasBlock() {
         return presenceSensor.on();
     }
-    
-    public void open()
-    {
+
+    public void open() {
         Main.modbus.setOutput(gripOutputId, gripState = false);
     }
-    
-    public void close()
-    {
+
+    public void close() {
         Main.modbus.setOutput(gripOutputId, gripState = true);
     }
-    
-    public boolean isOpen()
-    {
+
+    public boolean isOpen() {
         return !gripState;
     }
-    
-    void tranferBlock(int fromX, int fromY, int toX, int toY)
-    {
-        if( (fromX > 1 || fromX <0) || (toX > 1 || toX < 0) || (fromY > 4 || fromY < 0) || (toY > 4 || toY < 0) )
+
+    void tranferBlock(int fromX, int fromY, int toX, int toY) {
+        if ((fromX > 1 || fromX < 0) || (toX > 1 || toX < 0) || (fromY > 4 || fromY < 0) || (toY > 4 || toY < 0)) {
             throw new IndexOutOfBoundsException("Tried to transfer a block with Gantry from/to invalid coordinates");
-        
+        }
+
     }
 }

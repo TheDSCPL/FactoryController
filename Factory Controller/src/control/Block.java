@@ -5,31 +5,58 @@
  */
 package control;
 
+import control.order.*;
+
 /**
  * Represents a block.
+ *
  * @author Luis Paulo
  * @auhor Alex
  */
 public class Block {
-    
+
     public Block(Block.Type type) {
         this.type = type;
     }
     
+    public void completeOrder() {
+        if (order != null) {
+            order.complete(this);
+        }
+    }
+
     public enum Type {
-        P1, P2, P3, P4, P5,
-        P6, P7, P8, P9,
+        P1(1), P2(2), P3(3), P4(4), P5(5),
+        P6(6), P7(7), P8(8), P9(9),
         /**
          * For blocks that have two pieces one on top of the other
          */
-        Stacked,
+        Stacked(-1),
         /**
          * For blocks whose piece type is unknown, for example, when a block is
          * manually placed on the simulator by some person
          */
-        Unknown;
+        Unknown(-2);
+
+        public final int id;
+
+        Type(int id) {
+            this.id = id;
+        }
+
+        public static Type getType(int id) {
+            for (Type t : Type.values()) {
+                if (t.id == id) {
+                    return t;
+                }
+            }
+
+            return null;
+        }
+
     }
-    
+
+    public Order order;
     public Type type;
     public Path path = new Path();
 }

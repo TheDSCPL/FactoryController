@@ -11,15 +11,18 @@ import control.*;
  *
  * @author Alex
  */
-public class LoadOrder extends Order { // TODO
+/*public class LoadOrder extends Order { // TODO
         
-    public LoadOrder(int id, Block block) {
-        super(id, 1);
+    public LoadOrder(Block block) {
+        super(-1, 1); // Load orders do not have ids
+        blocks.add(block);
+        block.order = this;
     }
 
     @Override
-    public OrderExecution startExecution(Path path) {
+    public void startExecution(Path path) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }
+*/

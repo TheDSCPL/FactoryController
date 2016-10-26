@@ -10,21 +10,19 @@ import control.*;
 import factory.*;
 
 //TODO: create a class Error extends java.lang.Error that, in the constructor, has a printStackTrace and a System.exit so it is a fatal error and can't be caught.
-
 /**
  *
  * @author Alex
  */
 public class Main {
-    
+
     public static final Configuration config = new Configuration();
     public static final ModbusMaster modbus = new ModbusMaster();
     public static final Factory factory = new Factory();
     public static final TransformationManager transfm = new TransformationManager();
     public static final OrderController orderc = new OrderController();
 
-    private static void connectAndRun() throws Exception
-    {
+    private static void connectAndRun() throws Exception {
         modbus.connect();
 
         while (true) {
@@ -36,12 +34,11 @@ public class Main {
             Thread.sleep(1);
         }
     }
-    
+
     private static Process sfs = null;
-    
-    private static void tryToOpenSFS()
-    {
-        System.err.println("Simulator not running. Trying to start it.");
+
+    private static void tryToOpenSFS() {
+        System.out.println("Simulator not running. Trying to start it.");
         try {
             sfs = Runtime.getRuntime().exec("java -jar sfs.jar");
 
@@ -49,18 +46,21 @@ public class Main {
                 throw new Error("Error starting simulator. Check permissions and if all of the simulation's files are present.");
             }
             Thread.sleep(100);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
             /*System.exit(31);*/
         }
     }
-    
+
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        try { connectAndRun(); }
-        catch (java.net.ConnectException ex)    //if simulator not running try to start it
+        try {
+            connectAndRun();
+        }
+        catch (java.net.ConnectException ex) //if simulator not running try to start it
         {
             tryToOpenSFS();
             try { connectAndRun(); } catch(Exception e) {e.printStackTrace(); /*System.exit(32)*/;}
