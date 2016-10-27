@@ -49,7 +49,7 @@ public class Main {
         }
         catch (Exception e) {
             e.printStackTrace();
-            System.exit(31);
+            /*System.exit(31);*/
         }
     }
 
@@ -63,17 +63,10 @@ public class Main {
         catch (java.net.ConnectException ex) //if simulator not running try to start it
         {
             tryToOpenSFS();
-            try {
-                connectAndRun();
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                System.exit(32);
-            }
+            try { connectAndRun(); } catch(Exception e) {e.printStackTrace(); /*System.exit(32)*/;}
         }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        System.exit(33);
+        catch (Exception ex)
+        { ex.printStackTrace();}
+        //System.exit(33);
     }
 }
