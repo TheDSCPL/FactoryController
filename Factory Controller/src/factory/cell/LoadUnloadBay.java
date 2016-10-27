@@ -81,6 +81,12 @@ public class LoadUnloadBay extends Cell {
             
             t5.blockPlacedManually = false;
         }
+        
+        if (incomingBlock != null) {
+            // TODO decide which pusher to dump block
+            // Right now it's fized on t3
+            incomingBlock.path.push(t3);
+        }
     }
     
     @Override

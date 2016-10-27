@@ -7,6 +7,7 @@ package factory.cell;
 
 import control.*;
 import factory.conveyor.*;
+import java.util.*;
 import main.*;
 
 /**
@@ -17,8 +18,12 @@ public class Warehouse extends Cell {
 
     private final Mover out;
     private final Mover in;
-    private final int warehouseInID = Main.config.getBaseOutput(id + "T2") + 2;
+    private final int warehouseInID;
     private final int warehouseOutRegister = 0;
+    private final Queue<Block> blockOutQueue;
+    private boolean waitingForOut = false;
+    private boolean waitingForIn = false;
+    
 
     public Warehouse(String id) {
         super(id);
@@ -26,20 +31,17 @@ public class Warehouse extends Cell {
         out = new Mover(id + "T1", 1);
         in = new Mover(id + "T2", 1);
         conveyorList = new Conveyor[]{in, out};
+        
+        blockOutQueue = new LinkedList<>();
+        warehouseInID = Main.config.getBaseOutput(id + "T2") + 2;
     }
     
-    private Block blockOut;
-    private boolean waitingForOut = false;
-    private boolean waitingForIn = false;
-    
-    public void setBlockOut(Block block) {
-        Main.modbus.setRegister(warehouseOutRegister, block.type.id);
-        waitingForOut = true;
-        blockOut = block;
+    public void addBlockOut(Block block) {
+        blockOutQueue.add(block);
     }
     
-    public boolean canOutputBlock() {
-        return out.isIdle() && !out.hasBlock() && !waitingForOut;
+    public int getBlockOutQueueCount() {
+        return blockOutQueue.size();
     }
 
     //int p = 1; // DEMO
@@ -48,12 +50,14 @@ public class Warehouse extends Cell {
     public void update() {
         super.update();
 
-        // Remove block in entry conveyor for warehouse
+        // Signal simulator to remove block in entry conveyor
         if (in.isIdle() && in.hasBlock()) {
             Main.modbus.setOutput(warehouseInID, true);
             waitingForIn = true;
         }
         
+        // Block in entry conveyor has disappeared in simulator,
+        // remove block from conveyor and reset
         if (waitingForIn && in.isIdle() && !in.presenceSensors[0].on()) {
             Main.modbus.setOutput(warehouseInID, false);
             in.getBlock(0).completeOrder();
@@ -61,11 +65,17 @@ public class Warehouse extends Cell {
             waitingForIn = false;
         }
         
+        // Signal simulator to remove block from warehouse
+        if (!waitingForOut && blockOutQueue.size() > 0 && out.isIdle() && !out.hasBlock()) {
+            Main.modbus.setRegister(warehouseOutRegister, blockOutQueue.element().type.id);
+            waitingForOut = true;
+        }
+        
+        // Block has been placed on out conveyor, notify conveyor, remove block from outQueue and reset
         if (waitingForOut && out.isIdle() && out.presenceSensors[0].on()) {
             Main.modbus.setRegister(warehouseOutRegister, 0);
-            out.placeBlock(blockOut, 0);
+            out.placeBlock(blockOutQueue.remove(), 0);
             waitingForOut = false;
-            blockOut = null;
         }
         
         // DEMO
@@ -92,10 +102,6 @@ public class Warehouse extends Cell {
         }*/
         
         
-    }
-
-    public void addPendingOutBlock(Block block) {
-
     }
 
     @Override

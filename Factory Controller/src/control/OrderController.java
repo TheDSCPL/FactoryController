@@ -22,12 +22,12 @@ public class OrderController {
      * All orders waiting to be executing and currently executing
      */
     public Set<Order> pendingOrders = new HashSet<>();
-    
+
     /**
      * All orders that have completed execution
      */
     public Set<Order> completedOrders = new HashSet<>();
-    
+
     private final SocketInput socket;
 
     public OrderController() {
@@ -42,7 +42,6 @@ public class OrderController {
 
     private void processNewOrder(byte[] packet) { // TODO do error handling
         String orderString = new String(packet, 0, packet.length);
-        System.out.println("processNewOrder: " + orderString);
 
         if (orderString.charAt(0) != ':') {
             return;
@@ -78,7 +77,6 @@ public class OrderController {
     /*public void addNewLoadOrder(Block block) {
         pendingOrders.add(new LoadOrder(block));
     }*/
-
     void completeOrder(Order o) {
         pendingOrders.remove(o);
         completedOrders.add(o);

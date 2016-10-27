@@ -70,7 +70,6 @@ public abstract class Cell {
         }
 
         // See if there is any block waiting to get in the cell
-        incomingBlock = null;
         Conveyor entryConveyor = getEntryConveyor();
         if (entryConveyor != null) {
             if (entryConveyor.isIdle() && entryConveyor.hasBlock()) {
@@ -79,7 +78,9 @@ public abstract class Cell {
                 Block b = entryConveyor.getBlock(0);
 
                 if (!b.path.hasNext()) {
-                    incomingBlock = b;
+                    if (incomingBlock != b) {
+                        incomingBlock = b; // TODO
+                    }
                 }
             }
         }
