@@ -22,7 +22,7 @@ public class Pusher extends Conveyor {
     private boolean lastUpdateWasIdle;
     public boolean blockPlacedManually;
     private State pusherState = State.Idle;
-    
+
     private enum State {
         Idle, Pushing, Retracting
     }
@@ -55,7 +55,6 @@ public class Pusher extends Conveyor {
 
         lastUpdateWasIdle = isIdle();
 
-        
         // Push block
         switch (pusherState) {
             case Pushing:
@@ -88,7 +87,7 @@ public class Pusher extends Conveyor {
 
     @Override
     public void blockTransferFinished() {
-        
+
         // Push if necessary
         if (getBlock(0) != null) {
             Block block = getBlock(0);
@@ -96,7 +95,7 @@ public class Pusher extends Conveyor {
             // Block has stopped here and has an Unload order
             if (!block.path.hasNext() && block.order != null) {
                 Order order = block.order;
-                
+
                 if (order instanceof UnloadOrder) {
                     pusherState = State.Pushing;
                     pushMotor.turnOn(false);
@@ -112,6 +111,7 @@ public class Pusher extends Conveyor {
 
     @Override
     public void blockTransferPrepare() {
+
     }
 
     @Override

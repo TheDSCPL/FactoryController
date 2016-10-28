@@ -22,12 +22,12 @@ public abstract class Order { // TODO
     private int completedCount = 0;
     private State state = State.Received;
 
-    public boolean isPending() {
-        return state != State.Completed;
-    }
-
     public enum State {
         Received, Initiated, AllPlaced, Completed
+    }
+    
+    public boolean isPending() {
+        return state == State.Received || state == State.Initiated;
     }
     
     public Order(int id, int count) {
