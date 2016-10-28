@@ -9,24 +9,20 @@ import control.order.*;
 import coms.*;
 import control.order.AssemblyOrder;
 import java.util.*;
+import static java.util.stream.Collectors.*;
 import main.*;
 
 /**
  *
  * @author Alex
  */
-public class OrderController {
-    // TODO: write class
+public class OrderController { // TODO: write class
 
     /**
-     * All orders waiting to be executing and currently executing
+     * All orders waiting to be executing, currently executing
+     * and that have finished executing
      */
-    public Set<Order> pendingOrders = new HashSet<>();
-
-    /**
-     * All orders that have completed execution
-     */
-    public Set<Order> completedOrders = new HashSet<>();
+    public Set<Order> orders = new HashSet<>();
 
     private final SocketInput socket;
 
@@ -38,6 +34,10 @@ public class OrderController {
     public void update() {
         // Get new orders from socket and process them
         socket.getNewPackets().stream().forEach(this::processNewOrder);
+    }
+    
+    public Set<Order> getPendingOrders() {
+        return orders.stream().filter(o -> o.isPending()).collect(toSet());
     }
 
     private void processNewOrder(byte[] packet) { // TODO do error handling
@@ -66,19 +66,6 @@ public class OrderController {
             default: return;
         }
 
-        pendingOrders.add(order);
-    }
-
-    /**
-     * Called by Pusher conveyors whenever a new block is placed on them
-     *
-     * @param block the block that was placed
-     */
-    /*public void addNewLoadOrder(Block block) {
-        pendingOrders.add(new LoadOrder(block));
-    }*/
-    void completeOrder(Order o) {
-        pendingOrders.remove(o);
-        completedOrders.add(o);
+        orders.add(order);
     }
 }

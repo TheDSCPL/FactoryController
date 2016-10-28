@@ -6,6 +6,7 @@
 package factory.conveyor;
 
 import control.*;
+import control.order.*;
 import factory.*;
 import main.*;
 
@@ -20,6 +21,11 @@ public class Pusher extends Conveyor {
     private final Sensor pushSensorMinus;
     private boolean lastUpdateWasIdle;
     public boolean blockPlacedManually;
+    private State pusherState = State.Idle;
+    
+    private enum State {
+        Idle, Pushing, Retracting
+    }
 
     public Pusher(String id) {
         super(id, 1, 2);
@@ -46,15 +52,25 @@ public class Pusher extends Conveyor {
         else {
             blockPlacedManually = false;
         }
-        
+
         lastUpdateWasIdle = isIdle();
 
-        // DEMO ONLY
-        //if (pushSensorMinus.on()) { pushMotor.turnOn(true); }
-        //if (pushSensorPlus.on()) {
-        //    pushMotor.turnOn(false);
-        //    removeBlock(0);
-        //}
+        
+        // Push block
+        switch (pusherState) {
+            case Pushing:
+                if (pushSensorMinus.on()) {
+                    pushMotor.turnOn(true);
+                    pusherState = State.Retracting;
+                }
+                break;
+            case Retracting:
+                if (pushSensorPlus.on()) {
+                    pushMotor.turnOff();
+                    pusherState = State.Idle;
+                }
+                break;
+        }
     }
 
     @Override
@@ -72,12 +88,27 @@ public class Pusher extends Conveyor {
 
     @Override
     public void blockTransferFinished() {
-    } // TODO: push if necessary
+        
+        // Push if necessary
+        if (getBlock(0) != null) {
+            Block block = getBlock(0);
+
+            // Block has stopped here and has an Unload order
+            if (!block.path.hasNext() && block.order != null) {
+                Order order = block.order;
+                
+                if (order instanceof UnloadOrder) {
+                    pusherState = State.Pushing;
+                    pushMotor.turnOn(false);
+                }
+            }
+        }
+    }
 
     @Override
     public boolean isBlockTransferPossible() {
-        return true;
-    } // TODO: see if pusching has ended
+        return pusherState == State.Idle;
+    }
 
     @Override
     public void blockTransferPrepare() {

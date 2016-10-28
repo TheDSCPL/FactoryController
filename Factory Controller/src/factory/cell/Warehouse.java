@@ -40,6 +40,10 @@ public class Warehouse extends Cell {
         blockOutQueue.add(block);
     }
     
+    public void addBlocksOut(Block[] blocks) {
+        blockOutQueue.addAll(Arrays.asList(blocks));
+    }
+    
     public int getBlockOutQueueCount() {
         return blockOutQueue.size();
     }

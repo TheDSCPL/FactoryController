@@ -40,11 +40,7 @@ public class Factory {
         // Connect cells
         cellList = new Cell[]{cw, c1, c2, c3, c4, ca, cb};
         Cell.connect(cellList);
-        
-        p = cellList.length -1;
     }
-
-    private int p;
     
     public void update() {
 
@@ -53,25 +49,13 @@ public class Factory {
             cell.update();
         }
         
-        // Get all orders
-        Set<Order> orders = Main.orderc.pendingOrders;
-        
-        if (!orders.isEmpty()/* && cw.getBlockOutQueueCount() == 0*/) {
-
-            //Order order = chooseNextOrder(orders);
-            //Path blockPath = choosePathForOrder(order);
-
-            Order order = orders.iterator().next();
-            Path path = entryPathFromWarehouse(cellList[p]);
-            
-            Block block = new Block(Block.Type.getType(p));
-            block.path = path;
-            
-            order.blocks.add(block);
-            cw.addBlockOut(block);
-            
-            p--;
-            if (p == 1) p = cellList.length - 1;
+        // DEMO for unload orders
+        if (cw.getBlockOutQueueCount() == 0) {
+            for (Order order : Main.orderc.getPendingOrders()) {
+                if (order instanceof UnloadOrder) {
+                    cw.addBlocksOut(order.execute(entryPathFromWarehouse(cb)));
+                }
+            }
         }
     }
     

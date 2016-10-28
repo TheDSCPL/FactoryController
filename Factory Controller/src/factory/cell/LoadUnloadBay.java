@@ -84,8 +84,9 @@ public class LoadUnloadBay extends Cell {
         
         if (incomingBlock != null) {
             // TODO decide which pusher to dump block
-            // Right now it's fized on t3
-            incomingBlock.path.push(t3);
+            // Right now it's fixed on t4
+            incomingBlock.path.push(t4);
+            incomingBlock = null; // Reset incoming block
         }
     }
     

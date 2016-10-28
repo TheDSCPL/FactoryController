@@ -73,7 +73,7 @@ public class Path {
     public Conveyor getLast() {
         return path.isEmpty() ? null : path.get(path.size() - 1);
     }
-
+    
     public boolean hasNext() {
         return path.size() > 1;
     }

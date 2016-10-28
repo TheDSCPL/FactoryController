@@ -39,7 +39,7 @@ public abstract class Cell {
      * (normally, the rotator on the top)
      */
     public abstract Conveyor getEntryConveyor();
-    
+
     /**
      * @return The Conveyor that is the exit point for blocks on this cell
      * (normally, the rotator on the bottom)
@@ -70,16 +70,17 @@ public abstract class Cell {
         }
 
         // See if there is any block waiting to get in the cell
-        Conveyor entryConveyor = getEntryConveyor();
-        if (entryConveyor != null) {
-            if (entryConveyor.isIdle() && entryConveyor.hasBlock()) {
+        if (incomingBlock == null) {
+            Conveyor entryConveyor = getEntryConveyor();
+            
+            if (entryConveyor != null) {
+                if (entryConveyor.isIdle() && entryConveyor.hasBlock()) {
 
-                // Note: since entry conveyors are always length = 1, position = 0 is always correct
-                Block b = entryConveyor.getBlock(0);
+                    // Note: since entry conveyors are always length = 1, position = 0 is always correct
+                    Block b = entryConveyor.getBlock(0);
 
-                if (!b.path.hasNext()) {
-                    if (incomingBlock != b) {
-                        incomingBlock = b; // TODO
+                    if (!b.path.hasNext()) {
+                        incomingBlock = b;
                     }
                 }
             }

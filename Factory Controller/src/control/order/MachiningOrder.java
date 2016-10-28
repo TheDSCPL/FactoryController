@@ -23,8 +23,7 @@ public class MachiningOrder extends Order { // TODO
     }
 
     @Override
-    public void startExecution(Path path) {
+    Block[] createBlocksForExecution() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
 }

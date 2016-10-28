@@ -12,10 +12,10 @@ import control.*;
  * @author Alex
  */
 public class UnloadOrder extends Order { // TODO
-    
+
     public final int position;
     public final Block.Type blockType;
-    
+
     public UnloadOrder(int id, int count, Block.Type blockType, int position) {
         super(id, count);
         this.position = position;
@@ -23,8 +23,8 @@ public class UnloadOrder extends Order { // TODO
     }
 
     @Override
-    public void startExecution(Path blockPath) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    Block[] createBlocksForExecution() {
+        return new Block[]{ new Block(blockType) };
     }
     
 }
