@@ -43,8 +43,10 @@ public class Gantry {
      */
     private int isAtY;
 
-    private MOVEMENTSTATE XState = MOVEMENTSTATE.INITIALIZING1ST,
-            YState = MOVEMENTSTATE.INITIALIZING1ST;
+    private MOVEMENTSTATE   XState = MOVEMENTSTATE.INITIALIZING1ST,
+                            YState = MOVEMENTSTATE.INITIALIZING1ST;
+    //initialize z
+    private boolean Zready = false;
 
     Gantry(String id) {
         this.id = id;
@@ -108,6 +110,11 @@ public class Gantry {
         IDLE, MOVING_TO_ORIGIN, MOVING_TO_DESTINATION;  //TODO: Finish the enum with the states in my notepad
     }
 
+    private boolean isInitializing()
+    {
+        return (XState == MOVEMENTSTATE.INITIALIZING1ST || XState == MOVEMENTSTATE.INITIALIZING2ND || YState == MOVEMENTSTATE.INITIALIZING1ST || YState == MOVEMENTSTATE.INITIALIZING2ND || !Zready);
+    }
+    
     /**
      * Updates <i>isAtX</i> and <i>isAtY</i> variables.
      * <b>It's asured that this method only changes the XY state machines if
@@ -215,6 +222,19 @@ public class Gantry {
     }
 
     void update() {
+        //Gantry must be up
+        if(!Zready)
+        {
+            if(upZ.on())
+            {
+                Zready = true;
+                ZMotor.turnOff();
+            }
+            else
+                ZMotor.turnOnPlus();
+            return;
+        }
+            
         //Just updates the isAtX/Y variables
         if (updateIsAt()) {
             return;
