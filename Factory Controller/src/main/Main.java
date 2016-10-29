@@ -9,11 +9,20 @@ import coms.*;
 import control.*;
 import factory.*;
 
+/*
+Major TODO list:
+ - Gantry (Class: Gantry, Assigned to: Luis)
+ - Assembler cell processing and optimization (Class: Assembler, Assigned to: Luis)
+ - Serial cell processing and optimization (Class: SerialCell, Assigned to: Alex)
+ - Parallel cell processing and optimization (Class: ParalleCell, Assigned to: ?)
+ - Linear conveyors with multiple blocks (Class: Conveyor, Assigned to: Alex)
+ - Order processing algorithm and distribution by the various cells (Class: Factory, Assigned to: ?)
+ - Transformation sequences (Class: TransformationManager, Assigned to: Alex)
+ - TODO's in code (Class: -, Assigned to: all)
+*/
+
 //TODO: create a class Error extends java.lang.Error that, in the constructor, has a printStackTrace and a System.exit so it is a fatal error and can't be caught.
-/**
- *
- * @author Alex
- */
+
 public class Main {
 
     public static final Configuration config = new Configuration();

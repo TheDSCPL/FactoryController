@@ -17,6 +17,10 @@ public class Transformation {
     public final Block.Type end;
     public final Machine.Type machine;
     public final Machine.Tool tool;
+    
+    /**
+     * Process duration in milliseconds
+     */
     public final double duration;
     
     public Transformation(Block.Type start, Block.Type end, Machine.Type machine, Machine.Tool tool, double duration) {
