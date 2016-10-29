@@ -12,7 +12,7 @@ import java.util.*;
  *
  * @author Alex
  */
-public abstract class Order { // TODO    
+public abstract class Order {
 
     public final int id;
     public final int count;
@@ -23,7 +23,7 @@ public abstract class Order { // TODO
     private State state = State.Received;
 
     public enum State {
-        Received, Initiated, AllPlaced, Completed
+        Received, Initiated, AllPlaced, Completed // TODO, better names, javadoc
     }
     
     public boolean isPending() {

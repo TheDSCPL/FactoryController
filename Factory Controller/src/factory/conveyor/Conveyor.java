@@ -23,7 +23,7 @@ public abstract class Conveyor {
     private final Block[] blocks;
     private State conveyorState;
     /*private*/ public final Motor transferMotor;
-    public final Sensor[] presenceSensors; // TODO public for demo purposes only, should be protected
+    private final Sensor[] presenceSensors;
     private final int length;
 
     public String id;
@@ -137,6 +137,10 @@ public abstract class Conveyor {
             throw new IndexOutOfBoundsException("XXX"); // TODO exception text
         }
         return blocks[position];
+    }
+    
+    public boolean getPresenceSensorState(int position) {
+        return presenceSensors[position].on();
     }
 
     /**

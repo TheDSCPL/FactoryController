@@ -18,6 +18,11 @@ public class UnloadOrder extends Order { // TODO
 
     public UnloadOrder(int id, int count, Block.Type blockType, int position) {
         super(id, count);
+        
+        if (position != 1 && position != 2) {
+            throw new Error("Invalid position for UnloadOrder: " + position);
+        }
+        
         this.position = position;
         this.blockType = blockType;
     }

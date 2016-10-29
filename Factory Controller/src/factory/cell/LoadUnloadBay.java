@@ -7,6 +7,7 @@ package factory.cell;
 
 import factory.conveyor.*;
 import control.*;
+import control.order.*;
 import main.*;
 
 /**
@@ -65,6 +66,7 @@ public class LoadUnloadBay extends Cell {
     public void update() {
         super.update();
 
+        // Detect load orders on pusher t4 -> send block to warehouse in
         if (t4.blockPlacedManually) {
             Block b = t4.getBlock(0);
             b.path.push(t5);
@@ -74,6 +76,7 @@ public class LoadUnloadBay extends Cell {
             t4.blockPlacedManually = false;
         }
 
+        // Detect load orders on pusher t5 -> send block to warehouse in
         if (t5.blockPlacedManually) {
             Block b = t5.getBlock(0);
             b.path.push(t7);
@@ -82,10 +85,15 @@ public class LoadUnloadBay extends Cell {
             t5.blockPlacedManually = false;
         }
         
-        if (incomingBlock != null) {
-            // TODO decide which pusher to dump block
-            // Right now it's fixed on t4
-            incomingBlock.path.push(t4);
+        // Detect unload orders and dispatch block to correct pusher
+        if (incomingBlock != null) {            
+            UnloadOrder order = (UnloadOrder)incomingBlock.order;
+            
+            incomingBlock.path.push(t4); // Position == 1 or 2
+            if (order.position == 2) {
+                incomingBlock.path.push(t5);
+            }
+            
             incomingBlock = null; // Reset incoming block
         }
     }

@@ -7,7 +7,6 @@ package control;
 
 import control.order.*;
 import coms.*;
-import control.order.AssemblyOrder;
 import java.util.*;
 import static java.util.stream.Collectors.*;
 import main.*;
@@ -16,7 +15,7 @@ import main.*;
  *
  * @author Alex
  */
-public class OrderController { // TODO: write class
+public class OrderController {
 
     /**
      * All orders waiting to be executing, currently executing

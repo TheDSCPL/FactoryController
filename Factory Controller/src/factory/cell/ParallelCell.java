@@ -5,7 +5,6 @@
  */
 package factory.cell;
 
-import control.*;
 import factory.conveyor.*;
 
 /**

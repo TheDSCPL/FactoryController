@@ -22,11 +22,11 @@ public class Machine extends Conveyor {
     /**
      * Motor that makes the tool work
      */
-    public final Motor toolActivateMotor;
+    public final Motor toolActivateMotor; // TODO create class for tool management, selection and activation for specified periods of time
     /**
      * Motor that changes the tool
      */
-    public final Motor toolSelectMotor;
+    public final Motor toolSelectMotor; // TODO idem
     public final Motor xMotor, zMotor;
     
     public Machine(String id, Type type) {

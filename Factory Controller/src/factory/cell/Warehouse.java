@@ -48,8 +48,6 @@ public class Warehouse extends Cell {
         return blockOutQueue.size();
     }
 
-    //int p = 1; // DEMO
-
     @Override
     public void update() {
         super.update();
@@ -62,10 +60,9 @@ public class Warehouse extends Cell {
         
         // Block in entry conveyor has disappeared in simulator,
         // remove block from conveyor and reset
-        if (waitingForIn && in.isIdle() && !in.presenceSensors[0].on()) {
+        if (waitingForIn && in.isIdle() && !in.getPresenceSensorState(0)) {
             Main.modbus.setOutput(warehouseInID, false);
-            in.getBlock(0).completeOrder();
-            in.removeBlock(0);
+            in.removeBlock(0).completeOrder();
             waitingForIn = false;
         }
         
@@ -76,36 +73,11 @@ public class Warehouse extends Cell {
         }
         
         // Block has been placed on out conveyor, notify conveyor, remove block from outQueue and reset
-        if (waitingForOut && out.isIdle() && out.presenceSensors[0].on()) {
+        if (waitingForOut && out.isIdle() && out.getPresenceSensorState(0)) {
             Main.modbus.setRegister(warehouseOutRegister, 0);
             out.placeBlock(blockOutQueue.remove(), 0);
             waitingForOut = false;
         }
-        
-        // DEMO
-        /*Main.modbus.setRegister(0, out.presenceSensors[0].on() ? 0 : p);
-
-        if (out.presenceSensors[0].on() && !out.hasBlock()) {
-            Block b = new Block(Block.Type.P1);
-
-            int[] n = {1, 1, 3, 2, 1, 3, 2, 1, 1, 1, 0, 0, 0, 2, 1, 2, 1, 1, 2, 1, 3, 1, 1, 2, 1, 1, 0, 0, 2};
-            Conveyor last = out;
-
-            b.path.push(last);
-            for (int i : n) {
-                b.path.push(last.connections[i]);
-                last = last.connections[i];
-            }
-
-            out.placeBlock(b, 0);
-
-            p++;
-            if (p == 10) {
-                p = 1;
-            }
-        }*/
-        
-        
     }
 
     @Override

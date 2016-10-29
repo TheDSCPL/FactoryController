@@ -40,7 +40,7 @@ public class Pusher extends Conveyor {
         super.update();
 
         // Detect if block has been placed manually by a person
-        if (lastUpdateWasIdle && isIdle() && !hasBlock() && presenceSensors[0].on()) {
+        if (lastUpdateWasIdle && isIdle() && !hasBlock() && getPresenceSensorState(0)) {
             // Create block
             Block block = new Block(Block.Type.Unknown);
             block.path.push(this);
@@ -67,6 +67,9 @@ public class Pusher extends Conveyor {
                 if (pushSensorPlus.on()) {
                     pushMotor.turnOff();
                     pusherState = State.Idle;
+                    
+                    Block block = removeBlock(0);
+                    block.completeOrder();                    
                 }
                 break;
         }
