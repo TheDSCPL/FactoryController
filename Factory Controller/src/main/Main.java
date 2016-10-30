@@ -9,15 +9,26 @@ import factory.*;
 
 /*
 Major TODO list:
-  [ ]  Gantry (Class: Gantry, Assigned to: Luis)
-  [ ]  Assembler cell processing and optimization (Class: Assembler, Assigned to: Luis)
-  [ ]  Serial cell processing and optimization (Class: SerialCell, Assigned to: Alex)
-  [ ]  Parallel cell processing and optimization (Class: ParalleCell, Assigned to: ?)
-  [ ]  Linear conveyors with multiple blocks (Class: Conveyor, Assigned to: Alex)
-  [ ]  Order processing algorithm and distribution by the various cells (Class: Factory, Assigned to: ?)
-  [X]  Transformation sequences (Class: TransformationManager, Assigned to: Alex)
-  [X]  Tool class for selecting and activiating tools in machines (Class: Machine, Assigned to: Alex)
-  [ ]  TODO's in code (Class: -, Assigned to: all)
+
+Luis:
+  [.]  Gantry (Class: Gantry)
+  [ ]  Assembler cell processing and optimization (Class: Assembler)
+
+Alex:
+  [.]  Serial cell processing and optimization (Class: SerialCell)
+  [ ]  Linear conveyors with multiple blocks (Class: Conveyor)
+  [X]  Transformation sequences (Class: TransformationManager)
+  [X]  Tool class for selecting and activiating tools in machines (Class: Machine)
+
+Unassigned:
+  [ ]  Parallel cell processing and optimization (Class: ParalleCell)
+  [ ]  Order processing algorithm and distribution by the various cells (Class: Factory)
+  [ ]  (When everything else is done) Statistics module (Class: ?)
+  [ ]  TODO's in code (Class: N/A)
+
+Legend:
+   X   Done
+   .   In progress
  */
 
 public class Main {
@@ -44,7 +55,7 @@ public class Main {
             orderc.update();
             modbus.refreshOutputs();
 
-            //Thread.sleep(1);
+            Thread.sleep(1);
         }
     }
 

@@ -12,6 +12,7 @@ import factory.cell.*;
 import factory.conveyor.*;
 import main.*;
 import java.util.*;
+import transformation.*;
 
 /**
  *
@@ -41,35 +42,46 @@ public class Factory {
         cellList = new Cell[]{cw, c1, c2, c3, c4, ca, cb};
         Cell.connect(cellList);
     }
-    
+
     public void update() {
 
         // Update cells
         for (Cell cell : cellList) {
             cell.update();
         }
+
         
-        // DEMO for unload orders
         if (cw.getBlockOutQueueCount() == 0) {
             for (Order order : Main.orderc.getPendingOrders()) {
+                
+                // DEMO for unload orders
                 if (order instanceof UnloadOrder) {
-                    cw.addBlocksOut(order.execute(entryPathFromWarehouse(cb)));
+                    cw.addBlockOut(((UnloadOrder) order).execute(entryPathFromWarehouse(cb)));
                 }
+                
+                // DEMO for serial cells
                 else if (order instanceof MachiningOrder) {
-                    cw.addBlocksOut(order.execute(entryPathFromWarehouse(c2)));
+                    MachiningOrder mo = (MachiningOrder) order;
+                    
+                    Optional<TransformationSequence> seq;
+                    seq = mo.possibleSequences().stream().filter(s -> s.machineSet == Machine.Type.Set.AB).findFirst();
+                    
+                    if (seq.isPresent()) {
+                        cw.addBlockOut(mo.execute(entryPathFromWarehouse(c2), seq.get()));
+                    }
                 }
             }
         }
     }
-    
+
     public Path entryPathFromWarehouse(Cell cell) {
         Path path = new Path();
-        
+
         path.push(cw.getExitConveyor());
-        
+
         while (path.getLast() != cell.getEntryConveyor()) {
             Conveyor c;
-            
+
             // Get conveyor on the right
             if (path.getLast() instanceof Mover) {
                 c = path.getLast().connections[1];
@@ -77,22 +89,24 @@ public class Factory {
             else if (path.getLast() instanceof Rotator) {
                 c = path.getLast().connections[2];
             }
-            else throw new Error("Invalid conveyor type on top distribution path");
-            
+            else {
+                throw new Error("Invalid conveyor type on top distribution path");
+            }
+
             path.push(c);
         }
-        
+
         return path;
     }
-    
+
     public Path exitPathToWarehouse(Cell cell) {
         Path path = new Path();
-        
+
         path.push(cell.getExitConveyor());
-        
+
         while (path.getLast() != cw.getEntryConveyor()) {
             Conveyor c;
-            
+
             // Get conveyor on the right
             if (path.getLast() instanceof Mover) {
                 c = path.getLast().connections[0];
@@ -100,14 +114,16 @@ public class Factory {
             else if (path.getLast() instanceof Rotator) {
                 c = path.getLast().connections[0];
             }
-            else throw new Error("Invalid conveyor type on bottom return path");
-            
+            else {
+                throw new Error("Invalid conveyor type on bottom return path");
+            }
+
             path.push(c);
         }
-        
+
         return path;
     }
-    
+
     private Order chooseNextOrder(Set<Order> orders) {
         return orders.iterator().next(); // TODO
     }

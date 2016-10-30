@@ -18,9 +18,13 @@ public class TransformationSequence {
         this.sequence = Collections.unmodifiableList(sequence);
     }
     
-    /*public long totalDuration() {
+    public Transformation getNextTransformation(Block.Type block) {
+        return sequence.stream().filter(s -> s.start == block).findFirst().get();
+    }
+    
+    public long totalDuration() {
         return sequence.stream().map(t -> t.duration).reduce((long)0.0, Long::sum);
-    }*/
+    }
     
     public String toString() {
         return start + "-" + machineSet + "->" + end + ": " + sequence;

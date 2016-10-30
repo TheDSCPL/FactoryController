@@ -19,13 +19,21 @@ public abstract class Cell {
 
     /**
      * Not null whenever there is a block present in this cell's entryConveyor
-     * that wants to get in the cell for processing
+     * that wants to get in the cell for processing. Set this variable to null
+     * *after setting a path to the block* to signal the Cell class that the
+     * subclass is ready to process another block
      */
     protected Block incomingBlock;
 
     public Cell(String id) {
         this.id = id;
     }
+    
+    /**
+     * @return A time estimate in milliseconds of how much a block on the
+     * entry conveyor right now would have to wait to get in the cell
+     */
+    public abstract long getEntryDelayTimeEstimate();
 
     /**
      * @param position 0 = top left, turns clockwise

@@ -120,4 +120,9 @@ public class LoadUnloadBay extends Cell {
         return t7;
     }
 
+    @Override
+    public long getEntryDelayTimeEstimate() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

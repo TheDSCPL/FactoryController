@@ -18,31 +18,38 @@ public class Mover extends Conveyor {
     public Mover(String id, int length) {
         super(id, length, 2);
     }
-    
+
     @Override
-    public void update()
-    {
-        super.update();
+    public boolean transferMotorDirection() {
+        if (isSending()) {
+            return transferPartner == connections[0];
+        }
+        else if (isReceiving()) {
+            return transferPartner == connections[1];
+        }
+        else {
+            throw new Error("transferMotorDirection called when not transfering block");
+        }
     }
-    
+
     @Override
-    public boolean transferMotorDirection()
-    {
-        if (isSending()) return transferPartner == connections[0];
-        else if (isReceiving()) return transferPartner == connections[1];
-        else throw new Error("transferMotorDirection called when not transfering block");
+    public void blockTransferFinished() {
+        
     }
 
     @Override
-    public void blockTransferFinished() {}
+    public boolean isBlockTransferPossible() {
+        return true;
+    }
 
     @Override
-    public boolean isBlockTransferPossible() { return true; }
+    public void blockTransferPrepare() {
+        
+    }
 
     @Override
-    public void blockTransferPrepare() {}
+    public boolean isBlockTransferReady() {
+        return true;
+    }
 
-    @Override
-    public boolean isBlockTransferReady() { return true; }
-    
 }

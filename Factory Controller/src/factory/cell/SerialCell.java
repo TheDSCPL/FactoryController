@@ -6,14 +6,17 @@
 package factory.cell;
 
 import control.*;
+import main.*;
 import factory.conveyor.*;
+import static java.util.stream.Collectors.toList;
+import transformation.*;
 
 /**
  *
  * @author Alex
  */
 public class SerialCell extends Cell {
-    
+
     private final Mover t1;
     private final Rotator t2;
     private final Machine t3;
@@ -21,10 +24,10 @@ public class SerialCell extends Cell {
     private final Machine t5;
     private final Rotator t6;
     private final Mover t7;
-    
+
     public SerialCell(String id) {
         super(id);
-        
+
         // Create conveyors
         t1 = new Mover(id + "T1", 1);
         t2 = new Rotator(id + "T2");
@@ -33,16 +36,16 @@ public class SerialCell extends Cell {
         t5 = new Machine(id + "T5", Machine.Type.B);
         t6 = new Rotator(id + "T6");
         t7 = new Mover(id + "T7", 1);
-        conveyorList = new Conveyor[] {t1, t2, t3, t4, t5, t6, t7};
-        
+        conveyorList = new Conveyor[]{t1, t2, t3, t4, t5, t6, t7};
+
         // Connect conveyors
-        t1.connections = new Conveyor[] {null, t2};
-        t2.connections = new Conveyor[] {t1, null, null, t3};
-        t3.connections = new Conveyor[] {t2, t4};
-        t4.connections = new Conveyor[] {t3, t5};
-        t5.connections = new Conveyor[] {t4, t6};
-        t6.connections = new Conveyor[] {t7, t5, null, null};
-        t7.connections = new Conveyor[] {null, t6};
+        t1.connections = new Conveyor[]{null, t2};
+        t2.connections = new Conveyor[]{t1, null, null, t3};
+        t3.connections = new Conveyor[]{t2, t4};
+        t4.connections = new Conveyor[]{t3, t5};
+        t5.connections = new Conveyor[]{t4, t6};
+        t6.connections = new Conveyor[]{t7, t5, null, null};
+        t7.connections = new Conveyor[]{null, t6};
     }
 
     @Override
@@ -52,13 +55,53 @@ public class SerialCell extends Cell {
             case 1: return t2;
             case 2: return t6;
             case 3: return t7;
-            default: throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
+            default:
+                throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
         }
     }
 
     @Override
     public void update() {
         super.update();
+
+        // Detect incoming blocks and give them a path for processing
+        if (incomingBlock != null) {
+            if (incomingBlock.path.getCurrent() == t2 && !incomingBlock.path.hasNext()) {
+                Path path = incomingBlock.path;
+                path.push(t3);
+
+                Conveyor current = t3;
+                for (Transformation t : incomingBlock.sequence.sequence) {
+                    switch (t.machine) {
+                        case A:
+                            if (current == t5) {
+                                path.push(t4, t3);
+                                current = t3;
+                            }
+                            break;
+                        case B:
+                            if (current == t3) {
+                                path.push(t4, t5);
+                                current = t5;
+                            }
+                            break;
+                        default: throw new Error("XXX"); // TODO
+                    }
+                }
+
+                if (current == t3) {
+                    path.push(t4, t5);
+                }
+                
+                path.push(t6);
+            }
+        }
+
+        // Reset incoming block if no other block is in this cell
+        if (t6.isIdle() && t6.hasBlock()) {
+            t6.getBlock(0).path.append(Main.factory.exitPathToWarehouse(this));
+            incomingBlock = null;
+        }
     }
 
     @Override
@@ -77,10 +120,15 @@ public class SerialCell extends Cell {
     public Rotator getEntryConveyor() {
         return t2;
     }
-    
+
     @Override
     public Rotator getExitConveyor() {
         return t6;
     }
-    
+
+    @Override
+    public long getEntryDelayTimeEstimate() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }
