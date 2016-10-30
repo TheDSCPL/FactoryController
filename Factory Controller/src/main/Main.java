@@ -16,6 +16,7 @@ Major TODO list:
   [ ]  Linear conveyors with multiple blocks (Class: Conveyor, Assigned to: Alex)
   [ ]  Order processing algorithm and distribution by the various cells (Class: Factory, Assigned to: ?)
   [X]  Transformation sequences (Class: TransformationManager, Assigned to: Alex)
+  [X]  Tool class for selecting and activiating tools in machines (Class: Machine, Assigned to: Alex)
   [ ]  TODO's in code (Class: -, Assigned to: all)
  */
 
