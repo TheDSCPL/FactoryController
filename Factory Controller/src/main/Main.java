@@ -13,15 +13,17 @@ Major TODO list:
 Luis:
   [.]  Gantry (Class: Gantry)
   [ ]  Assembler cell processing and optimization (Class: Assembler)
+  [ ]  Parallel cell processing and optimization (Class: ParalleCell)
 
 Alex:
   [.]  Serial cell processing and optimization (Class: SerialCell)
   [ ]  Linear conveyors with multiple blocks (Class: Conveyor)
+  [ ]  Rotator conveyor optimization: automatically rotate back to horizontal position to speed up block traveling time (Class: Conveyor, Rotator)
   [X]  Transformation sequences (Class: TransformationManager)
-  [X]  Tool class for selecting and activiating tools in machines (Class: Machine)
+  [X]  Tool class for selecting and activating tools in machines (Class: Machine)
 
 Unassigned:
-  [ ]  Parallel cell processing and optimization (Class: ParalleCell)
+  [ ]  Tool selection is very slow. Opimization is possible by pre-selecting tools before machine receives block (Class: [Serial|Parallel]Cell, Machine)
   [ ]  Order processing algorithm and distribution by the various cells (Class: Factory)
   [ ]  (When everything else is done) Statistics module (Class: ?)
   [ ]  TODO's in code (Class: N/A)
