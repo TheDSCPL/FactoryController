@@ -1,24 +1,17 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package control;
 
 import control.order.*;
+import transformation.*;
 
 /**
- * Represents a block.
- *
- * @author Luis Paulo
- * @auhor Alex
+ * Represents a block, meaning, one occupied space in a conveyor
  */
 public class Block {
 
     public Block(Block.Type type) {
         this.type = type;
     }
-    
+
     public void completeOrder() {
         if (order != null) {
             order.complete(this);
@@ -58,4 +51,25 @@ public class Block {
     public Order order;
     public Type type;
     public Path path = new Path();
+
+    /**
+     * For blocks used in MachiningOrder
+     */
+    public TransformationSequence sequence;
+
+    public boolean hasNextTransformation() {
+        return type != sequence.end;
+    }
+    public Transformation getNextTransformation() {
+        return sequence.getNextTransformation(type);
+    }
+    public void applyNextTransformation() {
+        type = getNextTransformation().end;
+    }
+
+    /**
+     * For blocks used in AssemblyOrder
+     */
+    public Block otherAssemblyBlock;
+    public boolean isBottomBlock;
 }

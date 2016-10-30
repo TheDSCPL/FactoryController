@@ -90,5 +90,10 @@ public class ParallelCell extends Cell {
     public Conveyor getExitConveyor() {
         return t9;
     }
+
+    @Override
+    public long getEntryDelayTimeEstimate() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

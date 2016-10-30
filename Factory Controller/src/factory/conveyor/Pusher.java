@@ -58,9 +58,9 @@ public class Pusher extends Conveyor {
                 if (pushSensorPlus.on()) {
                     pushMotor.turnOff();
                     pusherState = State.Idle;
-                    
+
                     Block block = removeBlock(0);
-                    block.completeOrder();                    
+                    block.completeOrder();
                 }
                 break;
         }
@@ -87,13 +87,9 @@ public class Pusher extends Conveyor {
             Block block = getBlock(0);
 
             // Block has stopped here and has an Unload order
-            if (!block.path.hasNext() && block.order != null) {
-                Order order = block.order;
-
-                if (order instanceof UnloadOrder) {
-                    pusherState = State.Pushing;
-                    pushMotor.turnOn(false);
-                }
+            if (!block.path.hasNext() && block.order instanceof UnloadOrder) {
+                pusherState = State.Pushing;
+                pushMotor.turnOn(false);
             }
         }
     }

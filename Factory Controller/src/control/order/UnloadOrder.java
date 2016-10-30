@@ -27,9 +27,15 @@ public class UnloadOrder extends Order {
         this.blockType = blockType;
     }
 
-    @Override
-    Block[] createBlocksForExecution() {
-        return new Block[]{ new Block(blockType) };
+    public Block execute(Path blockPath) {
+        if (!isPending()) { return null; }
+        
+        Block b = new Block(blockType);
+        b.path = blockPath;
+        b.order = this;
+        
+        incrementPlacement();
+        return b;
     }
     
 }

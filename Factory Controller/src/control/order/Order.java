@@ -35,27 +35,17 @@ public abstract class Order {
         this.count = count;
     }
     
-    public Block[] execute(Path blockPath) {
-        if (state == State.AllPlaced || state == State.Completed) { return null; }
-        
-        Block[] blockPacket = createBlocksForExecution();
-        state = State.Initiated;
-        
-        for (Block b : blockPacket) {
-            b.path = blockPath;
-            b.order = this;
-            blocks.add(b);
-        }
+    protected void incrementPlacement() {
+        if (!isPending()) { return; }
         
         placedCount++;
         if (placedCount == count) {
             state = State.AllPlaced;
         }
-        
-        return blockPacket;
+        else {
+            state = State.Initiated;
+        }
     }
-    
-    abstract Block[] createBlocksForExecution();
 
     public void complete(Block block) {
         blocks.remove(block);

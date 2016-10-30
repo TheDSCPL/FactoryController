@@ -36,6 +36,12 @@ public class Path {
         path.add(c);
 
     }
+    
+    public void push(Conveyor... list) {
+        for (Conveyor c : list) {
+            push(c);
+        }
+    }
 
     /**
      * Appends newPath to the end of this path
@@ -82,5 +88,9 @@ public class Path {
         if (!path.isEmpty()) {
             path.remove(0);
         }
+    }
+    
+    public String toString() {
+        return path.stream().map(c -> c.id).reduce("Path {", (a,b) -> (a + ", " + b)) + "}";
     }
 }

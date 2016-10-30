@@ -139,4 +139,9 @@ public class Assembler extends Cell {
         return t5;
     }
 
+    @Override
+    public long getEntryDelayTimeEstimate() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

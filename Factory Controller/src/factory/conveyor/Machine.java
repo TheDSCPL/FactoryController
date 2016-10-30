@@ -1,8 +1,10 @@
 package factory.conveyor;
 
+import control.*;
+import control.order.*;
 import main.*;
 import factory.*;
-import java.util.Random;
+import transformation.*;
 
 public class Machine extends Conveyor {
 
@@ -10,7 +12,14 @@ public class Machine extends Conveyor {
         A, B, C;
 
         public enum Set {
-            AB, BC;
+            /**
+             * Set of machines on SerialCell
+             */
+            AB,
+            /**
+             * Set of machines on ParallelCell
+             */
+            BC;
 
             public boolean contains(Machine.Type machine) {
                 switch (machine) {
@@ -27,6 +36,8 @@ public class Machine extends Conveyor {
     private final Sensor ZSensor, zSensor, XSensor, xSensor;
     private final Motor xMotor, zMotor;
     private final Tool tool;
+
+    private boolean holdBlock = false;
 
     public Machine(String id, Type type) {
         super(id, 1, 2);
@@ -52,18 +63,36 @@ public class Machine extends Conveyor {
         super.update();
         tool.update();
 
-        // DEMO
+        // Position machine head correctly (only done on initialization)
         xMotor.control(!xSensor.on(), true);
         zMotor.control(!zSensor.on(), false);
+        
+        // Tool has finished
+        if (holdBlock && tool.isIdle()) {
+            
+            // Update block type
+            getBlock(0).applyNextTransformation();
+            
+            // Start next machining cycle here, or release block
+            startMachiningIfNecessary();
+        }
 
-        // DEMO
-        if (tool.isIdle() && xSensor.on() && zSensor.on()) {
-            Tool.Type[] list = Tool.Type.values();
+    }
 
-            Tool.Type next = list[new Random().nextInt(list.length)];
-            long time = (new Random().nextInt(10) + 1) * (long) 1000.0;
+    private void startMachiningIfNecessary() {
+        Block block = getBlock(0);
+        holdBlock = false;
 
-            tool.selectAndActivate(next, time);
+        if (block.order instanceof MachiningOrder) {
+            if (block.hasNextTransformation()) {
+                Transformation next = block.getNextTransformation();
+
+                // If block can be machined here
+                if (next.machine == type) {
+                    tool.selectAndActivate(next.tool, next.duration);
+                    holdBlock = true;
+                }
+            }
         }
     }
 
@@ -82,20 +111,27 @@ public class Machine extends Conveyor {
 
     @Override
     public void blockTransferFinished() {
-    } // TODO: start machining
+        startMachiningIfNecessary();
+    }
 
     @Override
     public boolean isBlockTransferPossible() {
-        return true;
-    } // TODO: has machining ended
+        return !holdBlock;
+    }
 
     @Override
     public void blockTransferPrepare() {
+
     }
 
     @Override
     public boolean isBlockTransferReady() {
         return true;
+    }
+
+    @Override
+    public boolean isIdle() {
+        return super.isIdle() && tool.isIdle();
     }
 
     public static class Tool {
@@ -108,7 +144,7 @@ public class Machine extends Conveyor {
             Idle, Selecting, Machining;
         }
 
-        private static final long toolSelectionTime = 12_000;
+        private static final long toolSelectionTime = ((360 / 3) / (long) Main.config.getI("tool.rotateSpeed")) * 1000;
 
         private final Sensor toolPresentSensor;
         private final Motor toolSelectMotor;
@@ -134,12 +170,10 @@ public class Machine extends Conveyor {
                     if (toolPresentSensor.on() && Main.time() - startTime > toolSelectionTime / 2) {
                         toolSelectMotor.turnOff();
                         currentTool = toolSelectTarget;
+                        state = State.Idle;
 
                         if (machiningDuration != -1) {
                             activate(machiningDuration);
-                        }
-                        else {
-                            state = State.Idle;
                         }
                     }
                     break;
@@ -153,19 +187,23 @@ public class Machine extends Conveyor {
         }
 
         public void select(Type type) {
+            if (state != State.Idle) {
+                throw new Error("select called on tool when tool is not on Idle state");
+            }
+
             if (type != currentTool) {
                 toolSelectTarget = type;
 
                 boolean direction;
                 switch (currentTool) {
                     case T1:
-                        direction = toolSelectTarget == Type.T3;
+                        direction = toolSelectTarget == Type.T2;
                         break;
                     case T2:
-                        direction = toolSelectTarget == Type.T1;
+                        direction = toolSelectTarget == Type.T3;
                         break;
                     case T3:
-                        direction = toolSelectTarget == Type.T2;
+                        direction = toolSelectTarget == Type.T1;
                         break;
                     default: throw new Error("XXX"); // TODO
                 }
@@ -178,20 +216,25 @@ public class Machine extends Conveyor {
         }
 
         public void activate(long duration) {
-            machiningDuration = duration;
-            state = State.Machining;
-            startTime = Main.time();
-            Main.modbus.setOutput(toolActivationMotorID, true);
+            switch (state) {
+                case Idle:
+                    machiningDuration = duration;
+                    state = State.Machining;
+                    startTime = Main.time();
+                    Main.modbus.setOutput(toolActivationMotorID, true);
+                    break;
+                case Selecting:
+                    machiningDuration = duration;
+                    break;
+                case Machining:
+                    throw new Error("activate called on tool when machining is already in progress");
+            }
+
         }
 
         public void selectAndActivate(Type type, long duration) {
-            if (type != currentTool) {
-                select(type);
-                machiningDuration = duration;
-            }
-            else {
-                activate(duration);
-            }
+            select(type);
+            activate(duration);
         }
 
         public boolean isIdle() {
