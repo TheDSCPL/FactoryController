@@ -47,40 +47,22 @@ public class Machine extends Conveyor {
         zSensor = new Sensor(Main.config.getBaseInput(id) + 5);
     }
 
-    // DEMO
-    boolean last1 = false;
-    boolean last2 = false;
-    boolean last3 = false;
-
     @Override
     public void update() {
         super.update();
         tool.update();
 
         // DEMO
-        if (xSensor.on()) {
-            last1 = false;
-        }
-        if (XSensor.on()) {
-            last1 = true;
-        }
-        xMotor.turnOn(last1);
+        xMotor.control(!xSensor.on(), true);
+        zMotor.control(!zSensor.on(), false);
 
-        if (zSensor.on()) {
-            last2 = true;
-        }
-        if (ZSensor.on()) {
-            last2 = false;
-        }
-        zMotor.turnOn(last2);
-        
         // DEMO
-        if (tool.isIdle()) {
+        if (tool.isIdle() && xSensor.on() && zSensor.on()) {
             Tool.Type[] list = Tool.Type.values();
-            
+
             Tool.Type next = list[new Random().nextInt(list.length)];
-            long time = (new Random().nextInt(4) + 1) * (long)1000.0;
-                        
+            long time = (new Random().nextInt(10) + 1) * (long) 1000.0;
+
             tool.selectAndActivate(next, time);
         }
     }
@@ -125,7 +107,7 @@ public class Machine extends Conveyor {
         private enum State {
             Idle, Selecting, Machining;
         }
-        
+
         private static final long toolSelectionTime = 12_000;
 
         private final Sensor toolPresentSensor;
