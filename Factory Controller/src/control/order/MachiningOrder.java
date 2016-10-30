@@ -24,6 +24,6 @@ public class MachiningOrder extends Order { // TODO
 
     @Override
     Block[] createBlocksForExecution() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new Block[]{ new Block(startType) };
     }
 }

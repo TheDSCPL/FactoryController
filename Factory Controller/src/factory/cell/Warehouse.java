@@ -60,7 +60,7 @@ public class Warehouse extends Cell {
         
         // Block in entry conveyor has disappeared in simulator,
         // remove block from conveyor and reset
-        if (waitingForIn && in.isIdle() && !in.getPresenceSensorState(0)) {
+        if (waitingForIn && in.isIdle() && !in.isPresenceSensorOn(0)) {
             Main.modbus.setOutput(warehouseInID, false);
             in.removeBlock(0).completeOrder();
             waitingForIn = false;
@@ -73,7 +73,7 @@ public class Warehouse extends Cell {
         }
         
         // Block has been placed on out conveyor, notify conveyor, remove block from outQueue and reset
-        if (waitingForOut && out.isIdle() && out.getPresenceSensorState(0)) {
+        if (waitingForOut && out.isIdle() && out.isPresenceSensorOn(0)) {
             Main.modbus.setRegister(warehouseOutRegister, 0);
             out.placeBlock(blockOutQueue.remove(), 0);
             waitingForOut = false;

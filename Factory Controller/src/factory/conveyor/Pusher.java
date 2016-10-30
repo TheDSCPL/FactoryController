@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package factory.conveyor;
 
 import control.*;
@@ -10,10 +5,6 @@ import control.order.*;
 import factory.*;
 import main.*;
 
-/**
- *
- * @author Alex
- */
 public class Pusher extends Conveyor {
 
     private final Motor pushMotor;
@@ -40,7 +31,7 @@ public class Pusher extends Conveyor {
         super.update();
 
         // Detect if block has been placed manually by a person
-        if (lastUpdateWasIdle && isIdle() && !hasBlock() && getPresenceSensorState(0)) {
+        if (lastUpdateWasIdle && isIdle() && !hasBlock() && isPresenceSensorOn(0)) {
             // Create block
             Block block = new Block(Block.Type.Unknown);
             block.path.push(this);

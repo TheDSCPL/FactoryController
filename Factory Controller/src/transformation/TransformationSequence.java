@@ -18,9 +18,9 @@ public class TransformationSequence {
         this.sequence = Collections.unmodifiableList(sequence);
     }
     
-    public double totalDuration() {
-        return sequence.stream().map(t -> t.duration).reduce(0.0, Double::sum);
-    }
+    /*public long totalDuration() {
+        return sequence.stream().map(t -> t.duration).reduce((long)0.0, Long::sum);
+    }*/
     
     public String toString() {
         return start + "-" + machineSet + "->" + end + ": " + sequence;

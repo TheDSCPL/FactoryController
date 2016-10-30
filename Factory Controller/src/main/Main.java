@@ -26,6 +26,13 @@ public class Main {
     public static final Factory factory = new Factory();
     public static final TransformationManager transfm = new TransformationManager();
     public static final OrderController orderc = new OrderController();
+    
+    /**
+     * @return Time in milliseconds
+     */
+    public static long time() {
+        return System.nanoTime() / (long)1_000_000;
+    }
 
     private static void connectAndRun() throws Exception {
         modbus.connect();
@@ -36,7 +43,7 @@ public class Main {
             orderc.update();
             modbus.refreshOutputs();
 
-            Thread.sleep(1);
+            //Thread.sleep(1);
         }
     }
 
@@ -63,8 +70,8 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        try {
+    public static void main(String[] args) throws Exception {
+        /*try {
             connectAndRun();
         }
         catch (java.net.ConnectException ex) //if simulator not running try to start it
@@ -75,10 +82,11 @@ public class Main {
             }
             catch (Exception e) {
                 /*System.exit(32)*/
-            }
+            /*}
         }
         catch (Exception ex) {
         }
-        //System.exit(33);
+        //System.exit(33);*/
+        connectAndRun();
     }
 }

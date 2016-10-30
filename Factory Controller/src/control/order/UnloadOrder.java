@@ -11,7 +11,7 @@ import control.*;
  *
  * @author Alex
  */
-public class UnloadOrder extends Order { // TODO
+public class UnloadOrder extends Order {
 
     public final int position;
     public final Block.Type blockType;

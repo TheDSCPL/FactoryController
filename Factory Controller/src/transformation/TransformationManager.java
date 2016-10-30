@@ -43,22 +43,22 @@ public class TransformationManager {
                 default: throw new Error("XXX"); // TODO
             }
 
-            Machine.Tool machineTool;
+            Machine.Tool.Type machineTool;
             switch (tool) {
                 case 1:
                 case 4:
                 case 7:
-                    machineTool = Machine.Tool.T1;
+                    machineTool = Machine.Tool.Type.T1;
                     break;
                 case 2:
                 case 5:
                 case 8:
-                    machineTool = Machine.Tool.T2;
+                    machineTool = Machine.Tool.Type.T2;
                     break;
                 case 3:
                 case 6:
                 case 9:
-                    machineTool = Machine.Tool.T3;
+                    machineTool = Machine.Tool.Type.T3;
                     break;
                 default: throw new Error("XXX"); // TODO
             }
@@ -94,8 +94,6 @@ public class TransformationManager {
                 }
             }
         }
-
-        System.out.println(sequences);
     }
 
     private List<List<Transformation>> recursiveSequenceBuild(Block.Type start, Block.Type end, Machine.Type.Set mts, Set<Block.Type> visited) {

@@ -1,18 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package factory.conveyor;
 
 import control.*;
 import factory.*;
 import main.*;
 
-/**
- * @author Alex
- * @author Luis Paulo
- */
 public abstract class Conveyor {
 
     /**
@@ -20,9 +11,11 @@ public abstract class Conveyor {
      * both are ready
      */
     Conveyor transferPartner;
+    private Sensor receivingFinishedSensor;
+
     private final Block[] blocks;
     private State conveyorState;
-    /*private*/ public final Motor transferMotor;
+    private final Motor transferMotor;
     private final Sensor[] presenceSensors;
     private final int length;
 
@@ -88,13 +81,13 @@ public abstract class Conveyor {
                 break;
             case PrepareToReceive:
                 if (isBlockTransferReady()) {
+                    receivingFinishedSensor = presenceSensors[0]; // TODO
                     blockTransferStart();
                     transferPartner.blockTransferStart();
                 }
                 break;
             case Receiving:
-                Sensor s = presenceSensors[0]; // TODO only works for conveyors of lenght 1
-                if (s.on()) {
+                if (receivingFinishedSensor.on()) {
                     blockTransferStop(transferPartner.blockTransferStop(null));
                 }
                 break;
@@ -110,6 +103,122 @@ public abstract class Conveyor {
                 break;
         }
     }
+
+    private int leftmostNonNullBlockIndex() {
+        for (int i = 0; i < length; i++) {
+            if (blocks[i] != null) {
+                return i;
+            }
+        }
+
+        return length;
+    }
+
+    private int rightmostNonNullBlockIndex() {
+        for (int i = length - 1; i >= 0; i--) {
+            if (blocks[i] != null) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private boolean hasSpace() {
+        for (Block b : blocks) {
+            if (b == null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void blockTransferRegister(Conveyor c) {
+        if (!isSending() && !isReceiving()) {
+            //if (transferPartner != null) {
+            // TODO it is possible that this may be called twice in the same loop
+            // for two different conveyors. Needs way of
+            // identifying best transferpartner
+            //}
+            //else {
+            transferPartner = c;
+            //}
+        }
+    }
+
+    private void blockTransferStart() {
+        transferMotor.turnOn(transferMotorDirection());
+        if (isSending()) {
+            conveyorState = State.Sending;
+        }
+        else if (isReceiving()) {
+            conveyorState = State.Receiving;
+        }
+    }
+
+    /**
+     *
+     * @param newBlock If receiving, expects the new block object to be passed.
+     * If sending, parameter is null
+     * @return If sending, returns the block sent
+     */
+    private Block blockTransferStop(Block newBlock) {
+        transferMotor.turnOff();
+
+        Block b = null;
+        if (isSending()) {
+            while (b == null) {
+                b = shiftOneBlock(transferMotorDirection(), null);
+            }
+        }
+        else if (isReceiving()) {
+            shiftOneBlock(transferMotorDirection(), newBlock);
+            newBlock.path.advance();
+            blockTransferFinished();
+        }
+
+        transferPartner = null;
+        conveyorState = State.Standby;
+
+        return b;
+    }
+
+    private Block shiftOneBlock(boolean shiftLeft, Block insert) {
+        Block ret;
+
+        if (shiftLeft) {
+            ret = blocks[0];
+
+            System.arraycopy(blocks, 1, blocks, 0, blocks.length - 1);
+            // Equivalent to: TODO verify
+            //for (int i = blocks.length - 1; i > 0; i--) {
+            //    blocks[i - 1] = blocks[i];
+            //}
+
+            blocks[blocks.length - 1] = insert;
+        }
+        else {
+            ret = blocks[blocks.length - 1];
+
+            System.arraycopy(blocks, 0, blocks, 1, blocks.length - 1);
+            // Equivalent to: TODO verify
+            //for (int i = 0; i < blocks.length - 1; i++) {
+            //    blocks[i + 1] = blocks[i];
+            //}
+
+            blocks[0] = insert;
+        }
+
+        return ret;
+    }
+
+
+
+
+
+
+
+
 
     /**
      * Checks if there are blocks in the conveyor
@@ -138,8 +247,8 @@ public abstract class Conveyor {
         }
         return blocks[position];
     }
-    
-    public boolean getPresenceSensorState(int position) {
+
+    public boolean isPresenceSensorOn(int position) {
         return presenceSensors[position].on();
     }
 
@@ -188,7 +297,7 @@ public abstract class Conveyor {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -213,85 +322,6 @@ public abstract class Conveyor {
      */
     public boolean isIdle() {
         return conveyorState == State.Standby;
-    }
-
-    private void blockTransferRegister(Conveyor c) {
-        if (!isSending() && !isReceiving()) {
-            //if (transferPartner != null) {
-            // TODO it is possible that this may be called twice in the same loop
-            // for two different conveyors. Needs way of
-            // identifying best transferpartner
-            //}
-            //else {
-            transferPartner = c;
-            //}
-        }
-    }
-
-    private void blockTransferStart() {
-        transferMotor.turnOn(transferMotorDirection());
-        if (isSending()) {
-            conveyorState = State.Sending;
-        }
-        else if (isReceiving()) {
-            conveyorState = State.Receiving;
-        }
-    }
-
-    /**
-     *
-     * @param newBlock If receiving, expects the new block object to be passed.
-     * If sending, parameter is null
-     * @return If sending, returns the block sent
-     */
-    private Block blockTransferStop(Block newBlock) {
-        transferMotor.turnOff();
-
-        Block b = null;
-        if (isSending()) {
-            while (b == null) {
-                b = shiftOneBlock(!transferMotorDirection(), null);
-            }
-        }
-        else if (isReceiving()) {
-            shiftOneBlock(!transferMotorDirection(), newBlock);
-            newBlock.path.advance();
-            blockTransferFinished();
-        }
-
-        transferPartner = null;
-        conveyorState = State.Standby;
-
-        return b;
-    }
-
-    private Block shiftOneBlock(boolean shiftRight, Block insert) {
-        Block ret;
-
-        if (shiftRight) {
-            ret = blocks[blocks.length - 1];
-
-            System.arraycopy(blocks, 0, blocks, 1, blocks.length - 1);
-            // Equivalent to: TODO verify
-            //for (int i = 0; i < blocks.length - 1; i++) {
-            //    blocks[i + 1] = blocks[i];
-            //}
-
-            blocks[0] = insert;
-        }
-        else {
-            ret = blocks[0];
-
-            System.arraycopy(blocks, 1, blocks, 0, blocks.length - 1);
-            // Equivalent to: TODO verify
-            //for (int i = blocks.length - 1; i > 0; i--) {
-            //    blocks[i - 1] = blocks[i];
-            //}
-
-            blocks[blocks.length - 1] = insert;
-        }
-
-        return ret;
     }
 
     public abstract boolean transferMotorDirection();

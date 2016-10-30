@@ -55,6 +55,9 @@ public class Factory {
                 if (order instanceof UnloadOrder) {
                     cw.addBlocksOut(order.execute(entryPathFromWarehouse(cb)));
                 }
+                else if (order instanceof MachiningOrder) {
+                    cw.addBlocksOut(order.execute(entryPathFromWarehouse(c2)));
+                }
             }
         }
     }
