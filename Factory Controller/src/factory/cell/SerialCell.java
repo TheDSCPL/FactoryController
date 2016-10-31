@@ -8,7 +8,7 @@ package factory.cell;
 import control.*;
 import main.*;
 import factory.conveyor.*;
-import static java.util.stream.Collectors.toList;
+import java.util.*;
 import transformation.*;
 
 /**
@@ -24,6 +24,9 @@ public class SerialCell extends Cell {
     private final Machine t5;
     private final Rotator t6;
     private final Mover t7;
+
+    private final Set<Block> blocksInside = new HashSet<>();
+    private boolean firstConveyorsBlocked = false;
 
     public SerialCell(String id) {
         super(id);
@@ -49,6 +52,138 @@ public class SerialCell extends Cell {
     }
 
     @Override
+    public void update() {
+        super.update();
+
+        boolean change = false;
+
+        // Process blocks going out
+        if (t6.isIdle() && t6.hasBlock()) {
+            processBlockOut(t6.getBlock(0));
+            change = true;
+        }
+
+        // Detect incoming blocks and give them a path for processing if possible
+        if (incomingBlock != null && !firstConveyorsBlocked) {
+            processBlockIn(incomingBlock);
+            incomingBlock = null;
+            change = true;
+        }
+
+        // Refresh conveyor blocking if necessary
+        if (firstConveyorsBlocked || change) {
+            refreshConveyorBlocking();
+        }
+
+        // Pre-select tools in machines
+        if (t3.canPreSelectTool()) {
+            processPreSelection(t3);
+        }
+        if (t5.canPreSelectTool()) {
+            processPreSelection(t5);
+        }
+    }
+    
+    private void processPreSelection(Machine machine) {
+        
+        // Get next block to go to that machine and be processed there
+        Block closestBlockToBeProcessed = null;
+        int minStepCount = Integer.MAX_VALUE;
+        
+        for (Block b : blocksInside) {
+            
+            // Block has to go to that machine in the future and be processed there
+            if (b.path.path.contains(machine) && b.getNextTransformationOnMachine(machine.type) != null) {
+                
+                // Calculate number of steps to machine for this block
+                int count = 0;
+                for (Conveyor c : b.path.path) {
+                    count++;
+                    if (c == machine) {
+                        break;
+                    }
+                }
+                
+                // If this block is closest, save that information
+                if (count < minStepCount) {
+                    minStepCount = count;
+                    closestBlockToBeProcessed = b;
+                }
+            }
+        }
+        
+        // Get next transformation that block will have on that machine, and pre-select the apropriate tool
+        if (closestBlockToBeProcessed != null) {
+            machine.preSelectTool(closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool);
+        }
+    }
+
+    private void refreshConveyorBlocking() {
+        boolean blocked = false;
+
+        // This loop looks at all the blocks and sees if any
+        // part of their paths contains the following transitions:
+        //      t5 -> t4   or   t4 -> t3
+        // Those transitions are backwards regarding the normal flow of blocks
+        // in the cell (from top to bottom), meaning the conveyors t3 and t4
+        // cannot have blocks there if this happens and are hence blocked
+        outerLoop:
+        for (Block b : blocksInside) {
+            if (b.path.hasNext()) {
+                for (int i = 1; i < b.path.path.size(); i++) {
+                    Conveyor last = b.path.path.get(i - 1);
+                    Conveyor current = b.path.path.get(i);
+
+                    if ((last == t5 && current == t4) || (last == t4 && current == t3)) {
+                        blocked = true;
+                        break outerLoop;
+                    }
+                }
+            }
+        }
+
+        firstConveyorsBlocked = blocked;
+    }
+
+    private void processBlockIn(Block block) {
+        Path path = block.path;
+
+        path.push(t3);
+        Conveyor current = t3;
+
+        for (Transformation t : block.sequence.sequence) {
+            switch (t.machine) {
+                case A:
+                    if (current == t5) {
+                        path.push(t4, t3);
+                        current = t3;
+                    }
+                    break;
+                case B:
+                    if (current == t3) {
+                        path.push(t4, t5);
+                        current = t5;
+                    }
+                    break;
+                default: throw new Error("XXX"); // TODO
+            }
+        }
+
+        if (current == t3) {
+            path.push(t4, t5);
+        }
+
+        path.push(t6);
+
+        blocksInside.add(block);
+    }
+
+    private void processBlockOut(Block block) {
+        t6.getBlock(0).path.append(Main.factory.exitPathToWarehouse(this));
+        blocksInside.remove(block);
+    }
+
+    @Override
     public Conveyor getCornerConveyor(int position) {
         switch (position) {
             case 0: return t1;
@@ -57,50 +192,6 @@ public class SerialCell extends Cell {
             case 3: return t7;
             default:
                 throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
-        }
-    }
-
-    @Override
-    public void update() {
-        super.update();
-
-        // Detect incoming blocks and give them a path for processing
-        if (incomingBlock != null) {
-            if (incomingBlock.path.getCurrent() == t2 && !incomingBlock.path.hasNext()) {
-                Path path = incomingBlock.path;
-                path.push(t3);
-
-                Conveyor current = t3;
-                for (Transformation t : incomingBlock.sequence.sequence) {
-                    switch (t.machine) {
-                        case A:
-                            if (current == t5) {
-                                path.push(t4, t3);
-                                current = t3;
-                            }
-                            break;
-                        case B:
-                            if (current == t3) {
-                                path.push(t4, t5);
-                                current = t5;
-                            }
-                            break;
-                        default: throw new Error("XXX"); // TODO
-                    }
-                }
-
-                if (current == t3) {
-                    path.push(t4, t5);
-                }
-                
-                path.push(t6);
-            }
-        }
-
-        // Reset incoming block if no other block is in this cell
-        if (t6.isIdle() && t6.hasBlock()) {
-            t6.getBlock(0).path.append(Main.factory.exitPathToWarehouse(this));
-            incomingBlock = null;
         }
     }
 
