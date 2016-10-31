@@ -54,7 +54,7 @@ public class Gantry {
         int outputActionId = Main.config.getBaseOutput(id + "R");
 
         // initialize outputs
-        gripOutputId = outputActionId;
+        gripOutputId = outputActionId+6;
         XMotor = new Motor(outputActionId + 0);
         YMotor = new Motor(outputActionId + 2);
         ZMotor = new Motor(outputActionId + 4);
