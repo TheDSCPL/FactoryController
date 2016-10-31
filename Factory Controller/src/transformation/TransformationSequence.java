@@ -19,7 +19,7 @@ public class TransformationSequence {
     }
     
     public Transformation getNextTransformation(Block.Type block) {
-        return sequence.stream().filter(s -> s.start == block).findFirst().get();
+        return sequence.stream().filter(s -> s.start == block).findFirst().orElse(null);
     }
     
     public long totalDuration() {

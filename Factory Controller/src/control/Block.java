@@ -1,6 +1,8 @@
 package control;
 
 import control.order.*;
+import factory.conveyor.*;
+import java.util.*;
 import transformation.*;
 
 /**
@@ -56,12 +58,27 @@ public class Block {
      * For blocks used in MachiningOrder
      */
     public TransformationSequence sequence;
-
     public boolean hasNextTransformation() {
         return type != sequence.end;
     }
     public Transformation getNextTransformation() {
         return sequence.getNextTransformation(type);
+    }
+    public Transformation getNextTransformationOnMachine(Machine.Type machineType) {
+        List<Transformation> nextTransformations = new ArrayList<>(sequence.sequence);
+
+        while (true) {
+            if (nextTransformations.isEmpty()) {
+                break;
+            }
+            if (nextTransformations.get(0).start == type) {
+                break;
+            }
+            
+            nextTransformations.remove(0);
+        }
+
+        return nextTransformations.stream().filter(s -> s.machine == machineType).findFirst().orElse(null);
     }
     public void applyNextTransformation() {
         type = getNextTransformation().end;
