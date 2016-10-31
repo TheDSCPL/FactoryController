@@ -41,10 +41,6 @@ public class Factory {
         // Connect cells
         cellList = new Cell[]{cw, c1, c2, c3, c4, ca, cb};
         Cell.connect(cellList);
-        
-        ca.tranferBlock(0, 1, 1, 3);
-        ca.tranferBlock(1, 3, 1, 2);
-        ca.tranferBlock(1, 2, 0, 4);
     }
 
     public void update() {

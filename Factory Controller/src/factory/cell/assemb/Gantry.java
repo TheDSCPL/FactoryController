@@ -54,7 +54,7 @@ public class Gantry {
         int outputActionId = Main.config.getBaseOutput(id + "R");
 
         // initialize outputs
-        gripOutputId = outputActionId+6;
+        gripOutputId = outputActionId + 6;
         XMotor = new Motor(outputActionId + 0);
         YMotor = new Motor(outputActionId + 2);
         ZMotor = new Motor(outputActionId + 4);
@@ -116,7 +116,6 @@ public class Gantry {
      * <b>It's asured that this method only changes the XY state machines if
      * they are initializing.</b> (so you don't have to worry about this
      * changing the states after the initialization is done)
-     *
      */
     private void updateIsAt() {
         //Initialize claw
