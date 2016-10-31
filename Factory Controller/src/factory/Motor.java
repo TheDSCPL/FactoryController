@@ -27,6 +27,20 @@ public class Motor {
     public void control(boolean on, boolean plus) {
         Main.modbus.setOutput(baseIndex, on && plus);
         Main.modbus.setOutput(baseIndex + 1, on && !plus);
+        /*if(on)
+        {
+            if(baseIndex==169)
+                System.out.println("X" + (plus?"+":"-") );
+            if(baseIndex==171)
+                System.out.println("Y" + (plus?"+":"-") );
+        }
+        else
+        {
+            if(baseIndex==169)
+                System.out.println("Xoff");
+            if(baseIndex==171)
+                System.out.println("Yoff");
+        }*/
     }
     
     public void turnOff() {
