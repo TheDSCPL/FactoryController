@@ -155,6 +155,7 @@ public class Assembler extends Cell {
             boolean Yready;
             switch (status) {
                 case MOVING_TO_ORIGIN:
+                    gantry.openGrab();
                     Xready = (gantry.isAtX == whereToX);
                     if (Xready) {
                         gantry.XMotor.turnOff();
@@ -188,6 +189,7 @@ public class Assembler extends Cell {
                     }
                     break;
                 case GO_DOWN_ORIGIN:
+                    gantry.openGrab();
                     gantry.ZMotor.turnOnMinus();
 
                     if (gantry.downZ.on()) //fully down
@@ -198,13 +200,15 @@ public class Assembler extends Cell {
                     }
                     break;
                 case GRAB_ORIGIN: //espera 1 segundo, como indicado na descrição da fábrica
+                    System.err.println("GRAB " + gantry.presenceSensor.on());
                     gantry.closeGrab();
-                    if (System.currentTimeMillis() - grabTimer >= 1200) {
+                    if (System.currentTimeMillis() - grabTimer >= 5000) {
                         status = TRANSFER_STATE.GO_UP_ORIGIN;
                     }
                     break;
                 case GO_UP_ORIGIN:
                     gantry.ZMotor.turnOnPlus();
+                    gantry.closeGrab();
 
                     if (gantry.upZ.on()) //fully up
                     {
@@ -215,6 +219,7 @@ public class Assembler extends Cell {
                     }
                     break;
                 case MOVING_TO_DESTINATION:
+                    gantry.closeGrab();
                     Xready = (gantry.isAtX == whereToX);
                     if (Xready) {
                         System.out.print("Xready ");
@@ -264,6 +269,7 @@ public class Assembler extends Cell {
                     }
                     break;
                 case FINISHED:
+                    gantry.openGrab();
                     gantry.XMotor.turnOff();
                     gantry.YMotor.turnOff();
                     return true;
