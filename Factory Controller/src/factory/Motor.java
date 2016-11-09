@@ -24,7 +24,7 @@ public class Motor {
     public void control(boolean on, boolean plus) {
         this.on = on;
         this.plus = plus;
-        
+
         Main.modbus.setOutput(baseIndex, on && plus);
         Main.modbus.setOutput(baseIndex + 1, on && !plus);
     }
@@ -44,10 +44,11 @@ public class Motor {
     public void turnOnMinus() {
         turnOn(false);
     }
-    
+
     public boolean on() {
         return on;
     }
+
     public boolean plus() {
         return plus;
     }

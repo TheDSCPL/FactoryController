@@ -39,7 +39,7 @@ public class Rotator extends Conveyor {
                 }
                 else if (Main.time() - timeSinceIdle > Main.controlLoopDelay * 50) {
                     // Some delay ("*50") to allow for neighboring containers to register themselves as transferPartners
-                    rotateMotor.turnOn(true);
+                    rotateMotor.turnOnPlus();
                 }
             }
             else {

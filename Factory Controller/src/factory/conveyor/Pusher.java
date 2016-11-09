@@ -54,12 +54,12 @@ public class Pusher extends Conveyor {
 
     private void startPushing() {
         pusherState = State.Pushing;
-        pushMotor.turnOn(false);
+        pushMotor.turnOnMinus();
     }
 
     private void startRetracting() {
         pusherState = State.Retracting;
-        pushMotor.turnOn(true);
+        pushMotor.turnOnPlus();
     }
 
     private void stopPusher() {
