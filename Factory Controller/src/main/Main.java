@@ -1,5 +1,6 @@
 package main;
 
+import config.Configuration;
 import coms.*;
 import control.*;
 import factory.*;
