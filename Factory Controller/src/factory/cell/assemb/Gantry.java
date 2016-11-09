@@ -55,6 +55,7 @@ public class Gantry {
 
         // initialize outputs
         gripOutputId = outputActionId + 6;
+        System.err.println("gripOutputId="+gripOutputId);
         XMotor = new Motor(outputActionId + 0);
         YMotor = new Motor(outputActionId + 2);
         ZMotor = new Motor(outputActionId + 4);
@@ -217,6 +218,7 @@ public class Gantry {
 
     void update() {
         //Gantry must be up
+        //closeGrab();
         if(!Zready)
         {
             System.out.print("initializing z | ");

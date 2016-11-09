@@ -58,7 +58,7 @@ public class Main {
             orderc.update();
             modbus.refreshOutputs();
 
-            Thread.sleep(1);
+            Thread.sleep(10);
         }
     }
 
