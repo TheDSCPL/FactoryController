@@ -26,14 +26,13 @@ public class Rail extends Conveyor {
     }
     
     @Override
-    public boolean transferMotorDirection()
+    public boolean transferMotorDirection(Conveyor partner, boolean sending)
     {
-        boolean top = transferPartner == connections[0] ||
-                      transferPartner == connections[1];
+        boolean top = partner == connections[0] ||
+                      partner == connections[1];
         
-        if (isSending()) return top;
-        else if (isReceiving()) return !top;
-        else throw new Error("transferMotorDirection called when not transfering block");
+        if (sending) return top;
+        else return !top;
     }
 
     @Override

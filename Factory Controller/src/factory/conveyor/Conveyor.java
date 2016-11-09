@@ -147,7 +147,7 @@ public abstract class Conveyor {
     }
 
     private void blockTransferStart() {
-        transferMotor.turnOn(transferMotorDirection());
+        transferMotor.turnOn(transferMotorDirection(transferPartner, isSending()));
         if (isSending()) {
             conveyorState = State.Sending;
         }
@@ -168,11 +168,11 @@ public abstract class Conveyor {
         Block b = null;
         if (isSending()) {
             while (b == null) {
-                b = shiftOneBlock(transferMotorDirection(), null);
+                b = shiftOneBlock(transferMotorDirection(transferPartner, isSending()), null);
             }
         }
         else if (isReceiving()) {
-            shiftOneBlock(transferMotorDirection(), newBlock);
+            shiftOneBlock(transferMotorDirection(transferPartner, isSending()), newBlock);
             newBlock.path.advance();
             blockTransferFinished();
         }
@@ -220,7 +220,8 @@ public abstract class Conveyor {
 
 
 
-    /**
+    
+     /**
      * Checks if there are blocks in the conveyor
      *
      * @return <i>true</i> if there is at least one block. <i>false</i>
@@ -246,10 +247,6 @@ public abstract class Conveyor {
             throw new IndexOutOfBoundsException("XXX"); // TODO exception text
         }
         return blocks[position];
-    }
-
-    public boolean isPresenceSensorOn(int position) {
-        return presenceSensors[position].on();
     }
 
     /**
@@ -300,16 +297,14 @@ public abstract class Conveyor {
 
         return false;
     }
-
-    public boolean isSending() {
-        return conveyorState == State.PrepareToSend
-               || conveyorState == State.ReadyToSend
-               || conveyorState == State.Sending;
-    }
-
-    public boolean isReceiving() {
-        return conveyorState == State.PrepareToReceive
-               || conveyorState == State.Receiving;
+    
+    /**
+     * Return if presence sensor is on at the specified position
+     * @param position The position
+     * @return Sensor is on
+     */
+    public boolean isPresenceSensorOn(int position) {
+        return presenceSensors[position].on();
     }
 
     /**
@@ -323,8 +318,23 @@ public abstract class Conveyor {
     public boolean isIdle() {
         return conveyorState == State.Standby;
     }
+    
+    public boolean isSending() {
+        return conveyorState == State.PrepareToSend
+               || conveyorState == State.ReadyToSend
+               || conveyorState == State.Sending;
+    }
 
-    public abstract boolean transferMotorDirection();
+    public boolean isReceiving() {
+        return conveyorState == State.PrepareToReceive
+               || conveyorState == State.Receiving;
+    }
+    
+    
+    
+    
+    
+    public abstract boolean transferMotorDirection(Conveyor partner, boolean sending);
 
     public abstract void blockTransferFinished();
 

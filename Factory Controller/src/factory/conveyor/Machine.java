@@ -2,8 +2,8 @@ package factory.conveyor;
 
 import control.*;
 import control.order.*;
-import main.*;
 import factory.*;
+import main.*;
 import transformation.*;
 
 public class Machine extends Conveyor {
@@ -83,7 +83,6 @@ public class Machine extends Conveyor {
         return tool.isIdle();
     }
     public void preSelectTool(Tool.Type type) {
-        //System.out.format("[%s] preSelectTool: %s%n", id, type);
         tool.select(type);
     }
     
@@ -97,7 +96,6 @@ public class Machine extends Conveyor {
 
                 // If block can be machined here
                 if (next.machine == type) {
-                    //System.out.format("[%s] startMachiningIfNecessary: tool=%s duration=%d%n", id, next.tool, next.duration);
                     tool.selectAndActivate(next.tool, next.duration);
                     holdBlock = true;
                 }
@@ -106,15 +104,12 @@ public class Machine extends Conveyor {
     }
 
     @Override
-    public boolean transferMotorDirection() {
-        if (isSending()) {
-            return transferPartner == connections[0];
-        }
-        else if (isReceiving()) {
-            return transferPartner == connections[1];
+    public boolean transferMotorDirection(Conveyor partner, boolean sending) {
+        if (sending) {
+            return partner == connections[0];
         }
         else {
-            throw new Error("transferMotorDirection called when not transfering block");
+            return partner == connections[1];
         }
     }
 

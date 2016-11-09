@@ -67,15 +67,12 @@ public class Pusher extends Conveyor {
     }
 
     @Override
-    public boolean transferMotorDirection() {
-        if (isSending()) {
-            return transferPartner == connections[0];
-        }
-        else if (isReceiving()) {
-            return transferPartner == connections[1];
+    public boolean transferMotorDirection(Conveyor partner, boolean sending) {
+        if (sending) {
+            return partner == connections[0];
         }
         else {
-            throw new Error("transferMotorDirection called when not transfering block");
+            return partner == connections[1];
         }
     }
 

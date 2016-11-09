@@ -31,18 +31,15 @@ public class Rotator extends Conveyor {
     }
 
     @Override
-    public boolean transferMotorDirection() {
-        boolean leftOrTop = transferPartner == connections[0]
-                            || transferPartner == connections[1];
+    public boolean transferMotorDirection(Conveyor partner, boolean sending) {
+        boolean leftOrTop = partner == connections[0]
+                            || partner == connections[1];
 
-        if (isSending()) {
+        if (sending) {
             return leftOrTop;
         }
-        else if (isReceiving()) {
-            return !leftOrTop;
-        }
         else {
-            throw new Error("transferMotorDirection called when not transfering block");
+            return !leftOrTop;
         }
     }
 

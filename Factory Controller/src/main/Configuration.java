@@ -21,7 +21,7 @@ public class Configuration {
     private static final String CSVFileName = "src/main/io.csv";
     private static final String PropertiesFileName = "src/main/config.properties";
     
-    Configuration() {
+    public Configuration() {
         
         // Load config file
         try { general.load(new FileInputStream(new File(PropertiesFileName))); }

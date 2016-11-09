@@ -143,8 +143,4 @@ public class TransformationManager {
                 .filter(t -> (mts != null ? (t.machineSet == mts) : true))
                 .collect(toList());
     }
-    
-    public Block.Type newPieceType(Block.Type old, Transformation transf) {
-        throw new UnsupportedOperationException("Not supported yet."); // TODO - not sure if necessary
-    }
 }
