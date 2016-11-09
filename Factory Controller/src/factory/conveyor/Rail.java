@@ -5,6 +5,8 @@
  */
 package factory.conveyor;
 
+import factory.other.Sensor;
+import factory.other.Motor;
 import factory.*;
 import main.*;
 

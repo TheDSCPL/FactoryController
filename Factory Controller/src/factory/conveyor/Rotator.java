@@ -5,7 +5,8 @@
  */
 package factory.conveyor;
 
-import factory.*;
+import factory.other.Motor;
+import factory.other.Sensor;
 import main.*;
 
 /**
@@ -18,21 +19,26 @@ public class Rotator extends Conveyor {
     private final Sensor rotateSensorMinus;
     private final Sensor rotateSensorPlus;
     
-    private final boolean preferHorizontalOrientation = true;
+    private final boolean prefersHorizontalOrientation;
     private long timeSinceIdle = Main.time();
     
     public Rotator(String id) {
+        this(id, true);
+    }
+    
+    public Rotator(String id, boolean prefersHorizontalOrientation) {
         super(id, 1, 4);
         rotateMotor = new Motor(Main.config.getBaseOutput(id) + 2);
         rotateSensorPlus = new Sensor(Main.config.getBaseInput(id) + 1);
         rotateSensorMinus = new Sensor(Main.config.getBaseInput(id) + 2);
+        this.prefersHorizontalOrientation = prefersHorizontalOrientation;
     }
 
     @Override
     public void update() {
         super.update();
 
-        if (preferHorizontalOrientation) {
+        if (prefersHorizontalOrientation) {
             if (isIdle()) {
                 if (rotateSensorPlus.on()) {
                     rotateMotor.turnOff();

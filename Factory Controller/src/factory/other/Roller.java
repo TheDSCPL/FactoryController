@@ -1,6 +1,5 @@
 package factory.other;
 
-import factory.Sensor;
 import main.Main;
 
 public class Roller {

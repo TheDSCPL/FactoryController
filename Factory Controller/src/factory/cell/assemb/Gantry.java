@@ -5,6 +5,8 @@
  */
 package factory.cell.assemb;
 
+import factory.other.Sensor;
+import factory.other.Motor;
 import factory.*;
 import main.*;
 

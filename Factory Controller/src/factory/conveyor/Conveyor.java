@@ -1,5 +1,7 @@
 package factory.conveyor;
 
+import factory.other.Sensor;
+import factory.other.Motor;
 import control.*;
 import factory.*;
 import java.util.*;
