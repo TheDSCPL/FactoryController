@@ -26,7 +26,7 @@ public class Rail extends Conveyor {
     }
     
     @Override
-    public boolean transferMotorDirection(Conveyor partner, boolean sending)
+    protected boolean transferMotorDirection(Conveyor partner, boolean sending)
     {
         boolean top = partner == connections[0] ||
                       partner == connections[1];
@@ -36,20 +36,20 @@ public class Rail extends Conveyor {
     }
 
     @Override
-    public void blockTransferFinished() {}
+    protected void blockTransferFinished() {}
 
     @Override
-    public boolean isBlockTransferPossible() {
+    protected boolean isBlockTransferPossible() {
         return true;
     }
 
     @Override
-    public void blockTransferPrepare() {
+    protected void blockTransferPrepare() {
         railMotor.turnOn(railMotorDirection());
     }
 
     @Override
-    public boolean isBlockTransferReady() {
+    protected boolean isBlockTransferReady() {
         boolean ready = 
                 (railMotorDirection() && railSensorPlus.on()) ||
                 (!railMotorDirection() && railSensorMinus.on());

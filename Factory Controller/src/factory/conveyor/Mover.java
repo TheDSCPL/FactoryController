@@ -20,7 +20,7 @@ public class Mover extends Conveyor {
     }
 
     @Override
-    public boolean transferMotorDirection(Conveyor partner, boolean sending) {
+    protected boolean transferMotorDirection(Conveyor partner, boolean sending) {
         if (sending) {
             return partner == connections[0];
         }
@@ -30,22 +30,22 @@ public class Mover extends Conveyor {
     }
 
     @Override
-    public void blockTransferFinished() {
+    protected void blockTransferFinished() {
         
     }
 
     @Override
-    public boolean isBlockTransferPossible() {
+    protected boolean isBlockTransferPossible() {
         return true;
     }
 
     @Override
-    public void blockTransferPrepare() {
+    protected void blockTransferPrepare() {
         
     }
 
     @Override
-    public boolean isBlockTransferReady() {
+    protected boolean isBlockTransferReady() {
         return true;
     }
 

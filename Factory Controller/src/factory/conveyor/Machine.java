@@ -71,7 +71,7 @@ public class Machine extends Conveyor {
         if (holdBlock && tool.isIdle()) {
             
             // Update block type
-            getBlock(0).applyNextTransformation();
+            getOneBlock().applyNextTransformation();
             
             // Start next machining cycle here, or release block
             startMachiningIfNecessary();
@@ -87,7 +87,7 @@ public class Machine extends Conveyor {
     }
     
     private void startMachiningIfNecessary() {
-        Block block = getBlock(0);
+        Block block = getOneBlock();
         holdBlock = false;
 
         if (block.order instanceof MachiningOrder) {
@@ -104,7 +104,7 @@ public class Machine extends Conveyor {
     }
 
     @Override
-    public boolean transferMotorDirection(Conveyor partner, boolean sending) {
+    protected boolean transferMotorDirection(Conveyor partner, boolean sending) {
         if (sending) {
             return partner == connections[0];
         }
@@ -114,22 +114,22 @@ public class Machine extends Conveyor {
     }
 
     @Override
-    public void blockTransferFinished() {
+    protected void blockTransferFinished() {
         startMachiningIfNecessary();
     }
 
     @Override
-    public boolean isBlockTransferPossible() {
+    protected boolean isBlockTransferPossible() {
         return !holdBlock;
     }
 
     @Override
-    public void blockTransferPrepare() {
+    protected void blockTransferPrepare() {
 
     }
 
     @Override
-    public boolean isBlockTransferReady() {
+    protected boolean isBlockTransferReady() {
         return true;
     }
 

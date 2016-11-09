@@ -1,19 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package factory.cell;
 
-import factory.conveyor.*;
 import control.*;
 import control.order.*;
+import factory.conveyor.*;
 import main.*;
 
-/**
- *
- * @author Alex
- */
 public class LoadUnloadBay extends Cell {
 
     private final Mover t1;
@@ -32,8 +23,8 @@ public class LoadUnloadBay extends Cell {
         t1 = new Mover(id + "T1", 1);
         t2 = new Rotator(id + "T2");
         t3 = new Mover(id + "T3", 1);
-        t4 = new Pusher(id + "T4");
-        t5 = new Pusher(id + "T5");
+        t4 = new Pusher(id + "T4", "PM1");
+        t5 = new Pusher(id + "T5", "PM2");
         t6 = new Mover(id + "T6", 1);
         t7 = new Rotator(id + "T7");
         t8 = new Mover(id + "T8", 1);
@@ -67,22 +58,24 @@ public class LoadUnloadBay extends Cell {
         super.update();
 
         // Detect load orders on pusher t4 -> send block to warehouse in
-        if (t4.blockPlacedManually) {
-            Block b = t4.getBlock(0);
-            b.path.push(t5);
-            b.path.push(t7);
-            b.path.append(Main.factory.exitPathToWarehouse(this));
+        if (t3.isPresenceSensorOn(0)) {
+            // Create block
+            Block block = new Block(Block.Type.Unknown);
+            block.path.push(t3, t2, t4, t5, t7);
+            block.path.append(Main.factory.exitPathToWarehouse(this));
 
-            t4.blockPlacedManually = false;
+            // Place block on this conveyor
+            t3.placeBlock(block, 0);
         }
-
-        // Detect load orders on pusher t5 -> send block to warehouse in
-        if (t5.blockPlacedManually) {
-            Block b = t5.getBlock(0);
-            b.path.push(t7);
-            b.path.append(Main.factory.exitPathToWarehouse(this));
+        
+        if (t8.isPresenceSensorOn(0)) {
+            // Create block
+            Block block = new Block(Block.Type.Unknown);
+            block.path.push(t8, t7);
+            block.path.append(Main.factory.exitPathToWarehouse(this));
             
-            t5.blockPlacedManually = false;
+            // Place block on this conveyor
+            t8.placeBlock(block, 0);
         }
         
         // Detect unload orders and dispatch block to correct pusher
@@ -93,7 +86,7 @@ public class LoadUnloadBay extends Cell {
             if (order.position == 2) {
                 incomingBlock.path.push(t5);
             }
-            
+                        
             incomingBlock = null; // Reset incoming block
         }
     }

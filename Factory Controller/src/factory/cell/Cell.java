@@ -83,9 +83,7 @@ public abstract class Cell {
             
             if (entryConveyor != null) {
                 if (entryConveyor.isIdle() && entryConveyor.hasBlock()) {
-
-                    // Note: since entry conveyors are always length = 1, position = 0 is always correct
-                    Block b = entryConveyor.getBlock(0);
+                    Block b = entryConveyor.getOneBlock();
 
                     if (!b.path.hasNext()) {
                         incomingBlock = b;

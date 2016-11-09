@@ -5,6 +5,7 @@
  */
 package factory.cell.assemb;
 
+import factory.other.Table;
 import factory.cell.*;
 import factory.conveyor.*;
 import java.util.ArrayDeque;

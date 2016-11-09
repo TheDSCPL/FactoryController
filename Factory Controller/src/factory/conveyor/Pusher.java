@@ -3,62 +3,48 @@ package factory.conveyor;
 import control.*;
 import control.order.*;
 import factory.*;
+import factory.other.Roller;
 import main.*;
 
 public class Pusher extends Conveyor {
 
+    public final Roller roller;
     private final Motor pushMotor;
     private final Sensor pushSensorPlus;
     private final Sensor pushSensorMinus;
-    private boolean lastUpdateWasIdle;
-    public boolean blockPlacedManually;
     private State pusherState = State.Idle;
 
     private enum State {
-        Idle, Pushing, Retracting
+        Idle, WaitingForSpace, Pushing, Retracting
     }
 
-    public Pusher(String id) {
+    public Pusher(String id, String rollerid) {
         super(id, 1, 2);
+        roller = new Roller(rollerid);
         pushMotor = new Motor(Main.config.getBaseOutput(id) + 2);
         pushSensorPlus = new Sensor(Main.config.getBaseInput(id) + 1);
         pushSensorMinus = new Sensor(Main.config.getBaseInput(id) + 2);
-        lastUpdateWasIdle = true;
     }
 
     @Override
     public void update() {
         super.update();
 
-        // Detect if block has been placed manually by a person
-        if (lastUpdateWasIdle && isIdle() && !hasBlock() && isPresenceSensorOn(0)) {
-            // Create block
-            Block block = new Block(Block.Type.Unknown);
-            block.path.push(this);
-
-            // Place block on this conveyor
-            placeBlock(block, 0);
-            blockPlacedManually = true;
-        }
-        else {
-            blockPlacedManually = false;
-        }
-
-        lastUpdateWasIdle = isIdle();
-
         // Push block
         switch (pusherState) {
+            case WaitingForSpace:
+                if (!roller.isFull()) {
+                    startPushing();
+                }
+                break;
             case Pushing:
                 if (pushSensorMinus.on()) {
-                    pushMotor.turnOn(true);
-                    pusherState = State.Retracting;
+                    startRetracting();
                 }
                 break;
             case Retracting:
                 if (pushSensorPlus.on()) {
-                    pushMotor.turnOff();
-                    pusherState = State.Idle;
-
+                    stopPusher();
                     Block block = removeBlock(0);
                     block.completeOrder();
                 }
@@ -66,8 +52,24 @@ public class Pusher extends Conveyor {
         }
     }
 
+    private void startPushing() {
+        pusherState = State.Pushing;
+        pushMotor.turnOn(false);
+    }
+
+    private void startRetracting() {
+        pusherState = State.Retracting;
+        pushMotor.turnOn(true);
+    }
+
+    private void stopPusher() {
+        pusherState = State.Idle;
+        pushMotor.turnOff();
+
+    }
+
     @Override
-    public boolean transferMotorDirection(Conveyor partner, boolean sending) {
+    protected boolean transferMotorDirection(Conveyor partner, boolean sending) {
         if (sending) {
             return partner == connections[0];
         }
@@ -77,33 +79,40 @@ public class Pusher extends Conveyor {
     }
 
     @Override
-    public void blockTransferFinished() {
+    protected void blockTransferFinished() {
 
         // Push if necessary
-        if (getBlock(0) != null) {
-            Block block = getBlock(0);
+        if (hasBlock()) {
+            Block block = getOneBlock();
 
-            // Block has stopped here and has an Unload order
+            // Block has stopped here, has an Unload order and roller has space
             if (!block.path.hasNext() && block.order instanceof UnloadOrder) {
-                pusherState = State.Pushing;
-                pushMotor.turnOn(false);
+                System.out.println(id + " if");
+                if (roller.isFull()) {
+                    System.out.println(id + " waiting");
+                    pusherState = State.WaitingForSpace;
+                }
+                else {
+                    System.out.println(id + " starting");
+                    startPushing();
+                }
+
             }
         }
     }
 
     @Override
-    public boolean isBlockTransferPossible() {
+    protected boolean isBlockTransferPossible() {
         return pusherState == State.Idle;
     }
 
     @Override
-    public void blockTransferPrepare() {
+    protected void blockTransferPrepare() {
 
     }
 
     @Override
-    public boolean isBlockTransferReady() {
+    protected boolean isBlockTransferReady() {
         return true;
     }
-
 }

@@ -2,6 +2,7 @@ package factory.conveyor;
 
 import control.*;
 import factory.*;
+import java.util.*;
 import main.*;
 
 public abstract class Conveyor {
@@ -18,8 +19,9 @@ public abstract class Conveyor {
     private final Motor transferMotor;
     private final Sensor[] presenceSensors;
     private final int length;
+    private final Double[] priorities;
 
-    public String id;
+    public final String id;
     public Conveyor[] connections;
 
     public enum State {
@@ -42,6 +44,7 @@ public abstract class Conveyor {
         blocks = new Block[length];
         presenceSensors = new Sensor[length];
         connections = new Conveyor[connectionCount];
+        priorities = new Double[connectionCount];
 
         transferMotor = new Motor(Main.config.getBaseOutput(id) + 0);
 
@@ -49,21 +52,20 @@ public abstract class Conveyor {
             presenceSensors[i] = new Sensor(Main.config.getBaseInput(id) + i);
         }
 
+        for (int i = 0; i < connectionCount; i++) {
+            priorities[i] = 0.0;
+        }
+
         conveyorState = State.Standby;
     }
 
     public void update() {
+        updatePriorities();
+        
         switch (conveyorState) {
             case Standby:
                 if (hasBlock()) {
-                    // TODO deciding which block is transfered next should be
-                    // better - right now only works for conveyors of length 1
-                    Block block = null;
-                    for (Block b : blocks) {
-                        if (b != null) {
-                            block = b;
-                        }
-                    }
+                    Block block = getOneBlock();
 
                     if (block.path.hasNext()) {
                         if (isBlockTransferPossible()) {
@@ -81,7 +83,7 @@ public abstract class Conveyor {
                 break;
             case PrepareToReceive:
                 if (isBlockTransferReady()) {
-                    receivingFinishedSensor = presenceSensors[0]; // TODO
+                    receivingFinishedSensor = presenceSensors[0];
                     blockTransferStart();
                     transferPartner.blockTransferStart();
                 }
@@ -104,26 +106,6 @@ public abstract class Conveyor {
         }
     }
 
-    private int leftmostNonNullBlockIndex() {
-        for (int i = 0; i < length; i++) {
-            if (blocks[i] != null) {
-                return i;
-            }
-        }
-
-        return length;
-    }
-
-    private int rightmostNonNullBlockIndex() {
-        for (int i = length - 1; i >= 0; i--) {
-            if (blocks[i] != null) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
     private boolean hasSpace() {
         for (Block b : blocks) {
             if (b == null) {
@@ -135,14 +117,13 @@ public abstract class Conveyor {
 
     private void blockTransferRegister(Conveyor c) {
         if (!isSending() && !isReceiving()) {
-            //if (transferPartner != null) {
-            // TODO it is possible that this may be called twice in the same loop
-            // for two different conveyors. Needs way of
-            // identifying best transferpartner
-            //}
-            //else {
-            transferPartner = c;
-            //}
+            if (transferPartner != null && transferPartner != c) {
+                System.out.println("blockTransferRegister chooseNextConveyor id = " + id + " transferPartner = " + transferPartner.id + " c = " + c.id);
+                transferPartner = chooseNextConveyor(transferPartner, c);
+            }
+            else {
+                transferPartner = c;
+            }
         }
     }
 
@@ -212,16 +193,79 @@ public abstract class Conveyor {
         return ret;
     }
 
+    /**
+     * Get block at position <i>position</i> in this conveyor
+     *
+     * @param position
+     * @return Block, or null if no block is present
+     */
+    private Block getBlock(int position) {
+        if (position >= length) {
+            throw new IndexOutOfBoundsException("XXX"); // TODO exception text
+        }
+        return blocks[position];
+    }
 
+    private int indexForConveyor(Conveyor c) {
+        for (int i = 0; i < connections.length; i++) {
+            if (connections[i] == c) {
+                return i;
+            }
+        }
 
+        return -1;
+    }
 
+    private Conveyor chooseNextConveyor(Conveyor c1, Conveyor c2) {
+        if (priorities[indexForConveyor(c1)] > priorities[indexForConveyor(c2)]) {
+            return c1;
+        }
+        else {
+            return c2;
+        }
+    }
 
+    private void setPriority(Conveyor from, double priority) {
+        priorities[indexForConveyor(from)] = priority;
+    }
 
+    private void updatePriorities() {
+        for (Conveyor c : connections) {
+            if (c == null) {
+                continue;
+            }
 
+            double priority = 0;
 
+            if (hasBlock()) {
+                if (getOneBlock().path != null) {
+                    if (getOneBlock().path.getNext() == c) {
+                        List<Double> plist = new ArrayList(Arrays.asList(priorities));
+                        plist.remove(indexForConveyor(c));
+                        priority = priorityFunction(plist);
+                    }
+                }
+            }
 
-    
-     /**
+            c.setPriority(this, priority);
+        }
+    }
+
+    private double priorityFunction(List<Double> list) {
+        return list.stream().reduce(0.0, Double::sum) + 1;
+    }
+
+    /*private double conveyorPriority(Conveyor from, int level) {
+        if (level > 10 || !hasBlock()) return 0;
+        
+        double priority = 0;
+        for (Conveyor c : connections) {
+            if (c == from) continue;
+            priority += conveyorPriority(this, level + 1);
+        }
+        return priority / 2 + 1; // Has one block
+    }*/
+    /**
      * Checks if there are blocks in the conveyor
      *
      * @return <i>true</i> if there is at least one block. <i>false</i>
@@ -237,16 +281,18 @@ public abstract class Conveyor {
     }
 
     /**
-     * Get block at position <i>position</i> in this conveyor
+     * Returns one block on the conveyor or null if no blocks are present
      *
-     * @param position
-     * @return Block, or null if no block is present
+     * @return
      */
-    public Block getBlock(int position) {
-        if (position >= length) {
-            throw new IndexOutOfBoundsException("XXX"); // TODO exception text
+    public Block getOneBlock() {
+        for (Block b : blocks) {
+            if (b != null) {
+                return b;
+            }
         }
-        return blocks[position];
+
+        return null;
     }
 
     /**
@@ -297,9 +343,10 @@ public abstract class Conveyor {
 
         return false;
     }
-    
+
     /**
      * Return if presence sensor is on at the specified position
+     *
      * @param position The position
      * @return Sensor is on
      */
@@ -318,7 +365,7 @@ public abstract class Conveyor {
     public boolean isIdle() {
         return conveyorState == State.Standby;
     }
-    
+
     public boolean isSending() {
         return conveyorState == State.PrepareToSend
                || conveyorState == State.ReadyToSend
@@ -329,18 +376,14 @@ public abstract class Conveyor {
         return conveyorState == State.PrepareToReceive
                || conveyorState == State.Receiving;
     }
-    
-    
-    
-    
-    
-    public abstract boolean transferMotorDirection(Conveyor partner, boolean sending);
 
-    public abstract void blockTransferFinished();
+    protected abstract boolean transferMotorDirection(Conveyor partner, boolean sending);
 
-    public abstract boolean isBlockTransferPossible();
+    protected abstract void blockTransferFinished();
 
-    public abstract void blockTransferPrepare();
+    protected abstract boolean isBlockTransferPossible();
 
-    public abstract boolean isBlockTransferReady();
+    protected abstract void blockTransferPrepare();
+
+    protected abstract boolean isBlockTransferReady();
 }

@@ -5,8 +5,8 @@
  */
 package factory.cell.assemb;
 
-import main.*;
 import factory.*;
+import main.*;
 
 /**
  *
@@ -21,7 +21,7 @@ public class Gantry {
     public final Sensor maxX, minX, upZ, downZ;
     public final Sensor[] Xsensors, Ysensors;
 
-    private final long initializationTimeoutMillis = 1500;
+    private final long initializationTimeoutMillis = 1500; // TODO this should be a property in the config file
 
     public final String id;
     /**

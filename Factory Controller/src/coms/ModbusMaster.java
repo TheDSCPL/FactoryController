@@ -1,23 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package coms;
 
-import main.*;
 import java.net.*;
+import main.*;
 import net.wimpi.modbus.*;
-import net.wimpi.modbus.msg.*;
 import net.wimpi.modbus.io.*;
+import net.wimpi.modbus.msg.*;
 import net.wimpi.modbus.net.*;
 import net.wimpi.modbus.procimg.*;
 import net.wimpi.modbus.util.*;
 
-/**
- *
- * @author Alex
- */
 public class ModbusMaster {
     public final int inputCount, outputCount, registerCount;
     private TCPMasterConnection conn;

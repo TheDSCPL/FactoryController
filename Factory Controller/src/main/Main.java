@@ -1,9 +1,9 @@
 package main;
 
-import transformation.*;
 import coms.*;
 import control.*;
 import factory.*;
+import transformation.*;
 
 // PULL -> WORK -> ADD -> COMMIT -> PULL -> PUSH
 
@@ -13,25 +13,26 @@ Major TODO list:
 Luis:
   [.]  Gantry (Class: Gantry)
   [ ]  Assembler cell processing and optimization (Class: Assembler)
-  [ ]  Parallel cell processing and optimization (Class: ParalleCell)
-  [ ]  Tool pre-selection on Parallel cell (Class: ParallelCell)
+  [ ]  Order processing algorithm and distribution by the various cells (Class: Factory)
 
 Alex:
   [X]  Serial cell processing and optimization (Class: SerialCell)
   [X]  Tool pre-selection on Serial cell (Class: SerialCell)
-  [ ]  Linear conveyors with multiple blocks (Class: Conveyor)
-  [ ]  Rotator conveyor optimization: automatically rotate back to horizontal position to speed up block traveling time (Class: Conveyor, Rotator)
+  [\]  Linear conveyors with multiple blocks (Class: Conveyor)
+  [X]  Rotator conveyor optimization: automatically rotate back to horizontal position to speed up block traveling time (Class: Conveyor, Rotator)
   [X]  Transformation sequences (Class: TransformationManager)
   [X]  Tool class for selecting and activating tools in machines (Class: Machine)
+  [ ]  Parallel cell processing and optimization (Class: ParalleCell)
+  [ ]  Tool pre-selection on Parallel cell (Class: ParallelCell)
 
 Unassigned:
-  [ ]  Order processing algorithm and distribution by the various cells (Class: Factory)
   [ ]  (When everything else is done) Statistics module (Class: ?)
   [ ]  TODO's in code (Class: N/A)
 
 Legend:
    X   Done
    .   In progress
+   \   Skipped
  */
 
 public class Main {
@@ -41,6 +42,7 @@ public class Main {
     public static final Factory factory = new Factory();
     public static final TransformationManager transfm = new TransformationManager();
     public static final OrderController orderc = new OrderController();
+    public static final long controlLoopDelay = (long)config.getI("controlLoopDelay");
     
     /**
      * @return Time in milliseconds
@@ -58,7 +60,7 @@ public class Main {
             orderc.update();
             modbus.refreshOutputs();
 
-            Thread.sleep(1);
+            Thread.sleep(controlLoopDelay);
         }
     }
 

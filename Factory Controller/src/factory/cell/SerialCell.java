@@ -6,9 +6,9 @@
 package factory.cell;
 
 import control.*;
-import main.*;
 import factory.conveyor.*;
 import java.util.*;
+import main.*;
 import transformation.*;
 
 /**
@@ -59,8 +59,11 @@ public class SerialCell extends Cell {
 
         // Process blocks going out
         if (t6.isIdle() && t6.hasBlock()) {
-            processBlockOut(t6.getBlock(0));
-            change = true;
+            // If block came from this cell and is not just passing by
+            if (!t6.getOneBlock().path.hasNext()) {
+                processBlockOut(t6.getOneBlock());
+                change = true;
+            }
         }
 
         // Detect incoming blocks and give them a path for processing if possible
@@ -83,18 +86,18 @@ public class SerialCell extends Cell {
             processPreSelection(t5);
         }
     }
-    
+
     private void processPreSelection(Machine machine) {
-        
+
         // Get next block to go to that machine and be processed there
         Block closestBlockToBeProcessed = null;
         int minStepCount = Integer.MAX_VALUE;
-        
+
         for (Block b : blocksInside) {
-            
+
             // Block has to go to that machine in the future and be processed there
             if (b.path.path.contains(machine) && b.getNextTransformationOnMachine(machine.type) != null) {
-                
+
                 // Calculate number of steps to machine for this block
                 int count = 0;
                 for (Conveyor c : b.path.path) {
@@ -103,7 +106,7 @@ public class SerialCell extends Cell {
                         break;
                     }
                 }
-                
+
                 // If this block is closest, save that information
                 if (count < minStepCount) {
                     minStepCount = count;
@@ -111,7 +114,7 @@ public class SerialCell extends Cell {
                 }
             }
         }
-        
+
         // Get next transformation that block will have on that machine, and pre-select the apropriate tool
         if (closestBlockToBeProcessed != null) {
             machine.preSelectTool(closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool);
@@ -179,7 +182,7 @@ public class SerialCell extends Cell {
     }
 
     private void processBlockOut(Block block) {
-        t6.getBlock(0).path.append(Main.factory.exitPathToWarehouse(this));
+        t6.getOneBlock().path.append(Main.factory.exitPathToWarehouse(this));
         blocksInside.remove(block);
     }
 

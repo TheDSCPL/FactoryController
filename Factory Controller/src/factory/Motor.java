@@ -1,19 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package factory;
 
 import main.*;
 
-/**
- *
- * @author Alex
- */
 public class Motor {
 
     public final int baseIndex;
+    private boolean on;
+    private boolean plus;
 
     public Motor(int baseIndex) {
         this.baseIndex = baseIndex;
@@ -29,24 +22,11 @@ public class Motor {
      * way
      */
     public void control(boolean on, boolean plus) {
+        this.on = on;
+        this.plus = plus;
+        
         Main.modbus.setOutput(baseIndex, on && plus);
         Main.modbus.setOutput(baseIndex + 1, on && !plus);
-        if (on) {
-            if (baseIndex == 169) {
-                System.out.println("X" + (plus ? "+" : "-"));
-            }
-            if (baseIndex == 171) {
-                System.out.println("Y" + (plus ? "+" : "-"));
-            }
-        }
-        else {
-            if (baseIndex == 169) {
-                System.out.println("Xoff");
-            }
-            if (baseIndex == 171) {
-                System.out.println("Yoff");
-            }
-        }
     }
 
     public void turnOff() {
@@ -63,6 +43,13 @@ public class Motor {
 
     public void turnOnMinus() {
         turnOn(false);
+    }
+    
+    public boolean on() {
+        return on;
+    }
+    public boolean plus() {
+        return plus;
     }
 
 }

@@ -17,7 +17,10 @@ public class Rotator extends Conveyor {
     private final Motor rotateMotor;
     private final Sensor rotateSensorMinus;
     private final Sensor rotateSensorPlus;
-
+    
+    private final boolean preferHorizontalOrientation = true;
+    private long timeSinceIdle = Main.time();
+    
     public Rotator(String id) {
         super(id, 1, 4);
         rotateMotor = new Motor(Main.config.getBaseOutput(id) + 2);
@@ -28,10 +31,25 @@ public class Rotator extends Conveyor {
     @Override
     public void update() {
         super.update();
+
+        if (preferHorizontalOrientation) {
+            if (isIdle()) {
+                if (rotateSensorPlus.on()) {
+                    rotateMotor.turnOff();
+                }
+                else if (Main.time() - timeSinceIdle > Main.controlLoopDelay * 50) {
+                    // Some delay ("*50") to allow for neighboring containers to register themselves as transferPartners
+                    rotateMotor.turnOn(true);
+                }
+            }
+            else {
+                timeSinceIdle = Main.time();
+            }
+        }
     }
 
     @Override
-    public boolean transferMotorDirection(Conveyor partner, boolean sending) {
+    protected boolean transferMotorDirection(Conveyor partner, boolean sending) {
         boolean leftOrTop = partner == connections[0]
                             || partner == connections[1];
 
@@ -44,27 +62,28 @@ public class Rotator extends Conveyor {
     }
 
     @Override
-    public void blockTransferFinished() {
+    protected void blockTransferFinished() {
 
     }
 
     @Override
-    public boolean isBlockTransferPossible() {
+    protected boolean isBlockTransferPossible() {
         return true;
     }
 
     @Override
-    public void blockTransferPrepare() {
+    protected void blockTransferPrepare() {
         rotateMotor.turnOn(rotateMotorDirection());
     }
 
     @Override
-    public boolean isBlockTransferReady() {
+    protected boolean isBlockTransferReady() {
         boolean ready
                 = (rotateMotorDirection() && rotateSensorPlus.on())
                   || (!rotateMotorDirection() && rotateSensorMinus.on());
 
         if (ready) {
+            timeSinceIdle = Main.time();
             rotateMotor.turnOff();
         }
         return ready;
