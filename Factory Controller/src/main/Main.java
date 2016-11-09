@@ -1,7 +1,7 @@
 package main;
 
-import config.Configuration;
 import coms.*;
+import config.Configuration;
 import control.*;
 import factory.*;
 import transformation.*;
@@ -23,6 +23,7 @@ Alex:
   [X]  Rotator conveyor optimization: automatically rotate back to horizontal position to speed up block traveling time (Class: Conveyor, Rotator)
   [X]  Transformation sequences (Class: TransformationManager)
   [X]  Tool class for selecting and activating tools in machines (Class: Machine)
+  [X]  Algorithm for selecting which transfer partner should be chonse first (Class: Conveyor)
   [ ]  Parallel cell processing and optimization (Class: ParalleCell)
   [ ]  Tool pre-selection on Parallel cell (Class: ParallelCell)
 
