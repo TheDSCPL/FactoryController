@@ -1,9 +1,8 @@
 package factory.conveyor;
 
-import factory.other.Sensor;
-import factory.other.Motor;
 import control.*;
-import factory.*;
+import factory.other.Motor;
+import factory.other.Sensor;
 import java.util.*;
 import main.*;
 
@@ -21,7 +20,7 @@ public abstract class Conveyor {
     private final Motor transferMotor;
     private final Sensor[] presenceSensors;
     private final int length;
-    private final Double[] priorities;
+    private final Double[] queueWeights;
 
     public final String id;
     public Conveyor[] connections;
@@ -46,7 +45,7 @@ public abstract class Conveyor {
         blocks = new Block[length];
         presenceSensors = new Sensor[length];
         connections = new Conveyor[connectionCount];
-        priorities = new Double[connectionCount];
+        queueWeights = new Double[connectionCount];
 
         transferMotor = new Motor(Main.config.getBaseOutput(id) + 0);
 
@@ -55,14 +54,14 @@ public abstract class Conveyor {
         }
 
         for (int i = 0; i < connectionCount; i++) {
-            priorities[i] = 0.0;
+            queueWeights[i] = 0.0;
         }
 
         conveyorState = State.Standby;
     }
 
     public void update() {
-        updatePriorities();
+        updateQueueWeights();
         
         switch (conveyorState) {
             case Standby:
@@ -218,8 +217,12 @@ public abstract class Conveyor {
         return -1;
     }
 
+    public double getQueueWeight(Conveyor from) {
+        return queueWeights[indexForConveyor(from)];
+    }
+    
     private Conveyor chooseNextConveyor(Conveyor c1, Conveyor c2) {
-        if (priorities[indexForConveyor(c1)] > priorities[indexForConveyor(c2)]) {
+        if (getQueueWeight(c1) > getQueueWeight(c2)) {
             return c1;
         }
         else {
@@ -227,11 +230,11 @@ public abstract class Conveyor {
         }
     }
 
-    private void setPriority(Conveyor from, double priority) {
-        priorities[indexForConveyor(from)] = priority;
+    private void setQueueWeight(Conveyor from, double weight) {
+        queueWeights[indexForConveyor(from)] = weight;
     }
 
-    private void updatePriorities() {
+    private void updateQueueWeights() {
         for (Conveyor c : connections) {
             if (c == null) {
                 continue;
@@ -242,31 +245,21 @@ public abstract class Conveyor {
             if (hasBlock()) {
                 if (getOneBlock().path != null) {
                     if (getOneBlock().path.getNext() == c) {
-                        List<Double> plist = new ArrayList(Arrays.asList(priorities));
-                        plist.remove(indexForConveyor(c));
-                        priority = priorityFunction(plist);
+                        List<Double> wList = new ArrayList(Arrays.asList(queueWeights));
+                        wList.remove(indexForConveyor(c));
+                        priority = queueWeightsFunction(wList);
                     }
                 }
             }
 
-            c.setPriority(this, priority);
+            c.setQueueWeight(this, priority);
         }
     }
 
-    private double priorityFunction(List<Double> list) {
+    private double queueWeightsFunction(List<Double> list) {
         return list.stream().reduce(0.0, Double::sum) + 1;
     }
-
-    /*private double conveyorPriority(Conveyor from, int level) {
-        if (level > 10 || !hasBlock()) return 0;
-        
-        double priority = 0;
-        for (Conveyor c : connections) {
-            if (c == from) continue;
-            priority += conveyorPriority(this, level + 1);
-        }
-        return priority / 2 + 1; // Has one block
-    }*/
+    
     /**
      * Checks if there are blocks in the conveyor
      *

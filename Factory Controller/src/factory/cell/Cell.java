@@ -7,6 +7,8 @@ package factory.cell;
 
 import control.*;
 import factory.conveyor.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -14,8 +16,23 @@ import factory.conveyor.*;
  */
 public abstract class Cell {
 
+    public static void connect(Cell... cells) {
+        if (cells.length == 0) {
+            return;
+        }
+        for (int i = 1; i < cells.length; i++) {
+            Cell.connect(cells[i - 1], cells[i]);
+        }
+    }
+
+    public static void connect(Cell left, Cell right) {
+        left.connectWithRightCell(right);
+        right.connectWithLeftCell(left);
+    }
+
     public final String id;
     protected Conveyor[] conveyorList;
+    protected final Set<Block> blocksInside = new HashSet<>();
 
     /**
      * Not null whenever there is a block present in this cell's entryConveyor
@@ -28,10 +45,10 @@ public abstract class Cell {
     public Cell(String id) {
         this.id = id;
     }
-    
+
     /**
-     * @return A time estimate in milliseconds of how much a block on the
-     * entry conveyor right now would have to wait to get in the cell
+     * @return A time estimate in milliseconds of how much a block on the entry
+     * conveyor right now would have to wait to get in the cell
      */
     public abstract long getEntryDelayTimeEstimate();
 
@@ -80,7 +97,7 @@ public abstract class Cell {
         // See if there is any block waiting to get in the cell
         if (incomingBlock == null) {
             Conveyor entryConveyor = getEntryConveyor();
-            
+
             if (entryConveyor != null) {
                 if (entryConveyor.isIdle() && entryConveyor.hasBlock()) {
                     Block b = entryConveyor.getOneBlock();
@@ -91,19 +108,53 @@ public abstract class Cell {
                 }
             }
         }
+
+        // Process any pre-selection of tools on machines
+        processToolPreSelection();
     }
 
-    public static void connect(Cell... cells) {
-        if (cells.length == 0) {
-            return;
-        }
-        for (int i = 1; i < cells.length; i++) {
-            Cell.connect(cells[i - 1], cells[i]);
+    private void processToolPreSelection() {
+        for (Conveyor c : conveyorList) {
+            if (c instanceof Machine) {
+                Machine m = (Machine) c;
+                if (m.canPreSelectTool()) {
+                    processToolPreSelectionForMachine(m);
+                }
+            }
         }
     }
 
-    public static void connect(Cell left, Cell right) {
-        left.connectWithRightCell(right);
-        right.connectWithLeftCell(left);
+    private void processToolPreSelectionForMachine(Machine machine) {
+
+        // Get next block to go to that machine and be processed there
+        Block closestBlockToBeProcessed = null;
+        int minStepCount = Integer.MAX_VALUE;
+
+        for (Block b : blocksInside) {
+
+            // Block has to go to that machine in the future and be processed there
+            if (b.path.path.contains(machine) && b.getNextTransformationOnMachine(machine.type) != null) {
+
+                // Calculate number of steps to machine for this block
+                int count = 0;
+                for (Conveyor c : b.path.path) {
+                    count++;
+                    if (c == machine) {
+                        break;
+                    }
+                }
+
+                // If this block is closest, save that information
+                if (count < minStepCount) {
+                    minStepCount = count;
+                    closestBlockToBeProcessed = b;
+                }
+            }
+        }
+
+        // Get next transformation that block will have on that machine, and pre-select the apropriate tool
+        if (closestBlockToBeProcessed != null) {
+            machine.preSelectTool(closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool);
+        }
     }
 }

@@ -24,8 +24,8 @@ Alex:
   [X]  Transformation sequences (Class: TransformationManager)
   [X]  Tool class for selecting and activating tools in machines (Class: Machine)
   [X]  Algorithm for selecting which transfer partner should be chonse first (Class: Conveyor)
-  [ ]  Parallel cell processing and optimization (Class: ParalleCell)
-  [ ]  Tool pre-selection on Parallel cell (Class: ParallelCell)
+  [.]  Parallel cell processing and optimization (Class: ParalleCell)
+  [X]  Tool pre-selection on Parallel cell (Class: ParallelCell)
 
 Unassigned:
   [ ]  (When everything else is done) Statistics module (Class: ?)

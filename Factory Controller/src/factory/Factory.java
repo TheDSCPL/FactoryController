@@ -1,23 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package factory;
 
-import factory.cell.assemb.*;
-import control.order.*;
 import control.*;
+import control.order.*;
 import factory.cell.*;
+import factory.cell.assemb.*;
 import factory.conveyor.*;
-import main.*;
 import java.util.*;
+import main.*;
 import transformation.*;
 
-/**
- *
- * @author Alex
- */
 public class Factory {
 
     private final Warehouse cw;
@@ -50,24 +41,29 @@ public class Factory {
             cell.update();
         }
 
-        
         if (cw.getBlockOutQueueCount() == 0) {
             for (Order order : Main.orderc.getPendingOrders()) {
-                
+
                 // DEMO for unload orders
                 if (order instanceof UnloadOrder) {
                     cw.addBlockOut(((UnloadOrder) order).execute(entryPathFromWarehouse(cb)));
                 }
-                
+
                 // DEMO for serial cells
                 else if (order instanceof MachiningOrder) {
                     MachiningOrder mo = (MachiningOrder) order;
+
+                    Optional<TransformationSequence> seqAB;
+                    seqAB = mo.possibleSequences().stream().filter(s -> s.machineSet == Machine.Type.Set.AB).findFirst();
+
+                    Optional<TransformationSequence> seqBC;
+                    seqBC = mo.possibleSequences().stream().filter(s -> s.machineSet == Machine.Type.Set.BC).findFirst();
                     
-                    Optional<TransformationSequence> seq;
-                    seq = mo.possibleSequences().stream().filter(s -> s.machineSet == Machine.Type.Set.AB).findFirst();
-                    
-                    if (seq.isPresent()) {
-                        cw.addBlockOut(mo.execute(entryPathFromWarehouse(c2), seq.get()));
+                    if (seqAB.isPresent()) {
+                        cw.addBlockOut(mo.execute(entryPathFromWarehouse(c2), seqAB.get()));
+                    }
+                    else if (seqBC.isPresent()) {
+                        cw.addBlockOut(mo.execute(entryPathFromWarehouse(c1), seqBC.get()));
                     }
                 }
             }

@@ -7,7 +7,6 @@ package factory.cell;
 
 import control.*;
 import factory.conveyor.*;
-import java.util.*;
 import main.*;
 import transformation.*;
 
@@ -24,8 +23,7 @@ public class SerialCell extends Cell {
     private final Machine t5;
     private final Rotator t6;
     private final Mover t7;
-
-    private final Set<Block> blocksInside = new HashSet<>();
+    
     private boolean firstConveyorsBlocked = false;
 
     public SerialCell(String id) {
@@ -77,50 +75,8 @@ public class SerialCell extends Cell {
         if (firstConveyorsBlocked || change) {
             refreshConveyorBlocking();
         }
-
-        // Pre-select tools in machines
-        if (t3.canPreSelectTool()) {
-            processPreSelection(t3);
-        }
-        if (t5.canPreSelectTool()) {
-            processPreSelection(t5);
-        }
     }
-
-    private void processPreSelection(Machine machine) {
-
-        // Get next block to go to that machine and be processed there
-        Block closestBlockToBeProcessed = null;
-        int minStepCount = Integer.MAX_VALUE;
-
-        for (Block b : blocksInside) {
-
-            // Block has to go to that machine in the future and be processed there
-            if (b.path.path.contains(machine) && b.getNextTransformationOnMachine(machine.type) != null) {
-
-                // Calculate number of steps to machine for this block
-                int count = 0;
-                for (Conveyor c : b.path.path) {
-                    count++;
-                    if (c == machine) {
-                        break;
-                    }
-                }
-
-                // If this block is closest, save that information
-                if (count < minStepCount) {
-                    minStepCount = count;
-                    closestBlockToBeProcessed = b;
-                }
-            }
-        }
-
-        // Get next transformation that block will have on that machine, and pre-select the apropriate tool
-        if (closestBlockToBeProcessed != null) {
-            machine.preSelectTool(closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool);
-        }
-    }
-
+    
     private void refreshConveyorBlocking() {
         boolean blocked = false;
 

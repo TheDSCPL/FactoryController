@@ -1,16 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package factory.cell;
 
+import control.*;
 import factory.conveyor.*;
+import main.Main;
+import transformation.Transformation;
 
-/**
- *
- * @author Alex
- */
 public class ParallelCell extends Cell {
 
     private final Mover t1;
@@ -23,10 +17,10 @@ public class ParallelCell extends Cell {
     private final Mover t8;
     private final Rotator t9;
     private final Mover t10;
-        
+    
     public ParallelCell(String id) {
         super(id);
-        
+
         // Create conveyors
         t1 = new Mover(id + "T1", 1);
         t2 = new Rotator(id + "T2");
@@ -38,21 +32,80 @@ public class ParallelCell extends Cell {
         t8 = new Mover(id + "T8", 1);
         t9 = new Rotator(id + "T9");
         t10 = new Mover(id + "T10", 2);
-        conveyorList = new Conveyor[] {t1, t2, t3, t4, t5, t6, t7, t8, t9, t10};
-        
+        conveyorList = new Conveyor[]{t1, t2, t3, t4, t5, t6, t7, t8, t9, t10};
+
         // Connect conveyors
-        t1.connections = new Conveyor[] {null, t2};
-        t2.connections = new Conveyor[] {t1, null, t3, t4};
-        t3.connections = new Conveyor[] {t2, null};
-        t4.connections = new Conveyor[] {t2, null, t6, t5};
-        t5.connections = new Conveyor[] {t4, t7};
-        t6.connections = new Conveyor[] {t4, t7};
-        t7.connections = new Conveyor[] {t5, t6, null, t9};
-        t8.connections = new Conveyor[] {null, t9};
-        t9.connections = new Conveyor[] {t8, t7, t10, null};
-        t10.connections = new Conveyor[] {t9, null};
+        t1.connections = new Conveyor[]{null, t2};
+        t2.connections = new Conveyor[]{t1, null, t3, t4};
+        t3.connections = new Conveyor[]{t2, null};
+        t4.connections = new Conveyor[]{t2, null, t6, t5};
+        t5.connections = new Conveyor[]{t4, t7};
+        t6.connections = new Conveyor[]{t4, t7};
+        t7.connections = new Conveyor[]{t5, t6, null, t9};
+        t8.connections = new Conveyor[]{null, t9};
+        t9.connections = new Conveyor[]{t8, t7, t10, null};
+        t10.connections = new Conveyor[]{t9, null};
     }
-    
+
+    @Override
+    public void update() {
+        super.update();
+
+        // Process blocks going out
+        if (t9.isIdle() && t9.hasBlock()) {
+            // If block came from this cell and is not just passing by
+            if (!t9.getOneBlock().path.hasNext()) {
+                processBlockOut(t9.getOneBlock());
+            }
+        }
+        
+        // Detect incoming blocks and give them a path for processing if possible
+        if (incomingBlock != null && blocksInside.isEmpty()) {
+            processBlockIn(incomingBlock);
+            incomingBlock = null;
+        }
+    }
+
+    private void processBlockIn(Block block) {
+        Path path = block.path;
+
+        path.push(t4);
+        Conveyor current = t4;
+
+        for (Transformation t : block.sequence.sequence) {
+            switch (t.machine) {
+                case C:
+                    if (current == t4) {
+                        path.push(t6);
+                    }
+                    else if (current == t5) {
+                        path.push(t4, t6);
+                    }
+                    current = t6;
+
+                    break;
+                case B:
+                    if (current == t4) {
+                        path.push(t5);
+                    }
+                    else if (current == t6) {
+                        path.push(t4, t5);
+                    }
+                    current = t5;
+                    break;
+                default: throw new Error("XXX"); // TODO
+            }
+        }
+        
+        path.push(t7, t9);
+        blocksInside.add(block);
+    }
+
+    private void processBlockOut(Block block) {
+        t9.getOneBlock().path.append(Main.factory.exitPathToWarehouse(this));
+        blocksInside.remove(block);
+    }
+
     @Override
     public Conveyor getCornerConveyor(int position) {
         switch (position) {
@@ -60,13 +113,9 @@ public class ParallelCell extends Cell {
             case 1: return t3;
             case 2: return t10;
             case 3: return t8;
-            default: throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
+            default:
+                throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
         }
-    }
-
-    @Override
-    public void update() {
-        super.update();
     }
 
     @Override
@@ -85,7 +134,7 @@ public class ParallelCell extends Cell {
     public Rotator getEntryConveyor() {
         return t2;
     }
-    
+
     @Override
     public Conveyor getExitConveyor() {
         return t9;
@@ -95,5 +144,5 @@ public class ParallelCell extends Cell {
     public long getEntryDelayTimeEstimate() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
 }

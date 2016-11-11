@@ -18,8 +18,8 @@ public class Configuration {
     public final Map<String, Integer> inputIDs = new HashMap<>();
     public final Map<String, Integer> outputIDs = new HashMap<>();
     
-    private static final String CSVFileName = "src/main/io.csv";
-    private static final String PropertiesFileName = "src/main/config.properties";
+    private static final String CSVFileName = "src/config/io.csv";
+    private static final String PropertiesFileName = "src/config/config.properties";
     
     public Configuration() {
         
