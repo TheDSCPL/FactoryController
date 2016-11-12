@@ -32,6 +32,6 @@ public class Transformation {
     }
     
     public String toString() {
-        return start + "->" + end + " (" + machine + "/" + tool + ")";
+        return start + "->" + end + " (" + tool + "@" + machine + "/" + duration + ")";
     }
 }

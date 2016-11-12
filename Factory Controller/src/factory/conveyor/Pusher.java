@@ -1,11 +1,10 @@
 package factory.conveyor;
 
-import factory.other.Sensor;
-import factory.other.Motor;
 import control.*;
 import control.order.*;
-import factory.*;
+import factory.other.Motor;
 import factory.other.Roller;
+import factory.other.Sensor;
 import main.*;
 
 public class Pusher extends Conveyor {
@@ -49,6 +48,7 @@ public class Pusher extends Conveyor {
                     stopPusher();
                     Block block = removeBlock(0);
                     block.completeOrder();
+                    Main.stats.inc(id, Statistics.Type.BlocksPushed, block.type);
                 }
                 break;
         }

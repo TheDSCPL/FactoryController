@@ -152,11 +152,15 @@ public abstract class Conveyor {
             while (b == null) {
                 b = shiftOneBlock(transferMotorDirection(transferPartner, isSending()), null);
             }
+            
+            Main.stats.inc(id, Statistics.Type.BlocksSent, b.type);
         }
         else if (isReceiving()) {
             shiftOneBlock(transferMotorDirection(transferPartner, isSending()), newBlock);
             newBlock.path.advance();
             blockTransferFinished();
+            
+            Main.stats.inc(id, Statistics.Type.BlocksReceived, newBlock.type);
         }
 
         transferPartner = null;

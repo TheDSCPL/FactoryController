@@ -4,6 +4,9 @@ import coms.*;
 import config.Configuration;
 import control.*;
 import factory.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import transformation.*;
 
 // PULL -> WORK -> ADD -> COMMIT -> PULL -> PUSH
@@ -26,7 +29,7 @@ Alex:
   [X]  Algorithm for selecting which transfer partner should be chosen first (Class: Conveyor)
   [.]  Parallel cell processing and optimization (Class: ParalleCell - last thing: entry of blocks on cell is not prioritized)
   [X]  Tool pre-selection on Parallel cell (Class: ParallelCell)
-  [ ]  Statistics module (Class: Stats, ...?)
+  [.]  Statistics module (Class: Main, Statistics)
 
 Unassigned:
   [ ]  TODO's in code (Class: N/A)
@@ -36,7 +39,6 @@ Legend:
    .   In progress
    \   Skipped
  */
-
 public class Main {
 
     public static final Configuration config = new Configuration();
@@ -44,65 +46,76 @@ public class Main {
     public static final Factory factory = new Factory();
     public static final TransformationManager transfm = new TransformationManager();
     public static final OrderController orderc = new OrderController();
-    public static final long controlLoopDelay = (long)config.getI("controlLoopDelay");
-    
+    public static final Statistics stats = new Statistics();
+    public static final long controlLoopDelay = (long) config.getI("controlLoopDelay");
+
+    private static final Thread controlThread = new Thread(() -> controlLoop());
+
     /**
      * @return Time in milliseconds
      */
     public static long time() {
-        return System.nanoTime() / (long)1_000_000;
-    }
-
-    private static void connectAndRun() throws Exception {
-        modbus.connect();
-
-        while (true) {
-            modbus.refreshInputs();
-            factory.update();
-            orderc.update();
-            modbus.refreshOutputs();
-
-            Thread.sleep(controlLoopDelay);
-        }
-    }
-
-    private static Process sfs = null;
-
-    private static void tryToOpenSFS() {
-        System.out.println("Simulator not running. Trying to start it.");
-        try {
-            sfs = Runtime.getRuntime().exec("java -jar sfs.jar");
-
-            if (!sfs.isAlive()) {
-                throw new Error("Error starting simulator. Check permissions and if all of the simulation's files are present.");
-            }
-            Thread.sleep(100);
-        }
-        catch (Exception e) {
-            /*System.exit(31);*/
-        }
+        return System.nanoTime() / (long) 1_000_000;
     }
 
     /**
      * @param args the command line arguments
+     * @throws java.io.IOException
      */
-    public static void main(String[] args) throws Exception {
-        /*try {
-            connectAndRun();
-        }
-        catch (java.net.ConnectException ex) //if simulator not running try to start it
-        {
-            tryToOpenSFS();
-            try {
-                connectAndRun();
+    public static void main(String[] args) throws IOException {
+        controlThread.setDaemon(true);
+        controlThread.start();
+        inputLoop();
+    }
+
+    public static void inputLoop() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        while (true) {
+            System.out.print("> ");
+            String input = reader.readLine();
+            String output;
+
+            if (!input.equals("\n") && !input.isEmpty()) {
+                switch (input) {
+                    case "factory":
+                        output = factory.toString();
+                        break;
+                    case "orders":
+                        output = "Orders? What are those?"; // TODO: complete
+                        break;
+                    case "exit":
+                        return;
+                    default:
+                        output = stats.processCmd(input);
+                        break;
+                }
+
+                if (output != null) {
+                    System.out.println(output);
+                }
+                else {
+                    System.out.println("Invalid command " + input);
+                }
             }
-            catch (Exception e) {
-                /*System.exit(32)*/
-            /*}
         }
-        catch (Exception ex) {
+    }
+
+    public static void controlLoop() {
+        try {
+            modbus.connect();
+
+            while (true) {
+                modbus.refreshInputs();
+                factory.update();
+                orderc.update();
+                modbus.refreshOutputs();
+
+                Thread.sleep(controlLoopDelay);
+            }
         }
-        //System.exit(33);*/
-        connectAndRun();
+        catch (Throwable ex) {
+            ex.printStackTrace();
+        }
     }
 }

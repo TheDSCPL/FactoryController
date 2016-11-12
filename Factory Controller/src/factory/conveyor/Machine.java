@@ -1,9 +1,9 @@
 package factory.conveyor;
 
-import factory.other.Sensor;
-import factory.other.Motor;
 import control.*;
 import control.order.*;
+import factory.other.Motor;
+import factory.other.Sensor;
 import main.*;
 import transformation.*;
 
@@ -67,13 +67,17 @@ public class Machine extends Conveyor {
         // Position machine head correctly (only done on initialization)
         xMotor.control(!xSensor.on(), true);
         zMotor.control(!zSensor.on(), false);
-        
+
         // Tool has finished
         if (holdBlock && tool.isIdle()) {
+
+            // Update stats
+            Main.stats.inc(id, Statistics.Type.TransformationsOperated, getOneBlock().getNextTransformation());
+            Main.stats.inc(id, Statistics.Type.TotalTimeInOperation, (int)getOneBlock().getNextTransformation().duration);
             
             // Update block type
             getOneBlock().applyNextTransformation();
-            
+
             // Start next machining cycle here, or release block
             startMachiningIfNecessary();
         }
@@ -83,10 +87,11 @@ public class Machine extends Conveyor {
     public boolean canPreSelectTool() {
         return tool.isIdle();
     }
+
     public void preSelectTool(Tool.Type type) {
         tool.select(type);
     }
-    
+
     private void startMachiningIfNecessary() {
         Block block = getOneBlock();
         holdBlock = false;
@@ -198,18 +203,18 @@ public class Machine extends Conveyor {
 
         public void select(Type type) {
             //System.out.format("[tool] select: tool=%s%n", type);
-            
+
             // If already selecting that tool, do nothing
             if (state == State.Selecting && toolSelectTarget == type) {
                 //System.out.format("[tool] select: do nothing%n");
                 return;
             }
-            
+
             // If doing something else, throw error
             if (state != State.Idle) {
                 throw new Error("select called on tool when tool is not on Idle state");
             }
-            
+
             // If Idle and needs to select new tool, start tool selecting process
             if (state == State.Idle && currentTool != type) {
                 //System.out.format("[tool] select: start selection%n");

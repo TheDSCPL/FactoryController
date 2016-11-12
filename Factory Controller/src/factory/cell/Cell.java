@@ -10,6 +10,7 @@ import factory.conveyor.*;
 import java.util.HashSet;
 import java.util.Set;
 import main.Main;
+import main.Statistics;
 
 /**
  *
@@ -102,6 +103,7 @@ public abstract class Cell {
 
                 if (!b.path.hasNext()) {
                     if (processBlockIn(b)) {
+                        Main.stats.inc(id, Statistics.Type.BlocksReceived, b.type);
                         blocksInside.add(b);
                     }
                 }
@@ -116,6 +118,7 @@ public abstract class Cell {
                 if (!exit.getOneBlock().path.hasNext()) {
                     Block b = exit.getOneBlock();
                     processBlockOut(b);
+                    Main.stats.inc(id, Statistics.Type.BlocksSent, b.type);
                     b.path.append(Main.factory.exitPathToWarehouse(this));
                     blocksInside.remove(b);
                 }
@@ -177,5 +180,17 @@ public abstract class Cell {
         if (closestBlockToBeProcessed != null) {
             machine.preSelectTool(closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool);
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append(id).append(": ");
+        for (Conveyor conv : conveyorList) {
+            sb.append(conv.id).append("(").append(conv.getClass().getSimpleName()).append(")").append(" ");
+        }
+
+        return sb.toString();
     }
 }

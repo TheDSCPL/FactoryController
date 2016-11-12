@@ -59,7 +59,7 @@ public class Factory {
 
                     Optional<TransformationSequence> seqBC;
                     seqBC = mo.possibleSequences().stream().filter(s -> s.machineSet == Machine.Type.Set.BC).findFirst();
-                    
+
                     if (seqAB.isPresent()) {
                         cw.addBlockOut(mo.execute(entryPathFromWarehouse(c2), seqAB.get()));
                     }
@@ -121,4 +121,15 @@ public class Factory {
         return path;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        
+        for (Cell cell : cellList) {
+            sb.append(cell).append("\n");
+        }
+
+        return sb.toString();
+    }
+    
 }
