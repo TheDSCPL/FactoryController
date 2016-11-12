@@ -1,20 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and openGrab the template in the editor.
- */
 package factory.cell.assemb;
 
-import factory.other.Table;
 import factory.cell.*;
 import factory.conveyor.*;
+import factory.other.Table;
 import java.util.ArrayDeque;
 import main.*;
 
-/**
- *
- * @author Alex
- */
 public class Assembler extends Cell {
 
     private final Mover t1;

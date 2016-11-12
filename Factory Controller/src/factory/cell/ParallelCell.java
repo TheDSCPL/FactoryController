@@ -2,7 +2,6 @@ package factory.cell;
 
 import control.*;
 import factory.conveyor.*;
-import main.Main;
 import transformation.Transformation;
 
 public class ParallelCell extends Cell {
@@ -17,7 +16,7 @@ public class ParallelCell extends Cell {
     private final Mover t8;
     private final Rotator t9;
     private final Mover t10;
-    
+
     public ParallelCell(String id) {
         super(id);
 
@@ -47,48 +46,26 @@ public class ParallelCell extends Cell {
         t10.connections = new Conveyor[]{t9, null};
     }
 
-    @Override
-    public void update() {
-        super.update();
-
-        // Process blocks going out
-        if (t9.isIdle() && t9.hasBlock()) {
-            // If block came from this cell and is not just passing by
-            if (!t9.getOneBlock().path.hasNext()) {
-                processBlockOut(t9.getOneBlock());
-            }
+    protected boolean processBlockIn(Block block) {        
+        if (blocksInside.size() >= 3) {
+            return false;
         }
-        
-        // Detect incoming blocks and give them a path for processing if possible
-        if (incomingBlock != null && blocksInside.isEmpty()) {
-            processBlockIn(incomingBlock);
-            incomingBlock = null;
-        }
-    }
 
-    private void processBlockIn(Block block) {
         Path path = block.path;
 
-        path.push(t4);
-        Conveyor current = t4;
+        path.push(t4, t5);
+        Conveyor current = t5;
 
         for (Transformation t : block.sequence.sequence) {
             switch (t.machine) {
                 case C:
-                    if (current == t4) {
-                        path.push(t6);
-                    }
-                    else if (current == t5) {
-                        path.push(t4, t6);
+                    if (current == t5) {
+                        path.push(t7, t6);
                     }
                     current = t6;
-
                     break;
                 case B:
-                    if (current == t4) {
-                        path.push(t5);
-                    }
-                    else if (current == t6) {
+                    if (current == t6) {
                         path.push(t4, t5);
                     }
                     current = t5;
@@ -96,14 +73,13 @@ public class ParallelCell extends Cell {
                 default: throw new Error("XXX"); // TODO
             }
         }
-        
-        path.push(t7, t9);
-        blocksInside.add(block);
-    }
 
-    private void processBlockOut(Block block) {
-        t9.getOneBlock().path.append(Main.factory.exitPathToWarehouse(this));
-        blocksInside.remove(block);
+        if (current == t6) {
+            path.push(t4, t5);
+        }
+
+        path.push(t7, t9);
+        return true;
     }
 
     @Override

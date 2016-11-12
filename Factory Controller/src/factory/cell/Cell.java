@@ -9,6 +9,7 @@ import control.*;
 import factory.conveyor.*;
 import java.util.HashSet;
 import java.util.Set;
+import main.Main;
 
 /**
  *
@@ -40,8 +41,7 @@ public abstract class Cell {
      * *after setting a path to the block* to signal the Cell class that the
      * subclass is ready to process another block
      */
-    protected Block incomingBlock;
-
+    //protected Block incomingBlock;
     public Cell(String id) {
         this.id = id;
     }
@@ -94,17 +94,30 @@ public abstract class Cell {
             conveyor.update();
         }
 
-        // See if there is any block waiting to get in the cell
-        if (incomingBlock == null) {
-            Conveyor entryConveyor = getEntryConveyor();
+        // Process blocks coming in
+        Conveyor entry = getEntryConveyor();
+        if (entry != null) {
+            if (entry.isIdle() && entry.hasBlock()) {
+                Block b = entry.getOneBlock();
 
-            if (entryConveyor != null) {
-                if (entryConveyor.isIdle() && entryConveyor.hasBlock()) {
-                    Block b = entryConveyor.getOneBlock();
-
-                    if (!b.path.hasNext()) {
-                        incomingBlock = b;
+                if (!b.path.hasNext()) {
+                    if (processBlockIn(b)) {
+                        blocksInside.add(b);
                     }
+                }
+            }
+        }
+
+        // Process blocks going out
+        Conveyor exit = getExitConveyor();
+        if (exit != null) {
+            if (exit.isIdle() && exit.hasBlock()) {
+                // If block came from this cell and is not just passing by
+                if (!exit.getOneBlock().path.hasNext()) {
+                    Block b = exit.getOneBlock();
+                    processBlockOut(b);
+                    b.path.append(Main.factory.exitPathToWarehouse(this));
+                    blocksInside.remove(b);
                 }
             }
         }
@@ -113,18 +126,26 @@ public abstract class Cell {
         processToolPreSelection();
     }
 
+    protected boolean processBlockIn(Block block) {
+        return false;
+    }
+
+    protected void processBlockOut(Block block) {
+
+    }
+
     private void processToolPreSelection() {
         for (Conveyor c : conveyorList) {
             if (c instanceof Machine) {
                 Machine m = (Machine) c;
                 if (m.canPreSelectTool()) {
-                    processToolPreSelectionForMachine(m);
+                    processToolPreSelection(m);
                 }
             }
         }
     }
 
-    private void processToolPreSelectionForMachine(Machine machine) {
+    private void processToolPreSelection(Machine machine) {
 
         // Get next block to go to that machine and be processed there
         Block closestBlockToBeProcessed = null;

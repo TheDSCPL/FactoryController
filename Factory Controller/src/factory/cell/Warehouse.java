@@ -24,7 +24,6 @@ public class Warehouse extends Cell {
     private boolean waitingForOut = false;
     private boolean waitingForIn = false;
     
-
     public Warehouse(String id) {
         super(id);
         
@@ -98,6 +97,7 @@ public class Warehouse extends Cell {
 
     @Override
     public void connectWithLeftCell(Cell left) {
+        
     }
 
     @Override

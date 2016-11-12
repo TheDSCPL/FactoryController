@@ -1,9 +1,8 @@
 package factory.cell;
 
 import control.*;
-import control.order.*;
+import control.order.UnloadOrder;
 import factory.conveyor.*;
-import main.*;
 
 public class LoadUnloadBay extends Cell {
 
@@ -62,33 +61,31 @@ public class LoadUnloadBay extends Cell {
             // Create block
             Block block = new Block(Block.Type.Unknown);
             block.path.push(t3, t2, t4, t5, t7);
-            block.path.append(Main.factory.exitPathToWarehouse(this));
 
             // Place block on this conveyor
             t3.placeBlock(block, 0);
         }
-        
+
         if (t8.isPresenceSensorOn(0)) {
             // Create block
             Block block = new Block(Block.Type.Unknown);
             block.path.push(t8, t7);
-            block.path.append(Main.factory.exitPathToWarehouse(this));
-            
+
             // Place block on this conveyor
             t8.placeBlock(block, 0);
         }
-        
-        // Detect unload orders and dispatch block to correct pusher
-        if (incomingBlock != null) {            
-            UnloadOrder order = (UnloadOrder)incomingBlock.order;
-            
-            incomingBlock.path.push(t4); // Position == 1 or 2
-            if (order.position == 2) {
-                incomingBlock.path.push(t5);
-            }
-                        
-            incomingBlock = null; // Reset incoming block
+    }
+
+    @Override
+    protected boolean processBlockIn(Block block) {
+        UnloadOrder order = (UnloadOrder) block.order;
+
+        block.path.push(t4); // Position == 1 or 2
+        if (order.position == 2) {
+            block.path.push(t5);
         }
+        
+        return true;
     }
     
     @Override

@@ -7,7 +7,6 @@ package factory.cell;
 
 import control.*;
 import factory.conveyor.*;
-import main.*;
 import transformation.*;
 
 /**
@@ -23,7 +22,7 @@ public class SerialCell extends Cell {
     private final Machine t5;
     private final Rotator t6;
     private final Mover t7;
-    
+
     private boolean firstConveyorsBlocked = false;
 
     public SerialCell(String id) {
@@ -53,28 +52,7 @@ public class SerialCell extends Cell {
     public void update() {
         super.update();
 
-        boolean change = false;
-
-        // Process blocks going out
-        if (t6.isIdle() && t6.hasBlock()) {
-            // If block came from this cell and is not just passing by
-            if (!t6.getOneBlock().path.hasNext()) {
-                processBlockOut(t6.getOneBlock());
-                change = true;
-            }
-        }
-
-        // Detect incoming blocks and give them a path for processing if possible
-        if (incomingBlock != null && !firstConveyorsBlocked) {
-            processBlockIn(incomingBlock);
-            incomingBlock = null;
-            change = true;
-        }
-
-        // Refresh conveyor blocking if necessary
-        if (firstConveyorsBlocked || change) {
-            refreshConveyorBlocking();
-        }
+        refreshConveyorBlocking();
     }
     
     private void refreshConveyorBlocking() {
@@ -104,7 +82,12 @@ public class SerialCell extends Cell {
         firstConveyorsBlocked = blocked;
     }
 
-    private void processBlockIn(Block block) {
+    @Override
+    protected boolean processBlockIn(Block block) {
+        if (firstConveyorsBlocked) {
+            return false;
+        }
+
         Path path = block.path;
 
         path.push(t3);
@@ -133,13 +116,7 @@ public class SerialCell extends Cell {
         }
 
         path.push(t6);
-
-        blocksInside.add(block);
-    }
-
-    private void processBlockOut(Block block) {
-        t6.getOneBlock().path.append(Main.factory.exitPathToWarehouse(this));
-        blocksInside.remove(block);
+        return true;
     }
 
     @Override
