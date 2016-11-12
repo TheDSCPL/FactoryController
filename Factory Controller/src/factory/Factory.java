@@ -41,6 +41,7 @@ public class Factory {
             cell.update();
         }
 
+        // TODO: Do this
         if (cw.getBlockOutQueueCount() == 0) {
             for (Order order : Main.orderc.getPendingOrders()) {
 
@@ -118,14 +119,6 @@ public class Factory {
         }
 
         return path;
-    }
-
-    private Order chooseNextOrder(Set<Order> orders) {
-        return orders.iterator().next(); // TODO
-    }
-
-    private Path choosePathForOrder(Order order) {
-        return new Path(); // TODO
     }
 
 }

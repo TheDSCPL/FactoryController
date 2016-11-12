@@ -70,7 +70,7 @@ public class ParallelCell extends Cell {
                     }
                     current = t5;
                     break;
-                default: throw new Error("XXX"); // TODO
+                default: throw new Error("Invalid machine on sequence of a block");
             }
         }
 

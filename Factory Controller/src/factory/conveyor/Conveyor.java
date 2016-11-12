@@ -172,7 +172,7 @@ public abstract class Conveyor {
             ret = blocks[0];
 
             System.arraycopy(blocks, 1, blocks, 0, blocks.length - 1);
-            // Equivalent to: TODO verify
+            // Equivalent to: TODO: verify
             //for (int i = blocks.length - 1; i > 0; i--) {
             //    blocks[i - 1] = blocks[i];
             //}
@@ -183,7 +183,7 @@ public abstract class Conveyor {
             ret = blocks[blocks.length - 1];
 
             System.arraycopy(blocks, 0, blocks, 1, blocks.length - 1);
-            // Equivalent to: TODO verify
+            // Equivalent to: TODO: verify
             //for (int i = 0; i < blocks.length - 1; i++) {
             //    blocks[i + 1] = blocks[i];
             //}
@@ -202,7 +202,7 @@ public abstract class Conveyor {
      */
     private Block getBlock(int position) {
         if (position >= length) {
-            throw new IndexOutOfBoundsException("XXX"); // TODO exception text
+            throw new IndexOutOfBoundsException("Invalid block position " + position);
         }
         return blocks[position];
     }
@@ -300,7 +300,7 @@ public abstract class Conveyor {
      */
     public boolean placeBlock(Block b, int position) {
         if (position >= length) {
-            throw new IndexOutOfBoundsException("XXX"); // TODO exception text
+            throw new IndexOutOfBoundsException("Inavlid block position " + position);
         }
         if (blocks[position] == null) {
             blocks[position] = b;

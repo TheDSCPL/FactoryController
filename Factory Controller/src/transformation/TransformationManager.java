@@ -40,7 +40,7 @@ public class TransformationManager {
                 case 9:
                     machineType = Machine.Type.C;
                     break;
-                default: throw new Error("XXX"); // TODO
+                default: throw new Error("Inavli machine type in config file");
             }
 
             Machine.Tool.Type machineTool;
@@ -60,7 +60,7 @@ public class TransformationManager {
                 case 9:
                     machineTool = Machine.Tool.Type.T3;
                     break;
-                default: throw new Error("XXX"); // TODO
+                default: throw new Error("Invalid tool type in config file");
             }
 
             Transformation t = new Transformation(

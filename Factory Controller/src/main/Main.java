@@ -74,9 +74,6 @@ public class Main {
             sfs = Runtime.getRuntime().exec("java -jar sfs.jar");
 
             if (!sfs.isAlive()) {
-                // TODO: create a class Error extends java.lang.Error that, in
-                // the constructor, has a printStackTrace and a System.exit so
-                // it is a fatal error and can't be caught
                 throw new Error("Error starting simulator. Check permissions and if all of the simulation's files are present.");
             }
             Thread.sleep(100);

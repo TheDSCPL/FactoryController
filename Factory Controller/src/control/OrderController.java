@@ -5,8 +5,8 @@
  */
 package control;
 
-import control.order.*;
 import coms.*;
+import control.order.*;
 import java.util.*;
 import static java.util.stream.Collectors.*;
 import main.*;
@@ -39,7 +39,7 @@ public class OrderController {
         return orders.stream().filter(o -> o.isPending()).collect(toSet());
     }
 
-    private void processNewOrder(byte[] packet) { // TODO do error handling
+    private void processNewOrder(byte[] packet) { // TODO: do error handling
         String orderString = new String(packet, 0, packet.length);
 
         if (orderString.charAt(0) != ':') {

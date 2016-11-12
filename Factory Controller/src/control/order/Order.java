@@ -14,7 +14,7 @@ public abstract class Order {
     private State state = State.Received;
 
     public enum State {
-        Received, Initiated, AllPlaced, Completed // TODO, better names, javadoc
+        Received, Initiated, AllPlaced, Completed // TODO: better names, javadoc
     }
     
     public boolean isPending() {

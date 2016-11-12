@@ -4,7 +4,6 @@ import factory.other.Sensor;
 import factory.other.Motor;
 import control.*;
 import control.order.*;
-import factory.*;
 import main.*;
 import transformation.*;
 
@@ -227,7 +226,7 @@ public class Machine extends Conveyor {
                     case T3:
                         direction = toolSelectTarget == Type.T1;
                         break;
-                    default: throw new Error("XXX"); // TODO
+                    default: throw new Error("Invalid tool type");
                 }
 
                 machiningDuration = -1;
