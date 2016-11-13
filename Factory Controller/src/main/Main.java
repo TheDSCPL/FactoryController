@@ -29,7 +29,7 @@ Alex:
   [X]  Algorithm for selecting which transfer partner should be chosen first (Class: Conveyor)
   [.]  Parallel cell processing and optimization (Class: ParalleCell - last thing: entry of blocks on cell is not prioritized)
   [X]  Tool pre-selection on Parallel cell (Class: ParallelCell)
-  [.]  Statistics module (Class: Main, Statistics)
+  [.]  Statistics module + thread safety! (Class: Main, Statistics)
 
 Unassigned:
   [ ]  TODO's in code (Class: N/A)
