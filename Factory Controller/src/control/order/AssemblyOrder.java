@@ -36,4 +36,8 @@ public class AssemblyOrder extends Order {
         return new Block[]{b1, b2};
     }
 
+    @Override
+    public String orderDescription() {
+        return bottomType + "\\" + topType;
+    }
 }

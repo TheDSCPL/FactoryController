@@ -28,5 +28,10 @@ public class UnloadOrder extends Order {
         incrementPlacement();
         return b;
     }
+
+    @Override
+    public String orderDescription() {
+        return blockType + "#" + position;
+    }
     
 }

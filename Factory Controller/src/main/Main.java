@@ -70,7 +70,7 @@ public class Main {
 
     public static void inputLoop() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-
+        
         while (true) {
             System.out.print("> ");
             String input = reader.readLine();
@@ -82,12 +82,17 @@ public class Main {
                         output = factory.toString();
                         break;
                     case "orders":
-                        output = "Orders? What are those?"; // TODO: complete
+                        output = orderc.toString();
                         break;
                     case "exit":
                         return;
                     default:
-                        output = stats.processCmd(input);
+                        if (input.startsWith("O")) {
+                            output = orderc.orderInfo(input.replaceFirst("^O", ""));
+                        }
+                        else {
+                            output = stats.processCmd(input);
+                        }
                         break;
                 }
 
@@ -96,7 +101,7 @@ public class Main {
                 }
                 else {
                     System.out.println("Invalid command " + input);
-                }
+                }                
             }
         }
     }

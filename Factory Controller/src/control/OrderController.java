@@ -67,4 +67,35 @@ public class OrderController {
 
         orders.add(order);
     }
+    
+    public Order getOrderWithID(int id) {
+        return orders.stream().filter(o -> o.id == id).findFirst().orElse(null);
+    }
+
+    public String orderInfo(String id) {
+        Order order = getOrderWithID(Integer.parseInt(id));
+        if (order != null) {
+            return "Info for order O" + id + ":\n" + order.toString();
+        }
+        
+        return "No order with id " + id;
+    }
+
+    @Override
+    public String toString() {
+        if (orders.isEmpty()) {
+            return "No orders have been received";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        
+        for (Order order : orders) {
+            sb.append("O")
+              .append(order.id).append(" ")
+              .append(order.orderTypeString()).append(" ")
+              .append(order.getState()).append("\n");
+        }
+        
+        return sb.toString();
+    }
 }

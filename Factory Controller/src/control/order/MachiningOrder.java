@@ -2,8 +2,8 @@ package control.order;
 
 import control.*;
 import java.util.*;
-import transformation.*;
 import main.*;
+import transformation.*;
 
 public class MachiningOrder extends Order {
     
@@ -30,6 +30,11 @@ public class MachiningOrder extends Order {
         
         incrementPlacement();
         return b;
+    }
+
+    @Override
+    public String orderDescription() {
+        return startType + ">" + endType;
     }
     
 }
