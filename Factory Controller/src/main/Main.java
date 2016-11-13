@@ -23,7 +23,7 @@ Alex:
   [X]  Serial cell processing and optimization (Class: SerialCell)
   [X]  Tool pre-selection on Serial cell (Class: SerialCell)
   [\]  Linear conveyors with multiple blocks (Class: Conveyor)
-  [X]  Rotator conveyor optimization: automatically rotate back to horizontal position to speed up block traveling time (Class: Conveyor, Rotator)
+  [.]  Rotator/[Mover] conveyor optimization: automatically rotate back to horizontal position to speed up block traveling time (Class: Rotator, Mover)
   [X]  Transformation sequences (Class: TransformationManager)
   [X]  Tool class for selecting and activating tools in machines (Class: Machine)
   [X]  Algorithm for selecting which transfer partner should be chosen first (Class: Conveyor)
