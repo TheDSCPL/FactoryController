@@ -49,7 +49,7 @@ public class Main {
     public static final Statistics stats = new Statistics();
     public static final long controlLoopDelay = (long) config.getI("controlLoopDelay");
 
-    private static final Thread controlThread = new Thread(() -> controlLoop());
+    private static final Thread controlThread = new Thread(Main::controlLoop);
 
     /**
      * @return Time in milliseconds
