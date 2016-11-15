@@ -4,9 +4,7 @@ import coms.*;
 import config.Configuration;
 import control.*;
 import factory.*;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import transformation.*;
 
 // PULL -> WORK -> ADD -> COMMIT -> PULL -> PUSH
@@ -29,7 +27,7 @@ Alex:
   [X]  Algorithm for selecting which transfer partner should be chosen first (Class: Conveyor)
   [.]  Parallel cell processing and optimization (Class: ParalleCell - last thing: entry of blocks on cell is not prioritized)
   [X]  Tool pre-selection on Parallel cell (Class: ParallelCell)
-  [.]  Statistics module + thread safety! (Class: Main, Statistics)
+  [X]  Statistics module + thread safety! (Class: Main, Statistics)
 
 Unassigned:
   [ ]  TODO's in code (Class: N/A)
@@ -47,9 +45,8 @@ public class Main {
     public static final TransformationManager transfm = new TransformationManager();
     public static final OrderController orderc = new OrderController();
     public static final Statistics stats = new Statistics();
+    private static final Console console = new Console();
     public static final long controlLoopDelay = (long) config.getI("controlLoopDelay");
-
-    private static final Thread controlThread = new Thread(Main::controlLoop);
 
     /**
      * @return Time in milliseconds
@@ -63,50 +60,37 @@ public class Main {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
-        controlThread.setDaemon(true);
-        controlThread.start();
-        inputLoop();
+        console.setDaemon(true);
+        console.start();
+        controlLoop();
     }
 
-    public static void inputLoop() throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        
-        while (true) {
-            System.out.print("> ");
-            String input = reader.readLine();
-            String output;
+    private static void processCommand() {
+        String input = console.getInput();
+        String output;
 
-            if (!input.equals("\n") && !input.isEmpty()) {
-                switch (input) {
-                    case "factory":
-                        output = factory.toString();
-                        break;
-                    case "orders":
-                        output = orderc.toString();
-                        break;
-                    case "exit":
-                        return;
-                    default:
-                        if (input.startsWith("O")) {
-                            output = orderc.orderInfo(input.replaceFirst("^O", ""));
-                        }
-                        else {
-                            output = stats.processCmd(input);
-                        }
-                        break;
-                }
-
-                if (output != null) {
-                    System.out.println(output);
-                }
-                else {
-                    System.out.println("Invalid command " + input);
-                }                
+        if (input != null) {
+            switch (input) {
+                case "factory":
+                    output = factory.toString();
+                    break;
+                case "orders":
+                    output = orderc.toString();
+                    break;
+                default:
+                    if (input.startsWith("O")) {
+                        output = orderc.orderInfo(input.replaceFirst("^O", ""));
+                    }
+                    else {
+                        output = stats.processCmd(input);
+                    }
             }
+
+            console.setOutput(output != null ? output : "Invalid command " + input);
         }
     }
 
-    public static void controlLoop() {
+    private static void controlLoop() {
         try {
             modbus.connect();
 
@@ -116,6 +100,7 @@ public class Main {
                 orderc.update();
                 modbus.refreshOutputs();
 
+                processCommand();
                 Thread.sleep(controlLoopDelay);
             }
         }
