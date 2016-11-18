@@ -24,9 +24,10 @@ Alex:
   [X]  Transformation sequences (Class: TransformationManager)
   [X]  Tool class for selecting and activating tools in machines (Class: Machine)
   [X]  Algorithm for selecting which transfer partner should be chosen first (Class: Conveyor)
-  [X]  Parallel cell processing and optimization (Class: ParalleCell - last thing: entry of blocks on cell is not prioritized)
+  [X]  Parallel cell processing and optimization (Class: ParalleCell)
   [X]  Tool pre-selection on Parallel cell (Class: ParallelCell)
   [X]  Statistics module + thread safety! (Class: Main, Statistics)
+  [ ]  Parallel cell: entry of blocks on cell is not prioritized over block being transfer-rotated already on cell
   [ ]  Order processing algorithm and distribution by the various cells (Class: Factory)
 
 Unassigned:
