@@ -27,7 +27,8 @@ Alex:
   [X]  Parallel cell processing and optimization (Class: ParalleCell)
   [X]  Tool pre-selection on Parallel cell (Class: ParallelCell)
   [X]  Statistics module + thread safety! (Class: Main, Statistics)
-  [ ]  Parallel cell: entry of blocks on cell is not prioritized over block being transfer-rotated already on cell
+  [ ]  Parallel cell opimization: entry of blocks on cell is not prioritized over block being transfer-rotated already on cell
+  [ ]  Parallel cell opimization: path.length > 3, not 2
   [ ]  Order processing algorithm and distribution by the various cells (Class: Factory)
 
 Unassigned:

@@ -66,7 +66,7 @@ public class ParallelCell extends Cell {
         boolean free = true;
 
         for (Block block : blocksInside) {
-            if (block.path.length() > 2) {
+            if (block.path.length() > 2) { // TODO: optimize and do > 3
                 free = false;
                 break;
             }
