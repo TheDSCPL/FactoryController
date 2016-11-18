@@ -38,7 +38,7 @@ public class Configuration {
                 try {
                     newValue = Integer.parseInt(values[2]);
                 }
-                catch (NumberFormatException ne) {
+                catch (NumberFormatException ex) {
                     throw new Error("Non-integer 3rd value on line " + lineNumber);
                 }
 

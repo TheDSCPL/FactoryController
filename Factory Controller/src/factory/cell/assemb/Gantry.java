@@ -5,8 +5,8 @@
  */
 package factory.cell.assemb;
 
-import factory.other.Sensor;
 import factory.other.Motor;
+import factory.other.Sensor;
 import main.*;
 
 /**
@@ -56,7 +56,7 @@ public class Gantry {
 
         // initialize outputs
         gripOutputId = outputActionId + 6;
-        System.err.println("gripOutputId="+gripOutputId);
+        //System.err.println("gripOutputId="+gripOutputId);
         XMotor = new Motor(outputActionId + 0);
         YMotor = new Motor(outputActionId + 2);
         ZMotor = new Motor(outputActionId + 4);
@@ -222,7 +222,7 @@ public class Gantry {
         //closeGrab();
         if(!Zready)
         {
-            System.out.print("initializing z | ");
+            //System.out.print("initializing z | ");
             if(upZ.on())
             {
                 Zready = true;
@@ -230,7 +230,7 @@ public class Gantry {
             }
             else
             {
-                System.out.println("not yet up");
+                //System.out.println("not yet up");
                 ZMotor.turnOnPlus();
             }
             return;

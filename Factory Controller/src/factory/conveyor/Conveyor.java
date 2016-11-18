@@ -21,8 +21,9 @@ public abstract class Conveyor {
     private final Sensor[] presenceSensors;
     private final int length;
     private final Double[] queueWeights;
-
+    
     public final String id;
+    //public Integer highestPriorityConnection = null;
     public Conveyor[] connections;
 
     public enum State {
@@ -62,7 +63,7 @@ public abstract class Conveyor {
 
     public void update() {
         updateQueueWeights();
-        
+
         switch (conveyorState) {
             case Standby:
                 if (hasBlock()) {
@@ -107,15 +108,6 @@ public abstract class Conveyor {
         }
     }
 
-    private boolean hasSpace() {
-        for (Block b : blocks) {
-            if (b == null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void blockTransferRegister(Conveyor c) {
         if (!isSending() && !isReceiving()) {
             if (transferPartner != null && transferPartner != c) {
@@ -152,14 +144,14 @@ public abstract class Conveyor {
             while (b == null) {
                 b = shiftOneBlock(transferMotorDirection(transferPartner, isSending()), null);
             }
-            
+
             Main.stats.inc(id, Statistics.Type.BlocksSent, b.type);
         }
         else if (isReceiving()) {
             shiftOneBlock(transferMotorDirection(transferPartner, isSending()), newBlock);
             newBlock.path.advance();
             blockTransferFinished();
-            
+
             Main.stats.inc(id, Statistics.Type.BlocksReceived, newBlock.type);
         }
 
@@ -221,17 +213,27 @@ public abstract class Conveyor {
         return -1;
     }
 
-    public double getQueueWeight(Conveyor from) {
-        return queueWeights[indexForConveyor(from)];
-    }
-    
     private Conveyor chooseNextConveyor(Conveyor c1, Conveyor c2) {
+        /*if (highestPriorityConnection != null) {
+            if (indexForConveyor(c1) == highestPriorityConnection) {
+                return c1;
+            }
+
+            if (indexForConveyor(c2) == highestPriorityConnection) {
+                return c2;
+            }
+        }*/
+
         if (getQueueWeight(c1) > getQueueWeight(c2)) {
             return c1;
         }
         else {
             return c2;
         }
+    }
+
+    public double getQueueWeight(Conveyor from) {
+        return queueWeights[indexForConveyor(from)];
     }
 
     private void setQueueWeight(Conveyor from, double weight) {
@@ -263,7 +265,7 @@ public abstract class Conveyor {
     private double queueWeightsFunction(List<Double> list) {
         return list.stream().reduce(0.0, Double::sum) + 1;
     }
-    
+
     /**
      * Checks if there are blocks in the conveyor
      *

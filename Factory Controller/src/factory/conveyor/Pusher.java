@@ -89,13 +89,10 @@ public class Pusher extends Conveyor {
 
             // Block has stopped here, has an Unload order and roller has space
             if (!block.path.hasNext() && block.order instanceof UnloadOrder) {
-                System.out.println(id + " if");
                 if (roller.isFull()) {
-                    System.out.println(id + " waiting");
                     pusherState = State.WaitingForSpace;
                 }
                 else {
-                    System.out.println(id + " starting");
                     startPushing();
                 }
 

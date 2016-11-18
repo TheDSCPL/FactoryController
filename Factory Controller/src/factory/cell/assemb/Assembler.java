@@ -80,7 +80,7 @@ public class Assembler extends Cell {
 
         if (!gantry.isInitializing() && !pendingTransfers.isEmpty()) {
             if (pendingTransfers.peek().update()) { // if transaction completed
-                System.out.println("pop");
+                //System.out.println("pop");
                 pendingTransfers.pop();
             }
         }
@@ -106,12 +106,6 @@ public class Assembler extends Cell {
     @Override
     public Rotator getExitConveyor() {
         return t5;
-    }
-
-    //TODO: fill this
-    @Override
-    public long getEntryDelayTimeEstimate() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     //TODO: add Transfer field to Block
@@ -191,7 +185,7 @@ public class Assembler extends Cell {
                     }
                     break;
                 case GRAB_ORIGIN: //espera 1 segundo, como indicado na descrição da fábrica
-                    System.err.println("GRAB " + gantry.presenceSensor.on());
+                    //System.err.println("GRAB " + gantry.presenceSensor.on());
                     gantry.closeGrab();
                     if (System.currentTimeMillis() - grabTimer >= 5000) {
                         status = TRANSFER_STATE.GO_UP_ORIGIN;
@@ -213,34 +207,34 @@ public class Assembler extends Cell {
                     gantry.closeGrab();
                     Xready = (gantry.isAtX == whereToX);
                     if (Xready) {
-                        System.out.print("Xready ");
+                        //System.out.print("Xready ");
                         gantry.XState = Gantry.MOVEMENT_STATE.IDLE;
                         gantry.XMotor.turnOff();
                     }
                     else if (gantry.isAtX < whereToX) {
-                        System.out.println("XPlus ");
+                        //System.out.println("XPlus ");
                         gantry.XMotor.turnOnPlus();
                         gantry.XState = Gantry.MOVEMENT_STATE.MOVINGPLUS;
                     }
                     else {
-                        System.out.println("XMinus ");
+                        //System.out.println("XMinus ");
                         gantry.XMotor.turnOnMinus();
                         gantry.XState = Gantry.MOVEMENT_STATE.MOVINGMINUS;
                     }
 
                     Yready = (gantry.isAtY == whereToY);
                     if (Yready) {
-                        System.out.println("Yready");
+                        //System.out.println("Yready");
                         gantry.YState = Gantry.MOVEMENT_STATE.IDLE;
                         gantry.YMotor.turnOff();
                     }
                     else if (gantry.isAtY < whereToY) {
-                        System.out.println("YPlus");
+                        //System.out.println("YPlus");
                         gantry.YMotor.turnOnPlus();
                         gantry.YState = Gantry.MOVEMENT_STATE.MOVINGPLUS;
                     }
                     else {
-                        System.out.println("YMinus");
+                        //System.out.println("YMinus");
                         gantry.YMotor.turnOnMinus();
                         gantry.YState = Gantry.MOVEMENT_STATE.MOVINGMINUS;
                     }

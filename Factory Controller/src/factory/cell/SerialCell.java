@@ -67,9 +67,9 @@ public class SerialCell extends Cell {
         outerLoop:
         for (Block b : blocksInside) {
             if (b.path.hasNext()) {
-                for (int i = 1; i < b.path.path.size(); i++) {
-                    Conveyor last = b.path.path.get(i - 1);
-                    Conveyor current = b.path.path.get(i);
+                for (int i = 1; i < b.path.length(); i++) {
+                    Conveyor last = b.path.get(i - 1);
+                    Conveyor current = b.path.get(i);
 
                     if ((last == t5 && current == t4) || (last == t4 && current == t3)) {
                         blocked = true;
@@ -93,7 +93,7 @@ public class SerialCell extends Cell {
         path.push(t3);
         Conveyor current = t3;
 
-        for (Transformation t : block.sequence.sequence) {
+        for (Transformation t : block.transformations.sequence) {
             switch (t.machine) {
                 case A:
                     if (current == t5) {
@@ -152,10 +152,4 @@ public class SerialCell extends Cell {
     public Rotator getExitConveyor() {
         return t6;
     }
-
-    @Override
-    public long getEntryDelayTimeEstimate() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
 }

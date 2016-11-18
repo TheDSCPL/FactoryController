@@ -18,8 +18,8 @@ import main.*;
 public class OrderController {
 
     /**
-     * All orders waiting to be executing, currently executing
-     * and that have finished executing
+     * All orders waiting to be executing, currently executing and that have
+     * finished executing
      */
     public Set<Order> orders = new HashSet<>();
 
@@ -34,51 +34,63 @@ public class OrderController {
         // Get new orders from socket and process them
         socket.getNewPackets().stream().forEach(this::processNewOrder);
     }
-    
+
     public Set<Order> getPendingOrders() {
         return orders.stream().filter(o -> o.isPending()).collect(toSet());
     }
 
-    private void processNewOrder(byte[] packet) { // TODO: do error handling
+    private void processNewOrder(byte[] packet) {
         String orderString = new String(packet, 0, packet.length);
 
         if (orderString.charAt(0) != ':') {
             return;
         }
 
-        int orderId = Integer.parseInt(orderString.substring(2, 5));
-        int value1 = Integer.parseInt(orderString.substring(5, 6));
-        int value2 = Integer.parseInt(orderString.substring(6, 7));
-        int quantity = Integer.parseInt(orderString.substring(7, 9));
+        try {
+            int orderId = Integer.parseInt(orderString.substring(2, 5));
+            int value1 = Integer.parseInt(orderString.substring(5, 6));
+            int value2 = Integer.parseInt(orderString.substring(6, 7));
+            int quantity = Integer.parseInt(orderString.substring(7, 9));
 
-        Order order;
-        switch (orderString.charAt(1)) {
-            case 'T':
-                order = new MachiningOrder(orderId, quantity, Block.Type.getType(value1), Block.Type.getType(value2));
-                break;
-            case 'M':
-                order = new AssemblyOrder(orderId, quantity, Block.Type.getType(value1), Block.Type.getType(value2));
-                break;
-            case 'U':
-                order = new UnloadOrder(orderId, quantity, Block.Type.getType(value1), value2);
-                break;
-            default: return;
+            Order order;
+            switch (orderString.charAt(1)) {
+                case 'T':
+                    order = new MachiningOrder(orderId, quantity, Block.Type.getType(value1), Block.Type.getType(value2));
+                    break;
+                case 'M':
+                    order = new AssemblyOrder(orderId, quantity, Block.Type.getType(value1), Block.Type.getType(value2));
+                    break;
+                case 'U':
+                    order = new UnloadOrder(orderId, quantity, Block.Type.getType(value1), value2);
+                    break;
+                default:
+                    System.out.println("Invalid order type: '" + orderString.charAt(1) + "'");
+                    return;
+            }
+
+            orders.add(order);
         }
-
-        orders.add(order);
+        catch (NumberFormatException ex) {
+            System.out.println("Invalid order string: '" + orderString + "'");
+        }
     }
-    
+
     public Order getOrderWithID(int id) {
         return orders.stream().filter(o -> o.id == id).findFirst().orElse(null);
     }
 
     public String orderInfo(String id) {
-        Order order = getOrderWithID(Integer.parseInt(id));
-        if (order != null) {
-            return "Info for order O" + id + ":\n" + order.toString();
+        try {
+            Order order = getOrderWithID(Integer.parseInt(id));
+            if (order != null) {
+                return "Info for order O" + id + ":\n" + order.toString();
+            }
+
+            return "No order with id " + id;
         }
-        
-        return "No order with id " + id;
+        catch (NumberFormatException ex) {
+            return "Invalid order id '" + id + "'";
+        }
     }
 
     @Override
@@ -86,16 +98,16 @@ public class OrderController {
         if (orders.isEmpty()) {
             return "No orders have been received";
         }
-        
+
         StringBuilder sb = new StringBuilder();
-        
+
         for (Order order : orders) {
             sb.append("O")
-              .append(order.id).append(" ")
-              .append(order.orderTypeString()).append(" ")
-              .append(order.getState()).append("\n");
+                    .append(order.id).append(" ")
+                    .append(order.orderTypeString()).append(" ")
+                    .append(order.getState()).append("\n");
         }
-        
+
         return sb.toString();
     }
 }

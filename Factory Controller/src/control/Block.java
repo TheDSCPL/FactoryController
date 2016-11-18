@@ -57,15 +57,15 @@ public class Block {
     /**
      * For blocks used in MachiningOrder
      */
-    public TransformationSequence sequence;
+    public TransformationSequence transformations;
     public boolean hasNextTransformation() {
-        return type != sequence.end;
+        return type != transformations.end;
     }
     public Transformation getNextTransformation() {
-        return sequence.getNextTransformation(type);
+        return transformations.getNextTransformation(type);
     }
     public Transformation getNextTransformationOnMachine(Machine.Type machineType) {
-        List<Transformation> nextTransformations = new ArrayList<>(sequence.sequence);
+        List<Transformation> nextTransformations = new ArrayList<>(transformations.sequence);
 
         while (true) {
             if (nextTransformations.isEmpty()) {

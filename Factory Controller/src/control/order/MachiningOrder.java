@@ -26,7 +26,7 @@ public class MachiningOrder extends Order {
         Block b = new Block(startType);
         b.path = blockPath;
         b.order = this;
-        b.sequence = sequence;
+        b.transformations = sequence;
         
         incrementPlacement();
         return b;

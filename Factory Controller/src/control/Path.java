@@ -5,16 +5,12 @@
  */
 package control;
 
-import java.util.*;
 import factory.conveyor.*;
+import java.util.*;
 
-/**
- *
- * @author Alex
- */
 public class Path {
 
-    public final List<Conveyor> path = new ArrayList<>();
+    private final List<Conveyor> path = new ArrayList<>();
 
     /**
      * Pushes the conveyor to the end of the FIFO queue
@@ -88,6 +84,18 @@ public class Path {
         if (!path.isEmpty()) {
             path.remove(0);
         }
+    }
+    
+    public int length() {
+        return path.size();
+    }
+    
+    public Conveyor get(int i) {
+        return path.get(i);
+    }
+    
+    public boolean contains(Conveyor c) {
+        return path.contains(c);
     }
     
     public String toString() {

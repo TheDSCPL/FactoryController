@@ -68,8 +68,8 @@ public class ModbusMaster {
         return inputs.getBit(index);
     }
     public void setOutput(int index, boolean value) {
-        if(index==175)
-            System.err.println(value ? "openGrab" : "closeGrab");
+        //if(index==175)
+        //    System.err.println(value ? "openGrab" : "closeGrab");
         outputs.setBit(index, value);
     }    
     public int getRegister(int index) {

@@ -109,9 +109,4 @@ public class Warehouse extends Cell {
     public Conveyor getExitConveyor() {
         return out;
     }
-
-    @Override
-    public long getEntryDelayTimeEstimate() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

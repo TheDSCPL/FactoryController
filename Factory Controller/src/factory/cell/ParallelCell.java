@@ -2,7 +2,7 @@ package factory.cell;
 
 import control.*;
 import factory.conveyor.*;
-import transformation.Transformation;
+import transformation.*;
 
 public class ParallelCell extends Cell {
 
@@ -44,42 +44,123 @@ public class ParallelCell extends Cell {
         t8.connections = new Conveyor[]{null, t9};
         t9.connections = new Conveyor[]{t8, t7, t10, null};
         t10.connections = new Conveyor[]{t9, null};
+
+        // Set transfer priorities
+        //t4.highestPriorityConnection = 0;
     }
 
-    protected boolean processBlockIn(Block block) {        
+    private BlockRotation currentBlockRotation = BlockRotation.Undefined;
+
+    private enum BlockRotation {
+        Clockwise, CounterClockwise, Undefined;
+    }
+
+    @Override
+    public void update() {
+        super.update();
+
+        resetBlockRotation();
+    }
+
+    private void resetBlockRotation() {
+        boolean free = true;
+
+        for (Block block : blocksInside) {
+            if (block.path.length() > 2) {
+                free = false;
+                break;
+            }
+        }
+        
+        if (free) {
+            currentBlockRotation = BlockRotation.Undefined;
+        }
+    }
+    
+    protected boolean processBlockIn(Block block) {
+        BlockRotation rotation = getBlockRotationForBlock(block);
+        Path path = block.path;
+
         if (blocksInside.size() >= 3) {
             return false;
         }
 
-        Path path = block.path;
+        if (currentBlockRotation != BlockRotation.Undefined) {
+            if (currentBlockRotation != rotation) {
+                return false;
+            }
+        }
 
-        path.push(t4, t5);
-        Conveyor current = t5;
+        path.push(t4);
+        Conveyor current, next;
 
-        for (Transformation t : block.sequence.sequence) {
+        if (block.getNextTransformation().machine == Machine.Type.B) {
+            path.push(t5);
+            current = t5;
+        }
+        else {
+            path.push(t6);
+            current = t6;
+        }
+
+        for (Transformation t : block.transformations.sequence) {
             switch (t.machine) {
                 case C:
                     if (current == t5) {
-                        path.push(t7, t6);
+                        if (rotation == BlockRotation.CounterClockwise) {
+                            next = t7;
+                        }
+                        else {
+                            next = t4;
+                        }
+
+                        path.push(next, t6);
                     }
+
                     current = t6;
                     break;
                 case B:
                     if (current == t6) {
-                        path.push(t4, t5);
+                        if (rotation == BlockRotation.CounterClockwise) {
+                            next = t4;
+                        }
+                        else {
+                            next = t7;
+                        }
+
+                        path.push(next, t5);
                     }
+
                     current = t5;
                     break;
-                default: throw new Error("Invalid machine on sequence of a block");
+                default:
+                    throw new Error("Invalid machine on sequence of a block");
             }
         }
 
-        if (current == t6) {
+        if (current == t5 && rotation == BlockRotation.Clockwise) {
+            path.push(t4, t6);
+        }
+        else if (current == t6 && rotation == BlockRotation.CounterClockwise) {
             path.push(t4, t5);
         }
 
         path.push(t7, t9);
+
+        currentBlockRotation = rotation;
+        //t7.highestPriorityConnection = rotation == BlockRotation.Clockwise ? 1 : 0;
+
+        System.out.println("processBlockIn: currentBlockRotation = " + currentBlockRotation);
         return true;
+    }
+
+    private BlockRotation getBlockRotationForBlock(Block b) {
+        if (b.getNextTransformation().machine == Machine.Type.B) {
+            return BlockRotation.CounterClockwise;
+        }
+        else {
+            return BlockRotation.Clockwise;
+        }
     }
 
     @Override
@@ -115,10 +196,4 @@ public class ParallelCell extends Cell {
     public Conveyor getExitConveyor() {
         return t9;
     }
-
-    @Override
-    public long getEntryDelayTimeEstimate() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
 }

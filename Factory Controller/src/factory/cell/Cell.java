@@ -1,21 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package factory.cell;
 
 import control.*;
 import factory.conveyor.*;
-import java.util.HashSet;
-import java.util.Set;
-import main.Main;
-import main.Statistics;
+import java.util.*;
+import main.*;
 
-/**
- *
- * @author Alex
- */
 public abstract class Cell {
 
     public static void connect(Cell... cells) {
@@ -36,22 +25,9 @@ public abstract class Cell {
     protected Conveyor[] conveyorList;
     protected final Set<Block> blocksInside = new HashSet<>();
 
-    /**
-     * Not null whenever there is a block present in this cell's entryConveyor
-     * that wants to get in the cell for processing. Set this variable to null
-     * *after setting a path to the block* to signal the Cell class that the
-     * subclass is ready to process another block
-     */
-    //protected Block incomingBlock;
     public Cell(String id) {
         this.id = id;
     }
-
-    /**
-     * @return A time estimate in milliseconds of how much a block on the entry
-     * conveyor right now would have to wait to get in the cell
-     */
-    public abstract long getEntryDelayTimeEstimate();
 
     /**
      * @param position 0 = top left, turns clockwise
@@ -85,6 +61,14 @@ public abstract class Cell {
      * @param left Cell on the left side of this
      */
     public abstract void connectWithLeftCell(Cell left);
+
+    protected boolean processBlockIn(Block block) {
+        return false;
+    }
+
+    protected void processBlockOut(Block block) {
+
+    }
 
     /**
      * Update the FSM of this cell and the FSMs of the conveyors
@@ -129,14 +113,6 @@ public abstract class Cell {
         processToolPreSelection();
     }
 
-    protected boolean processBlockIn(Block block) {
-        return false;
-    }
-
-    protected void processBlockOut(Block block) {
-
-    }
-
     private void processToolPreSelection() {
         for (Conveyor c : conveyorList) {
             if (c instanceof Machine) {
@@ -157,13 +133,13 @@ public abstract class Cell {
         for (Block b : blocksInside) {
 
             // Block has to go to that machine in the future and be processed there
-            if (b.path.path.contains(machine) && b.getNextTransformationOnMachine(machine.type) != null) {
+            if (b.path.contains(machine) && b.getNextTransformationOnMachine(machine.type) != null) {
 
                 // Calculate number of steps to machine for this block
                 int count = 0;
-                for (Conveyor c : b.path.path) {
+                for (int i = 0; i < b.path.length(); i++) {
                     count++;
-                    if (c == machine) {
+                    if (b.path.get(i) == machine) {
                         break;
                     }
                 }
@@ -185,7 +161,7 @@ public abstract class Cell {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        
+
         sb.append(id).append(": ");
         for (Conveyor conv : conveyorList) {
             sb.append(conv.id).append("(").append(conv.getClass().getSimpleName()).append(")").append(" ");
