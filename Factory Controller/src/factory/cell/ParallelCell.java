@@ -2,7 +2,7 @@ package factory.cell;
 
 import control.*;
 import factory.conveyor.*;
-import transformation.*;
+import transformation.Transformation;
 
 public class ParallelCell extends Cell {
 
@@ -16,6 +16,12 @@ public class ParallelCell extends Cell {
     private final Mover t8;
     private final Rotator t9;
     private final Mover t10;
+
+    private BlockRotation currentBlockRotation = BlockRotation.Undefined;
+
+    private enum BlockRotation {
+        Clockwise, CounterClockwise, Undefined;
+    }
 
     public ParallelCell(String id) {
         super(id);
@@ -49,20 +55,14 @@ public class ParallelCell extends Cell {
         //t4.highestPriorityConnection = 0;
     }
 
-    private BlockRotation currentBlockRotation = BlockRotation.Undefined;
-
-    private enum BlockRotation {
-        Clockwise, CounterClockwise, Undefined;
-    }
-
     @Override
     public void update() {
         super.update();
 
-        resetBlockRotation();
+        refreshBlockRotation();
     }
 
-    private void resetBlockRotation() {
+    private void refreshBlockRotation() {
         boolean free = true;
 
         for (Block block : blocksInside) {
@@ -71,25 +71,45 @@ public class ParallelCell extends Cell {
                 break;
             }
         }
-        
+
         if (free) {
             currentBlockRotation = BlockRotation.Undefined;
         }
     }
     
+    @Override
     protected boolean processBlockIn(Block block) {
-        BlockRotation rotation = getBlockRotationForBlock(block);
-        Path path = block.path;
+        BlockRotation rotation = getBlockRotation(block);
 
+        // Cannot have more than three blocks at once on the cell
         if (blocksInside.size() >= 3) {
             return false;
         }
 
-        if (currentBlockRotation != BlockRotation.Undefined) {
-            if (currentBlockRotation != rotation) {
-                return false;
-            }
+        // Cannot have two blocks with opposite rotations
+        if (currentBlockRotation != BlockRotation.Undefined && currentBlockRotation != rotation) {
+            return false;
         }
+
+        currentBlockRotation = rotation;
+        block.path.append(getBlockPath(block, rotation));
+        //t7.highestPriorityConnection = rotation == BlockRotation.Clockwise ? 1 : 0;
+
+        System.out.println("processBlockIn: currentBlockRotation = " + currentBlockRotation);
+        return true;
+    }
+
+    private BlockRotation getBlockRotation(Block block) {
+        if (block.getNextTransformation().machine == Machine.Type.B) {
+            return BlockRotation.CounterClockwise;
+        }
+        else {
+            return BlockRotation.Clockwise;
+        }
+    }
+
+    private Path getBlockPath(Block block, BlockRotation rotation) {
+        Path path = new Path();
 
         path.push(t4);
         Conveyor current, next;
@@ -146,21 +166,7 @@ public class ParallelCell extends Cell {
         }
 
         path.push(t7, t9);
-
-        currentBlockRotation = rotation;
-        //t7.highestPriorityConnection = rotation == BlockRotation.Clockwise ? 1 : 0;
-
-        System.out.println("processBlockIn: currentBlockRotation = " + currentBlockRotation);
-        return true;
-    }
-
-    private BlockRotation getBlockRotationForBlock(Block b) {
-        if (b.getNextTransformation().machine == Machine.Type.B) {
-            return BlockRotation.CounterClockwise;
-        }
-        else {
-            return BlockRotation.Clockwise;
-        }
+        return path;
     }
 
     @Override

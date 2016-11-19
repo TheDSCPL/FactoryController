@@ -123,7 +123,7 @@ public abstract class Cell {
             }
         }
     }
-
+    
     private void processToolPreSelection(Machine machine) {
 
         // Get next block to go to that machine and be processed there

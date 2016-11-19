@@ -1,18 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package factory.cell;
 
 import control.*;
 import factory.conveyor.*;
 import transformation.*;
 
-/**
- *
- * @author Alex
- */
 public class SerialCell extends Cell {
 
     private final Mover t1;
@@ -88,7 +79,12 @@ public class SerialCell extends Cell {
             return false;
         }
 
-        Path path = block.path;
+        block.path.append(getBlockPath(block));
+        return true;
+    }
+    
+    private Path getBlockPath(Block block) {
+        Path path = new Path();
 
         path.push(t3);
         Conveyor current = t3;
@@ -116,7 +112,7 @@ public class SerialCell extends Cell {
         }
 
         path.push(t6);
-        return true;
+        return path;
     }
 
     @Override
