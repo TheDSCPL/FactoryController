@@ -7,71 +7,117 @@ import factory.cell.assemb.*;
 import factory.conveyor.*;
 import java.util.*;
 import main.*;
-import transformation.*;
 
 public class Factory {
 
     private final Warehouse cw;
-    private final ParallelCell c1, c3;
-    private final SerialCell c2, c4;
-    private final Assembler ca;
-    private final LoadUnloadBay cb;
-    private final Cell[] cellList;
-
+    private final Cell[] processingCells;
+    
     public Factory() {
 
         // Create cells
         cw = new Warehouse("A");
-        c1 = new ParallelCell("Pa");
-        c2 = new SerialCell("Sa");
-        c3 = new ParallelCell("Pb");
-        c4 = new SerialCell("Sb");
-        ca = new Assembler("M");
-        cb = new LoadUnloadBay("C");
+        ParallelCell c1 = new ParallelCell("Pa");
+        SerialCell c2 = new SerialCell("Sa");
+        ParallelCell c3 = new ParallelCell("Pb");
+        SerialCell c4 = new SerialCell("Sb");
+        Assembler ca = new Assembler("M");
+        LoadUnloadBay cb = new LoadUnloadBay("C");
 
         // Connect cells
-        cellList = new Cell[]{cw, c1, c2, c3, c4, ca, cb};
-        Cell.connect(cellList);
+        Cell[] allCells = new Cell[]{cw, c1, c2, c3, c4, ca, cb};
+        Cell.connect(allCells);
+
+        // Fill lists
+        processingCells = new Cell[]{c1, c2, c3, c4, ca, cb};
     }
 
     public void update() {
 
         // Update cells
-        for (Cell cell : cellList) {
+        cw.update();
+        for (Cell cell : processingCells) {
             cell.update();
         }
 
-        // TODO: Do this
+        // Choose next order to be executed
         if (cw.getBlockOutQueueCount() == 0) {
-            for (Order order : Main.orderc.getPendingOrders()) {
+            Set<Order> orders = Main.orderc.getPendingOrders();
 
-                // DEMO for unload orders
-                if (order instanceof UnloadOrder) {
-                    cw.addBlockOut(((UnloadOrder) order).execute(entryPathFromWarehouse(cb)));
-                }
-                
-                // DEMO for serial/parallel cells
-                else if (order instanceof MachiningOrder) {
-                    MachiningOrder mo = (MachiningOrder) order;
-
-                    Optional<TransformationSequence> seqAB;
-                    seqAB = mo.possibleSequences().stream().filter(s -> s.machineSet == Machine.Type.Set.AB).findFirst();
-
-                    Optional<TransformationSequence> seqBC;
-                    seqBC = mo.possibleSequences().stream().filter(s -> s.machineSet == Machine.Type.Set.BC).findFirst();
-
-                    if (seqAB.isPresent()) {
-                        cw.addBlockOut(mo.execute(entryPathFromWarehouse(c2), seqAB.get()));
-                    }
-                    else if (seqBC.isPresent()) {
-                        cw.addBlockOut(mo.execute(entryPathFromWarehouse(c1), seqBC.get()));
-                    }
-                }
-            }
+            Arrays.asList(processingCells) // Get all cells
+                    .stream()
+                    .map((c) -> c.getOrderProspects(orders, cellEntryPathFromWarehouse(c).timeEstimate())) // Get all order prospects from each cell
+                    .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll) // Collapse List<List<X>> into List<X>
+                    .stream()
+                    .map((op) -> (OrderProspect) op) // Cast from Object to OrderProspect
+                    .sorted(this::orderProspectsSortFunction) // Sort (better prospect becomes first on stream)
+                    .findFirst() // Get first prospect
+                    .ifPresent( // Execute prospect
+                            (op) -> {
+                                System.out.println("Executing prospect: " + op);
+                                for (int i = 0; i < op.possibleExecutionCount; i++) {
+                                    List<Block> bl = op.order.execute(cellEntryPathFromWarehouse(op.cell), op.executionInfo);
+                                    cw.addBlocksOut(bl);
+                                    op.cell.addIncomingBlocks(bl);
+                                }
+                            }
+                    );
         }
     }
 
-    public Path entryPathFromWarehouse(Cell cell) {
+    // TODO: sorting algorithm
+    private int orderProspectsSortFunction(OrderProspect op1, OrderProspect op2) {
+        int value = 0;
+
+        // Execute each set of rules, sequentially, from most important to least important
+        // Stop execution when a rule has decided the order between the prospects (value != 0)
+        for (int i = 0; i <= 3; i++) {
+            switch (i) {
+                case 0: // Leave for last prospects that cannot be processed immediately
+                    if (!op1.entersCellImmediately) {
+                        value = -1;
+                    }
+                    if (!op2.entersCellImmediately) {
+                        value = 1;
+                    }
+                    break;
+                case 1:
+                    if (op1.cell == op2.cell) { // Respect priority of orders in the same cell
+                        value = op1.priority - op2.priority;
+                    }
+                    else { // For different cells, prefer to send blocks to cells far away first
+                        value = indexForCell(op1.cell) - indexForCell(op2.cell);
+                    }
+                    break;
+                case 2: // For the same order, prefer cells that are quicker
+                    if (op1.order == op2.order) {
+                        value = (int) (op2.processingTime - op1.processingTime);
+                    }
+                    break;
+                case 3: // Prefer prospects that get more done at once
+                    value = op1.possibleExecutionCount - op2.possibleExecutionCount;
+                    break;
+            }
+
+            if (value != 0) {
+                break;
+            }
+        }
+
+        return -value; // Apparently, sorting order needs to be reversed
+    }
+
+    private int indexForCell(Cell c) {
+        for (int i = 0; i < processingCells.length; i++) {
+            if (processingCells[i] == c) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public Path cellEntryPathFromWarehouse(Cell cell) {
         Path path = new Path();
 
         path.push(cw.getExitConveyor());
@@ -96,7 +142,7 @@ public class Factory {
         return path;
     }
 
-    public Path exitPathToWarehouse(Cell cell) {
+    public Path cellExitPathToWarehouse(Cell cell) {
         Path path = new Path();
 
         path.push(cell.getExitConveyor());
@@ -124,12 +170,13 @@ public class Factory {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        
-        for (Cell cell : cellList) {
+
+        sb.append(cw).append("\n");
+        for (Cell cell : processingCells) {
             sb.append(cell).append("\n");
         }
 
         return sb.toString();
     }
-    
+
 }

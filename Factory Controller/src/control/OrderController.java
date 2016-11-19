@@ -101,12 +101,12 @@ public class OrderController {
 
         StringBuilder sb = new StringBuilder();
 
-        for (Order order : orders) {
+        orders.stream().forEach((order) -> {
             sb.append("O")
                     .append(order.id).append(" ")
                     .append(order.orderTypeString()).append(" ")
                     .append(order.getStateString()).append("\n");
-        }
+        });
 
         return sb.toString();
     }

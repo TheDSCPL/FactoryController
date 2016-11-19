@@ -1,8 +1,15 @@
 package factory.cell;
 
 import control.*;
+import control.order.MachiningOrder;
+import control.order.Order;
+import factory.OrderProspect;
 import factory.conveyor.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import transformation.Transformation;
+import transformation.TransformationSequence;
 
 public class ParallelCell extends Cell {
 
@@ -75,6 +82,34 @@ public class ParallelCell extends Cell {
         if (free) {
             currentBlockRotation = BlockRotation.Undefined;
         }
+    }
+    
+    @Override
+    public List<OrderProspect> getOrderProspects(Set<Order> orders, long arrivalDelayEstimate) {
+        List<OrderProspect> ret = new ArrayList<>();
+        
+        for (Order o : orders) {
+            if (o instanceof MachiningOrder) {
+                MachiningOrder order = (MachiningOrder) o;
+
+                for (TransformationSequence seq : order.possibleSequences()) {
+                    if (seq.machineSet == Machine.Type.Set.BC) {
+
+                        ret.add(new OrderProspect(
+                                this,
+                                order,
+                                1, // TODO: x
+                                seq,
+                                seq.totalDuration(),
+                                blocksIncoming.size() + blocksInside.size() < 3, // TODO: x
+                                1 // TODO: x
+                        ));
+                    }
+                }
+            }
+        }
+
+        return ret;
     }
     
     @Override

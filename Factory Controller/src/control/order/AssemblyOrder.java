@@ -1,6 +1,7 @@
 package control.order;
 
 import control.*;
+import java.util.List;
 
 public class AssemblyOrder extends Order {
 
@@ -13,9 +14,9 @@ public class AssemblyOrder extends Order {
         this.topType = topType;
     }
 
-    public Block[] execute(Path blockPath) {
+    /*public Block[] execute(Path blockPath) {
         if (!isPending()) {
-            return null;
+            return new ArrayList<>();
         }
 
         Block b1 = new Block(bottomType);
@@ -34,6 +35,11 @@ public class AssemblyOrder extends Order {
 
         incrementPlacement();
         return new Block[]{b1, b2};
+    }*/
+    
+    @Override
+    public List<Block> execute(Path path, Object info) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

@@ -3,7 +3,7 @@ package control;
 import factory.conveyor.*;
 import java.util.*;
 
-public class Path {
+public final class Path {
 
     private final List<Conveyor> path = new ArrayList<>();
 
@@ -91,6 +91,10 @@ public class Path {
     
     public boolean contains(Conveyor c) {
         return path.contains(c);
+    }
+    
+    public long timeEstimate() {
+        return 0; // TODO: calculate
     }
     
     public String toString() {

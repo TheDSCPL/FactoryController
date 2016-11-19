@@ -1,8 +1,11 @@
 package factory.cell;
 
 import control.*;
-import control.order.UnloadOrder;
+import control.order.*;
+import factory.OrderProspect;
 import factory.conveyor.*;
+import java.util.*;
+import static java.util.stream.Collectors.*;
 
 public class LoadUnloadBay extends Cell {
 
@@ -41,18 +44,6 @@ public class LoadUnloadBay extends Cell {
     }
 
     @Override
-    public Conveyor getCornerConveyor(int position) {
-        switch (position) {
-            case 0: return t1;
-            case 1: return t3;
-            case 2: return t8;
-            case 3: return t6;
-            default:
-                throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
-        }
-    }
-
-    @Override
     public void update() {
         super.update();
 
@@ -84,10 +75,40 @@ public class LoadUnloadBay extends Cell {
         if (order.position == 2) {
             block.path.push(t5);
         }
-        
+
         return true;
     }
     
+    @Override
+    public List<OrderProspect> getOrderProspects(Set<Order> orders, long arrivalDelayEstimate) {
+        return orders
+                .stream()
+                .filter((o) -> o instanceof UnloadOrder)
+                .map((o) -> (UnloadOrder) o)
+                .map((o) -> new OrderProspect(this, o, getPusherForPosition(o.position).roller.isFull() ? 1 : 2, null, 0, !t4.hasBlock(), o.position))
+                .collect(toList());
+    }
+
+    private Pusher getPusherForPosition(int position) {
+        switch (position) {
+            case 1: return t4;
+            case 2: return t5;
+            default: throw new IndexOutOfBoundsException("XXX"); // TODO: error string
+        }
+    }
+    
+    @Override
+    public Conveyor getCornerConveyor(int position) {
+        switch (position) {
+            case 0: return t1;
+            case 1: return t3;
+            case 2: return t8;
+            case 3: return t6;
+            default:
+                throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
+        }
+    }
+
     @Override
     public void connectWithRightCell(Cell right) {
         t3.connections[1] = right.getCornerConveyor(0);

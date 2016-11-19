@@ -23,11 +23,17 @@ public abstract class Order {
         dateReceived = new Date();
     }
 
-    public boolean isPending() {
-        return placedCount + completedCount < count; //state == State.Received || state == State.Processing;
+    public final boolean isPending() {
+        return placedCount + completedCount < count;
     }
-
-    protected void incrementPlacement() {
+    
+    public final int getPendingCount() {
+        return count - placedCount - completedCount;
+    }
+    
+    public abstract List<Block> execute(Path path, Object info);
+    
+    protected final void incrementPlacement() {
         if (!isPending()) {
             return;
         }
@@ -39,7 +45,7 @@ public abstract class Order {
         placedCount++;
     }
 
-    public void complete(Block block) {
+    public final void complete(Block block) {
         blocks.remove(block);
 
         placedCount--;
@@ -58,7 +64,7 @@ public abstract class Order {
         sb.append(" - ").append("Type: ").append(orderTypeString()).append("\n");
         sb.append(" - ").append("Count: ").append(count).append("\n");
         sb.append(" - ").append("State: ").append(getStateString()).append("\n");
-        sb.append(" - ").append("Blocks pending: ").append(count - placedCount - completedCount).append("\n");
+        sb.append(" - ").append("Blocks pending: ").append(getPendingCount()).append("\n");
         sb.append(" - ").append("Blocks processing: ").append(placedCount).append("\n");
         sb.append(" - ").append("Blocks completed: ").append(completedCount).append("\n");
         sb.append(" - ").append("Date received: ").append(df.format(dateReceived)).append("\n");

@@ -1,6 +1,8 @@
 package factory.cell;
 
 import control.*;
+import control.order.*;
+import factory.*;
 import factory.conveyor.*;
 import java.util.*;
 import main.*;
@@ -8,7 +10,7 @@ import main.*;
 public abstract class Cell {
 
     public static void connect(Cell... cells) {
-        if (cells.length == 0) {
+        if (cells.length <= 1) {
             return;
         }
         for (int i = 1; i < cells.length; i++) {
@@ -24,6 +26,7 @@ public abstract class Cell {
     public final String id;
     protected Conveyor[] conveyorList;
     protected final Set<Block> blocksInside = new HashSet<>();
+    protected final Set<Block> blocksIncoming = new HashSet<>();
 
     public Cell(String id) {
         this.id = id;
@@ -61,7 +64,15 @@ public abstract class Cell {
      * @param left Cell on the left side of this
      */
     public abstract void connectWithLeftCell(Cell left);
-
+    
+    public void addIncomingBlocks(List<Block> blocks) {
+        blocksIncoming.addAll(blocks);
+    }
+    
+    public List<OrderProspect> getOrderProspects(Set<Order> orders, long arrivalDelayEstimate) {
+        return new ArrayList<>();
+    }
+    
     protected boolean processBlockIn(Block block) {
         return false;
     }
@@ -89,6 +100,7 @@ public abstract class Cell {
                     if (processBlockIn(b)) {
                         Main.stats.inc(id, Statistics.Type.BlocksReceived, b.type);
                         blocksInside.add(b);
+                        blocksIncoming.remove(b);
                     }
                 }
             }
@@ -103,7 +115,7 @@ public abstract class Cell {
                     Block b = exit.getOneBlock();
                     processBlockOut(b);
                     Main.stats.inc(id, Statistics.Type.BlocksSent, b.type);
-                    b.path.append(Main.factory.exitPathToWarehouse(this));
+                    b.path.append(Main.factory.cellExitPathToWarehouse(this));
                     blocksInside.remove(b);
                 }
             }
