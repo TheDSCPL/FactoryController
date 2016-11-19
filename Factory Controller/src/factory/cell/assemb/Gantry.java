@@ -1,18 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and openGrab the template in the editor.
- */
 package factory.cell.assemb;
 
-import factory.other.Motor;
-import factory.other.Sensor;
+import factory.other.*;
 import main.*;
 
-/**
- *
- * @author luisp
- */
 public class Gantry {
 
     //Outputs
@@ -143,17 +133,17 @@ public class Gantry {
             {
                 case INITIALIZING1ST: //if undefined position; 1st attempt
                     if (initXTimer == -1) {
-                        initXTimer = System.currentTimeMillis();
+                        initXTimer = Main.time();
                         XMotor.turnOnMinus();
                     }
-                    else if (System.currentTimeMillis() - initXTimer >= initializationTimeoutMillis) {
+                    else if (Main.time() - initXTimer >= initializationTimeoutMillis) {
                         XState = MOVEMENT_STATE.INITIALIZING2ND;
-                        initXTimer = System.currentTimeMillis();
+                        initXTimer = Main.time();
                         XMotor.turnOff();
                     }
                     break;
                 case INITIALIZING2ND:    //if undefined position; 2nd attempt
-                    if (System.currentTimeMillis() - initXTimer >= initializationTimeoutMillis) {
+                    if (Main.time() - initXTimer >= initializationTimeoutMillis) {
                         //If the gatry is now trying to initialize in the other direction (second attempt) and it times out, then it's an error
                         throw new Error("Gantry initialization timed out");
                     }
@@ -189,17 +179,17 @@ public class Gantry {
             {
                 case INITIALIZING1ST: //if undefined position; 1st attempt
                     if (initYTimer == -1) {
-                        initYTimer = System.currentTimeMillis();
+                        initYTimer = Main.time();
                         YMotor.turnOnMinus();
                     }
-                    else if (System.currentTimeMillis() - initYTimer >= initializationTimeoutMillis) {
+                    else if (Main.time() - initYTimer >= initializationTimeoutMillis) {
                         YState = MOVEMENT_STATE.INITIALIZING2ND;
-                        initYTimer = System.currentTimeMillis();
+                        initYTimer = Main.time();
                         YMotor.turnOff();
                     }
                     break;
                 case INITIALIZING2ND:    //if undefined position; 2nd attempt
-                    if (System.currentTimeMillis() - initYTimer >= initializationTimeoutMillis) {
+                    if (Main.time() - initYTimer >= initializationTimeoutMillis) {
                         //If the gatry is now trying to initialize in the other direction (second attempt) and it times out, then it's an error
                         throw new Error("Gantry initialization timed out");
                     }
