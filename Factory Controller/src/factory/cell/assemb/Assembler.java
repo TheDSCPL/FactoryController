@@ -21,7 +21,7 @@ public class Assembler extends Cell {
 
     public final Gantry gantry;
 
-    private final ArrayDeque<Transfer> pendingTransfers;
+    private final List<Transfer> pendingTransfers;  //add at the end. get from the front
 
     public Assembler(String id) {
         super(id);
@@ -47,7 +47,11 @@ public class Assembler extends Cell {
 
         gantry = new Gantry(id);
 
-        pendingTransfers = new ArrayDeque<>();
+        pendingTransfers = new ArrayList<>();
+        
+        transferBlock(0, 0, 1, 3);
+        transferBlock(0, 2, 1, 4);
+        transferBlock(1, 3, 0, 2);
     }
 
     @Override
@@ -65,9 +69,10 @@ public class Assembler extends Cell {
     @Override
     public void update() {
         super.update();
-        gantry.update();
+        if(!gantry.update())
+            return;
 
-        // DEMO
+        /*// DEMO
         if (t1.isPresenceSensorOn(0) && pendingTransfers.isEmpty()) {
             transferBlock(0, 0, 1, 3);
         }
@@ -76,12 +81,12 @@ public class Assembler extends Cell {
         }
         if (t3.isPresenceSensorOn(0) && pendingTransfers.isEmpty()) {
             transferBlock(1, 3, 0, 2);
-        }
+        }*/
 
-        if (!gantry.isInitializing() && !pendingTransfers.isEmpty()) {
-            if (pendingTransfers.peek().update()) { // if transaction completed
-                //System.out.println("pop");
-                pendingTransfers.pop();
+        if (!pendingTransfers.isEmpty()) {
+            if (pendingTransfers.get(0).update()) { // if transaction completed
+                System.out.println("pop");
+                pendingTransfers.remove(0);
             }
         }
     }
@@ -112,8 +117,8 @@ public class Assembler extends Cell {
     public class Transfer {
 
         private final int fromX, fromY, toX, toY;
-        private int whereToX;
-        private int whereToY;
+        private int whereToX;   //where the gantry is supposed to be going atm in the X direction
+        private int whereToY;   //where the gantry is supposed to be going atm in the X direction
         private TRANSFER_STATE status = TRANSFER_STATE.MOVING_TO_ORIGIN;
 
         public Transfer(int fromX, int fromY, int toX, int toY) {
@@ -124,10 +129,20 @@ public class Assembler extends Cell {
             this.fromY = fromY;
             this.toX = toX;
             this.toY = toY;
-            whereToX = 2 * fromX + 1;
-            whereToY = 2 * fromY + 1;
+            this.whereToX = 2 * fromX + 1;
+            this.whereToY = 2 * fromY + 1;
         }
 
+        boolean isCompleted()
+        {
+            return status==TRANSFER_STATE.FINISHED;
+        }
+        
+        boolean isActive()
+        {
+            return status != TRANSFER_STATE.WAITING;
+        }
+        
         private long grabTimer;
 
         /**
@@ -139,34 +154,31 @@ public class Assembler extends Cell {
             boolean Xready;
             boolean Yready;
             switch (status) {
+                case WAITING:
+                    status = TRANSFER_STATE.MOVING_TO_ORIGIN;
+                    //intentional fall-through
                 case MOVING_TO_ORIGIN:
                     gantry.openGrab();
                     Xready = (gantry.isAtX == whereToX);
                     if (Xready) {
                         gantry.XMotor.turnOff();
-                        gantry.XState = Gantry.MOVEMENT_STATE.IDLE;
                     }
                     else if (gantry.isAtX < whereToX) {
                         gantry.XMotor.turnOnPlus();
-                        gantry.XState = Gantry.MOVEMENT_STATE.MOVINGPLUS;
                     }
                     else {
                         gantry.XMotor.turnOnMinus();
-                        gantry.XState = Gantry.MOVEMENT_STATE.MOVINGMINUS;
                     }
 
                     Yready = (gantry.isAtY == whereToY);
                     if (Yready) {
                         gantry.YMotor.turnOff();
-                        gantry.YState = Gantry.MOVEMENT_STATE.IDLE;
                     }
                     else if (gantry.isAtY < whereToY) {
                         gantry.YMotor.turnOnPlus();
-                        gantry.YState = Gantry.MOVEMENT_STATE.MOVINGPLUS;
                     }
                     else {
                         gantry.YMotor.turnOnMinus();
-                        gantry.YState = Gantry.MOVEMENT_STATE.MOVINGMINUS;
                     }
 
                     if (Xready && Yready) {    //arrived at origin
@@ -180,14 +192,15 @@ public class Assembler extends Cell {
                     if (gantry.downZ.on()) //fully down
                     {
                         gantry.ZMotor.turnOff();
-                        grabTimer = Main.time();
-                        status = TRANSFER_STATE.GRAB_ORIGIN;
+                        grabTimer = System.currentTimeMillis();
+                        if(gantry.presenceSensor.on())
+                            status = TRANSFER_STATE.GRAB_ORIGIN;
                     }
                     break;
                 case GRAB_ORIGIN: //espera 1 segundo, como indicado na descrição da fábrica
                     //System.err.println("GRAB " + gantry.presenceSensor.on());
                     gantry.closeGrab();
-                    if (Main.time() - grabTimer >= 5000) { // TODO: this constant should be defined with a name
+                    if (System.currentTimeMillis() - grabTimer >= 1200) {
                         status = TRANSFER_STATE.GO_UP_ORIGIN;
                     }
                     break;
@@ -208,60 +221,65 @@ public class Assembler extends Cell {
                     Xready = (gantry.isAtX == whereToX);
                     if (Xready) {
                         //System.out.print("Xready ");
-                        gantry.XState = Gantry.MOVEMENT_STATE.IDLE;
                         gantry.XMotor.turnOff();
                     }
                     else if (gantry.isAtX < whereToX) {
                         //System.out.println("XPlus ");
                         gantry.XMotor.turnOnPlus();
-                        gantry.XState = Gantry.MOVEMENT_STATE.MOVINGPLUS;
                     }
                     else {
                         //System.out.println("XMinus ");
                         gantry.XMotor.turnOnMinus();
-                        gantry.XState = Gantry.MOVEMENT_STATE.MOVINGMINUS;
                     }
 
                     Yready = (gantry.isAtY == whereToY);
                     if (Yready) {
                         //System.out.println("Yready");
-                        gantry.YState = Gantry.MOVEMENT_STATE.IDLE;
                         gantry.YMotor.turnOff();
                     }
                     else if (gantry.isAtY < whereToY) {
                         //System.out.println("YPlus");
                         gantry.YMotor.turnOnPlus();
-                        gantry.YState = Gantry.MOVEMENT_STATE.MOVINGPLUS;
                     }
                     else {
                         //System.out.println("YMinus");
                         gantry.YMotor.turnOnMinus();
-                        gantry.YState = Gantry.MOVEMENT_STATE.MOVINGMINUS;
                     }
 
                     if (Xready && Yready) //arrived at destination
                     {
                         gantry.XMotor.turnOff();
                         gantry.YMotor.turnOff();
-                        grabTimer = Main.time();
+                        grabTimer = System.currentTimeMillis();
                         status = TRANSFER_STATE.DROP_DESTINATION;
                     }
                     break;
                 case DROP_DESTINATION:
                     gantry.openGrab();
-                    if (Main.time() - grabTimer >= 1000) { // TODO: This constant should be defined with a name
+                    if (System.currentTimeMillis() - grabTimer >= 1000) {
                         status = TRANSFER_STATE.FINISHED;
                     }
                     break;
                 case FINISHED:
-                    gantry.openGrab();
                     gantry.XMotor.turnOff();
                     gantry.YMotor.turnOff();
+                    gantry.ZMotor.turnOff();
                     return true;
                 default:
                     throw new IllegalStateException("Illegal state reached at the Transfer FSM");
             }
             return false;
+        }
+        
+        /**
+         * cancels this transfer
+         */
+        void cancel()
+        {
+            pendingTransfers.remove(this);
+            if(!isCompleted())
+                status = TRANSFER_STATE.CANCELED;
+            System.gc();
         }
     }
 
@@ -272,7 +290,7 @@ public class Assembler extends Cell {
     }
 
     private enum TRANSFER_STATE {
-        MOVING_TO_ORIGIN, GO_DOWN_ORIGIN, GRAB_ORIGIN, GO_UP_ORIGIN, MOVING_TO_DESTINATION, DROP_DESTINATION, FINISHED; //considering that there is no need for the gantry to go down in the destination
+        WAITING, MOVING_TO_ORIGIN, GO_DOWN_ORIGIN, GRAB_ORIGIN, GO_UP_ORIGIN, MOVING_TO_DESTINATION, DROP_DESTINATION, FINISHED, CANCELED; //considering that there is no need for the gantry to go down in the destination
     }
 
 }
