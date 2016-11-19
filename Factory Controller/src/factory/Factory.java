@@ -49,8 +49,8 @@ public class Factory {
                 if (order instanceof UnloadOrder) {
                     cw.addBlockOut(((UnloadOrder) order).execute(entryPathFromWarehouse(cb)));
                 }
-
-                // DEMO for serial cells
+                
+                // DEMO for serial/parallel cells
                 else if (order instanceof MachiningOrder) {
                     MachiningOrder mo = (MachiningOrder) order;
 

@@ -12,46 +12,19 @@ public abstract class Order {
 
     private int placedCount = 0;
     private int completedCount = 0;
-    
+
     private final Date dateReceived;
     private Date dateStarted;
     private Date dateFinished;
-
-    public enum State {
-        Received("Received"),
-        Processing("Processing"),
-        Completed("Completed");
-
-        private final String desc;
-
-        private State(String desc) {
-            this.desc = desc;
-        }
-
-        @Override
-        public String toString() {
-            return desc;
-        }
-    }
-
-    public State getState() {
-        if (completedCount == count) {
-            return State.Completed;
-        }
-        if (placedCount + completedCount == 0) {
-            return State.Received;
-        }
-        return State.Processing;
-    }
-
-    public boolean isPending() {
-        return placedCount + completedCount < count; //state == State.Received || state == State.Processing;
-    }
 
     public Order(int id, int count) {
         this.id = id;
         this.count = count;
         dateReceived = new Date();
+    }
+
+    public boolean isPending() {
+        return placedCount + completedCount < count; //state == State.Received || state == State.Processing;
     }
 
     protected void incrementPlacement() {
@@ -62,13 +35,13 @@ public abstract class Order {
         if (placedCount == 0) {
             dateStarted = new Date();
         }
-        
+
         placedCount++;
     }
 
     public void complete(Block block) {
         blocks.remove(block);
-        
+
         placedCount--;
         completedCount++;
         if (completedCount == count) {
@@ -84,7 +57,7 @@ public abstract class Order {
         sb.append(" - ").append("ID: ").append(id).append("\n");
         sb.append(" - ").append("Type: ").append(orderTypeString()).append("\n");
         sb.append(" - ").append("Count: ").append(count).append("\n");
-        sb.append(" - ").append("State: ").append(getState()).append("\n");
+        sb.append(" - ").append("State: ").append(getStateString()).append("\n");
         sb.append(" - ").append("Blocks pending: ").append(count - placedCount - completedCount).append("\n");
         sb.append(" - ").append("Blocks processing: ").append(placedCount).append("\n");
         sb.append(" - ").append("Blocks completed: ").append(completedCount).append("\n");
@@ -93,6 +66,16 @@ public abstract class Order {
         sb.append(" - ").append("Date finished: ").append(dateFinished == null ? "not yet finished" : df.format(dateFinished)).append("\n");
 
         return sb.toString();
+    }
+
+    public String getStateString() {
+        if (completedCount == count) {
+            return "Completed";
+        }
+        if (placedCount + completedCount == 0) {
+            return "Received";
+        }
+        return "Processing";
     }
 
     public abstract String orderDescription();

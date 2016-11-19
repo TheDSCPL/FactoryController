@@ -105,7 +105,7 @@ public class OrderController {
             sb.append("O")
                     .append(order.id).append(" ")
                     .append(order.orderTypeString()).append(" ")
-                    .append(order.getState()).append("\n");
+                    .append(order.getStateString()).append("\n");
         }
 
         return sb.toString();

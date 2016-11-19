@@ -2,8 +2,8 @@ package factory.cell.assemb;
 
 import factory.cell.*;
 import factory.conveyor.*;
-import factory.other.Table;
-import java.util.ArrayDeque;
+import factory.other.*;
+import java.util.*;
 import main.*;
 
 public class Assembler extends Cell {
@@ -180,14 +180,14 @@ public class Assembler extends Cell {
                     if (gantry.downZ.on()) //fully down
                     {
                         gantry.ZMotor.turnOff();
-                        grabTimer = System.currentTimeMillis();
+                        grabTimer = Main.time();
                         status = TRANSFER_STATE.GRAB_ORIGIN;
                     }
                     break;
                 case GRAB_ORIGIN: //espera 1 segundo, como indicado na descrição da fábrica
                     //System.err.println("GRAB " + gantry.presenceSensor.on());
                     gantry.closeGrab();
-                    if (System.currentTimeMillis() - grabTimer >= 5000) {
+                    if (Main.time() - grabTimer >= 5000) { // TODO: this constant should be defined with a name
                         status = TRANSFER_STATE.GO_UP_ORIGIN;
                     }
                     break;
@@ -243,13 +243,13 @@ public class Assembler extends Cell {
                     {
                         gantry.XMotor.turnOff();
                         gantry.YMotor.turnOff();
-                        grabTimer = System.currentTimeMillis();
+                        grabTimer = Main.time();
                         status = TRANSFER_STATE.DROP_DESTINATION;
                     }
                     break;
                 case DROP_DESTINATION:
                     gantry.openGrab();
-                    if (System.currentTimeMillis() - grabTimer >= 1000) {
+                    if (Main.time() - grabTimer >= 1000) { // TODO: This constant should be defined with a name
                         status = TRANSFER_STATE.FINISHED;
                     }
                     break;

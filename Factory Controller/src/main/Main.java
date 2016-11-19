@@ -56,11 +56,7 @@ public class Main {
     public static long time() {
         return System.nanoTime() / (long) 1_000_000;
     }
-
-    /**
-     * @param args the command line arguments
-     * @throws java.io.IOException
-     */
+    
     public static void main(String[] args) throws IOException {
         console.setDaemon(true);
         console.start();

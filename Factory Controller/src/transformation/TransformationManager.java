@@ -40,7 +40,7 @@ public class TransformationManager {
                 case 9:
                     machineType = Machine.Type.C;
                     break;
-                default: throw new Error("Inavli machine type in config file");
+                default: throw new Error("Invalid machine type in config file");
             }
 
             Machine.Tool.Type machineTool;
@@ -130,7 +130,7 @@ public class TransformationManager {
     }
 
     /**
-     * Returns all TransformationSequence's possible from block type {@param from} to block type {@param to} using machine set {@param mts}
+     * Returns all TransformationSequences possible from block type {@param from} to block type {@param to} using machine set {@param mts}
      * @param from 
      * @param to
      * @param mts Machine type set to filter by. Can be null, in which case returns list for all machine type sets
