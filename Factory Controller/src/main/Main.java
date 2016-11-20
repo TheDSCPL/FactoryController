@@ -13,8 +13,8 @@ import transformation.*;
 Major TODO list:
 
 Luis:
-  [.]  Gantry (Class: Gantry)
-  [ ]  Assembler cell processing and optimization (Class: Assembler)
+  [X]  Gantry (Class: Gantry)
+  [.]  Assembler cell processing and optimization (Class: Assembler)
 
 Alex:
   [X]  Serial cell processing and optimization (Class: SerialCell)
@@ -27,8 +27,8 @@ Alex:
   [X]  Parallel cell processing and optimization (Class: ParalleCell)
   [X]  Tool pre-selection on Parallel cell (Class: ParallelCell)
   [X]  Statistics module + thread safety! (Class: Main, Statistics)
-  [ ]  Parallel cell opimization: entry of blocks on cell is not prioritized over block being transfer-rotated already on cell
-  [ ]  Parallel cell opimization: path.length > 3, not 2
+  [.]  Parallel cell opimization: entry of blocks on cell is not prioritized over block being transfer-rotated already on cell
+  [.]  Parallel cell opimization: path.length > 3, not 2
   [.]  Order processing algorithm and distribution by the various cells (Class: Factory)
 
 Unassigned:
