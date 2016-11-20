@@ -1,5 +1,8 @@
 package factory.cell.assemb;
 
+import control.Block;
+import control.order.Order;
+import factory.OrderPossibility;
 import factory.cell.*;
 import factory.conveyor.*;
 import factory.other.*;
@@ -111,6 +114,31 @@ public class Assembler extends Cell {
     @Override
     public Rotator getBottomTransferConveyor() {
         return t5;
+    }
+
+    @Override
+    public Conveyor getEntryConveyor() {
+        return t2;
+    }
+
+    @Override
+    public Conveyor getExitConveyor() {
+        return t2;
+    }
+
+    @Override
+    public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    protected boolean processBlockIn(Block block) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected Cell processBlockOut(Block block) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     //TODO: add Transfer field to Block

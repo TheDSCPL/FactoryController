@@ -267,11 +267,11 @@ public class Gantry {
     }
 
     public void openGrab() {
-        Main.modbus.setOutput(gripOutputId, gripState = true);
+        Main.modbus.setOutput(gripOutputId, gripState = false);
     }
 
     public void closeGrab() {
-        Main.modbus.setOutput(gripOutputId, gripState = false);
+        Main.modbus.setOutput(gripOutputId, gripState = true);
     }
 
     public boolean isOpen() {

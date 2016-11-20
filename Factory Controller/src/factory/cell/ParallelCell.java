@@ -1,15 +1,12 @@
 package factory.cell;
 
 import control.*;
-import control.order.MachiningOrder;
-import control.order.Order;
-import factory.OrderPossibility;
+import control.order.*;
+import factory.*;
 import factory.conveyor.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import transformation.Transformation;
-import transformation.TransformationSequence;
+import java.util.*;
+import main.Main;
+import transformation.*;
 
 public class ParallelCell extends Cell {
 
@@ -25,6 +22,21 @@ public class ParallelCell extends Cell {
     private final Mover t10;
 
     private BlockRotation currentBlockRotation = BlockRotation.Undefined;
+
+    @Override
+    public Conveyor getEntryConveyor() {
+        return t2;
+    }
+
+    @Override
+    public Conveyor getExitConveyor() {
+        return t9;
+    }
+
+    @Override
+    protected Cell processBlockOut(Block block) {
+        return Main.factory.warehouseCell;
+    }
 
     private enum BlockRotation {
         Clockwise, CounterClockwise, Undefined;
@@ -87,7 +99,7 @@ public class ParallelCell extends Cell {
     @Override
     public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
         List<OrderPossibility> ret = new ArrayList<>();
-
+        
         for (Order o : orders) {
             if (o instanceof MachiningOrder) {
                 MachiningOrder order = (MachiningOrder) o;

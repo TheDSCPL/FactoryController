@@ -10,42 +10,56 @@ import main.*;
 
 public class Factory {
 
-    private final Warehouse cw;
-    private final Cell[] cells;
+    public final Warehouse warehouseCell;
+    public final LoadUnloadBay loadUnloadCell;
+    private final List<Cell> cells = new ArrayList<>();
 
     public Factory() {
 
         // Create cells
-        cw = new Warehouse("A");
-        ParallelCell c1 = new ParallelCell("Pa");
-        SerialCell c2 = new SerialCell("Sa");
-        ParallelCell c3 = new ParallelCell("Pb");
-        SerialCell c4 = new SerialCell("Sb");
-        Assembler ca = new Assembler("M");
-        LoadUnloadBay cb = new LoadUnloadBay("C");
+        warehouseCell = new Warehouse(Main.config.getS("cell.warehouse.id"));
+        loadUnloadCell = new LoadUnloadBay(Main.config.getS("cell.loadunload.id"));
+        
+        cells.add(warehouseCell);
+        for (int i = 1; Main.config.getS("cell." + i + ".type") != null; i++) {
+            String type = Main.config.getS("cell." + i + ".type");
+            String id = Main.config.getS("cell." + i + ".id");
 
+            Cell cell;
+            switch (type) {
+                case "serial":
+                    cell = new SerialCell(id);
+                    break;
+                case "parallel":
+                    cell = new ParallelCell(id);
+                    break;
+                case "assembly":
+                    cell = new Assembler(id);
+                    break;
+                default: throw new Error("Invalid machine type in config file");
+            }
+
+            cells.add(cell);
+        }
+        cells.add(loadUnloadCell);
+        
         // Connect cells
-        cells = new Cell[]{cw, c1, c2, c3, c4, ca, cb};
         Cell.connect(cells);
     }
 
     public void update() {
-
+        
         // Update cells
-        for (Cell cell : cells) {
-            cell.update();
-        }
+        cells.stream().forEach(Cell::update);
 
         // Choose next order to be executed
-        if (cw.getBlockOutQueueCount() == 0) {
+        if (warehouseCell.getBlockOutQueueCount() == 0) {
             Set<Order> orders = Main.orderc.getPendingOrders();
-
-            Arrays.asList(cells) // Get all cells
-                    .stream()
-                    .filter((c) -> c != cw) // Remove warehouse
-                    .map((c) -> c.getOrderPossibilities(orders, cellEntryPathFromWarehouse(c).timeEstimate() + cw.reactionTime)) // Get all order possibilities from each cell
-                    .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll) // Collapse List<List<X>> into List<X>
-                    .stream()
+            
+            cells.stream()
+                    .filter((c) -> c != warehouseCell) // Warehouse does not process Orders
+                    .map((c) -> c.getOrderPossibilities(orders, cellEntryPathFromWarehouse(c).timeEstimate() + warehouseCell.reactionTime)) // Get all order possibilities from each cell
+                    .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll).stream() // Collapse List<List<X>> into List<X>
                     .map((op) -> (OrderPossibility) op) // Cast from Object to OrderPossibility
                     .sorted(this::orderPossibilitiesSortFunction) // Sort (better possibility becomes first on stream)
                     .findFirst() // Get first possibility
@@ -54,7 +68,7 @@ public class Factory {
                                 System.out.println("Executing possibility: " + op);
                                 for (int i = 0; i < op.possibleExecutionCount; i++) {
                                     List<Block> bl = op.order.execute(cellEntryPathFromWarehouse(op.cell), op.executionInfo);
-                                    cw.addBlocksOut(bl);
+                                    warehouseCell.addBlocksOut(bl);
                                     op.cell.addIncomingBlocks(bl);
                                 }
                             }
@@ -105,8 +119,8 @@ public class Factory {
     }
 
     private int indexForCell(Cell c) {
-        for (int i = 0; i < cells.length; i++) {
-            if (cells[i] == c) {
+        for (int i = 0; i < cells.size(); i++) {
+            if (cells.get(i) == c) {
                 return i;
             }
         }
@@ -169,18 +183,18 @@ public class Factory {
     }
 
     public Path cellEntryPathFromWarehouse(Cell cell) {
-        return blockTransportPath(cw, cell);
+        return blockTransportPath(warehouseCell, cell);
     }
 
     public Path cellExitPathToWarehouse(Cell cell) {
-        return blockTransportPath(cell, cw);
+        return blockTransportPath(cell, warehouseCell);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(cw).append("\n");
+        sb.append(warehouseCell).append("\n");
         for (Cell cell : cells) {
             sb.append(cell).append("\n");
         }

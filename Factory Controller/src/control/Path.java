@@ -108,6 +108,7 @@ public final class Path {
             time += current.transferTimeEstimate(last, next);
         }
 
+        //System.out.println("timeEstimate.time = " + time);
         return time;
     }
 

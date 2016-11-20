@@ -17,11 +17,11 @@ public class TransformationManager {
     }
 
     private void loadTransformations() {
-        for (int id = 1; Main.config.getS("transformation." + id + ".initial") != null; id++) {
-            int initial = Main.config.getI("transformation." + id + ".initial");
-            int result = Main.config.getI("transformation." + id + ".final");
-            int tool = Main.config.getI("transformation." + id + ".tool");
-            int duration = Main.config.getI("transformation." + id + ".duration");
+        for (int i = 1; Main.config.getS("transformation." + i + ".initial") != null; i++) {
+            int initial = Main.config.getI("transformation." + i + ".initial");
+            int result = Main.config.getI("transformation." + i + ".final");
+            int tool = Main.config.getI("transformation." + i + ".tool");
+            int duration = Main.config.getI("transformation." + i + ".duration");
 
             Machine.Type machineType;
             switch (tool) {

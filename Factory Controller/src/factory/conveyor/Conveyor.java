@@ -384,7 +384,7 @@ public abstract class Conveyor {
         }
 
         // TODO: not finished
-        return length * (double) Main.config.getI("conveyor.sizeUnit") / Main.config.getD("timing.conveyor.speed");
+        return length * (double) Main.config.getI("conveyor.sizeUnit") / Main.config.getD("timing.conveyor.speed") * 1000; // *1000 to convert to milliseconds
     }
 
     protected abstract boolean transferMotorDirection(Conveyor partner, boolean sending);

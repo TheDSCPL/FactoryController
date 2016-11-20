@@ -6,6 +6,7 @@ import factory.OrderPossibility;
 import factory.conveyor.*;
 import java.util.*;
 import static java.util.stream.Collectors.*;
+import main.*;
 
 public class LoadUnloadBay extends Cell {
 
@@ -55,6 +56,9 @@ public class LoadUnloadBay extends Cell {
 
             // Place block on this conveyor
             t3.placeBlock(block, 0);
+            
+            // Add block to cell
+            blocksInside.add(block);
         }
 
         if (t8.isPresenceSensorOn(0)) {
@@ -64,6 +68,9 @@ public class LoadUnloadBay extends Cell {
 
             // Place block on this conveyor
             t8.placeBlock(block, 0);
+            
+            // Add block to cell
+            blocksInside.add(block);
         }
     }
 
@@ -129,5 +136,20 @@ public class LoadUnloadBay extends Cell {
     @Override
     public Rotator getBottomTransferConveyor() {
         return t7;
+    }
+
+    @Override
+    public Conveyor getEntryConveyor() {
+        return t2;
+    }
+
+    @Override
+    public Conveyor getExitConveyor() {
+        return t7;
+    }
+
+    @Override
+    protected Cell processBlockOut(Block block) {
+        return Main.factory.warehouseCell;
     }
 }

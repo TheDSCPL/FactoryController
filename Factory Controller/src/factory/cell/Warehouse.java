@@ -6,6 +6,8 @@
 package factory.cell;
 
 import control.*;
+import control.order.Order;
+import factory.OrderPossibility;
 import factory.conveyor.*;
 import java.util.*;
 import main.*;
@@ -110,6 +112,31 @@ public class Warehouse extends Cell {
     @Override
     public Conveyor getBottomTransferConveyor() {
         return in;
+    }
+
+    @Override
+    public Conveyor getEntryConveyor() {
+        return null;
+    }
+
+    @Override
+    public Conveyor getExitConveyor() {
+        return null;
+    }
+
+    @Override
+    protected boolean processBlockIn(Block block)  {
+        return false;
+    }
+
+    @Override
+    protected Cell processBlockOut(Block block) {
+        return null;
+    }
+    
+    @Override
+    public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate)  {
+        return new ArrayList<>();
     }
 
 }

@@ -9,12 +9,12 @@ import main.*;
 
 public abstract class Cell {
 
-    public static void connect(Cell... cells) {
-        if (cells.length <= 1) {
+    public static void connect(List<Cell> cells) {
+        if (cells.size() <= 1) {
             return;
         }
-        for (int i = 1; i < cells.length; i++) {
-            Cell.connect(cells[i - 1], cells[i]);
+        for (int i = 1; i < cells.size(); i++) {
+            Cell.connect(cells.get(i - 1), cells.get(i));
         }
     }
 
@@ -40,16 +40,26 @@ public abstract class Cell {
     public abstract Conveyor getCornerConveyor(int position);
 
     /**
+     * @return The rotator on the top
+     */
+    public abstract Conveyor getTopTransferConveyor();
+
+    /**
+     * @return The rotator on the bottom
+     */
+    public abstract Conveyor getBottomTransferConveyor();
+
+    /**
      * @return The Conveyor that is the entry point for blocks on this cell
      * (normally, the rotator on the top)
      */
-    public abstract Conveyor getTopTransferConveyor();
+    public abstract Conveyor getEntryConveyor();
 
     /**
      * @return The Conveyor that is the exit point for blocks on this cell
      * (normally, the rotator on the bottom)
      */
-    public abstract Conveyor getBottomTransferConveyor();
+    public abstract Conveyor getExitConveyor();
 
     /**
      * This cell will be connected to a cell on its right
@@ -69,17 +79,11 @@ public abstract class Cell {
         blocksIncoming.addAll(blocks);
     }
 
-    public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
-        return new ArrayList<>();
-    }
+    public abstract List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate);
 
-    protected boolean processBlockIn(Block block) {
-        return false;
-    }
+    abstract protected boolean processBlockIn(Block block);
 
-    protected void processBlockOut(Block block) {
-
-    }
+    abstract protected Cell processBlockOut(Block block);
 
     /**
      * Update the FSM of this cell and the FSMs of the conveyors
@@ -91,11 +95,12 @@ public abstract class Cell {
         }
 
         // Process blocks coming in
-        Conveyor entry = getTopTransferConveyor();
+        Conveyor entry = getEntryConveyor();
         if (entry != null) {
             if (entry.isIdle() && entry.hasBlock()) {
                 Block b = entry.getOneBlock();
 
+                // If block wants to get inside this cell
                 if (!b.path.hasNext() && blocksIncoming.contains(b)) {
                     if (processBlockIn(b)) {
                         Main.stats.inc(id, Statistics.Type.BlocksReceived, b.type);
@@ -107,16 +112,16 @@ public abstract class Cell {
         }
 
         // Process blocks going out
-        Conveyor exit = getBottomTransferConveyor();
+        Conveyor exit = getExitConveyor();
         if (exit != null) {
             if (exit.isIdle() && exit.hasBlock()) {
                 Block b = exit.getOneBlock();
-                
+
                 // If block came from this cell and is not just passing by
                 if (!b.path.hasNext() && blocksInside.contains(b)) {
-                    processBlockOut(b);
+                    Cell destination = processBlockOut(b);
                     Main.stats.inc(id, Statistics.Type.BlocksSent, b.type);
-                    b.path.append(Main.factory.cellExitPathToWarehouse(this));
+                    b.path.append(Main.factory.blockTransportPath(this, destination));
                     blocksInside.remove(b);
                 }
             }

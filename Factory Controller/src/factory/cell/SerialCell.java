@@ -1,13 +1,11 @@
 package factory.cell;
 
 import control.*;
-import control.order.MachiningOrder;
-import control.order.Order;
-import factory.OrderPossibility;
+import control.order.*;
+import factory.*;
 import factory.conveyor.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import main.Main;
 import transformation.*;
 
 public class SerialCell extends Cell {
@@ -83,6 +81,20 @@ public class SerialCell extends Cell {
     public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
         List<OrderPossibility> ret = new ArrayList<>();
 
+        /*Set<Block> blocksInsideEstimate = new HashSet<>();
+
+        for (Block b : blocksInside) {
+            if (b.path.timeEstimate() + transformation time 0 > arrivalDelayEstimate) {
+                blocksInsideEstimate.add(b);
+            }
+        }
+        for (Block b : blocksIncoming) {
+            if (b.path.timeEstimate() < arrivalDelayEstimate) {
+                blocksInsideEstimate.add(b);
+            }
+        }*/
+        //System.out.println("getOrderPossibilities.arrivalDelayEstimate = " + arrivalDelayEstimate);
+        //System.out.println("getOrderPossibilities.blocksInsideEstimate = " + blocksInsideEstimate);
         for (Order o : orders) {
             if (o instanceof MachiningOrder) {
                 MachiningOrder order = (MachiningOrder) o;
@@ -90,14 +102,22 @@ public class SerialCell extends Cell {
                 for (TransformationSequence seq : order.possibleSequences()) {
                     if (seq.machineSet == Machine.Type.Set.AB) {
 
-                        int priority = 1; // TODO: x
+                        int priority = 0;
+                        if (!seq.containsMachineType(Machine.Type.A)) {
+                            priority = 1;
+                        }
+                        /*else if () {
+                            priority = -1;
+                        }
+                        else {
+                            priority = 0;
+                        }*/ // TODO: finish
                         
-                        
-                        // If the only machine in the sequence is 
-                        int possibleExecutionCount = !seq.containsMachineType(Machine.Type.A) ? 3 : 1; // TODO: x
-                        
+                        int possibleExecutionCount = seq.containsMachineType(Machine.Type.A) ? 1 : 3;
+
+                        boolean entersImmediately = !(firstConveyorsBlocked || t3.hasBlock());//blocksIncoming.size() + blocksInside.size() < 3;
+
                         double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();
-                        boolean entersImmediately = blocksIncoming.size() + blocksInside.size() < 3; // TODO: x
 
                         ret.add(new OrderPossibility(
                                 this, order, possibleExecutionCount, seq,
@@ -107,6 +127,8 @@ public class SerialCell extends Cell {
                 }
             }
         }
+
+        System.out.println("getOrderPossibilities.ret = " + ret);
 
         return ret;
     }
@@ -186,5 +208,20 @@ public class SerialCell extends Cell {
     @Override
     public Rotator getBottomTransferConveyor() {
         return t6;
+    }
+
+    @Override
+    public Conveyor getEntryConveyor() {
+        return t2;
+    }
+
+    @Override
+    public Conveyor getExitConveyor() {
+        return t6;
+    }
+
+    @Override
+    protected Cell processBlockOut(Block block) {
+        return Main.factory.warehouseCell;
     }
 }

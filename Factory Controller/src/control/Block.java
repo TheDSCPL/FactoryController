@@ -13,13 +13,6 @@ public class Block {
     public Block(Block.Type type) {
         this.type = type;
     }
-
-    public void completeOrder() {
-        if (order != null) {
-            order.complete(this);
-        }
-    }
-
     public enum Type {
         P1(1), P2(2), P3(3), P4(4), P5(5),
         P6(6), P7(7), P8(8), P9(9),
@@ -53,6 +46,12 @@ public class Block {
     public Order order;
     public Type type;
     public Path path = new Path();
+
+    public void completeOrder() {
+        if (order != null) {
+            order.complete(this);
+        }
+    }
 
     /**
      * For blocks used in MachiningOrder
