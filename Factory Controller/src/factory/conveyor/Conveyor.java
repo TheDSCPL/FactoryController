@@ -21,8 +21,9 @@ public abstract class Conveyor {
     private final Sensor[] presenceSensors;
     private final int length;
     private final Double[] queueWeights;
-
+    
     public final String id;
+    public boolean sendingFrozen;
     //public Integer highestPriorityConnection = null;
     public Conveyor[] connections;
 
@@ -66,7 +67,7 @@ public abstract class Conveyor {
 
         switch (conveyorState) {
             case Standby:
-                if (hasBlock()) {
+                if (hasBlock() && !sendingFrozen) {
                     Block block = getOneBlock();
 
                     if (block.path.hasNext()) {

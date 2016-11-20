@@ -1,7 +1,7 @@
 package control.order;
 
 import control.*;
-import java.util.List;
+import java.util.*;
 
 public class AssemblyOrder extends Order {
 
