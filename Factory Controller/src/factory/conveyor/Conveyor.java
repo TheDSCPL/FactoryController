@@ -21,9 +21,9 @@ public abstract class Conveyor extends BlockContainer {
     private final Sensor[] presenceSensors;
     private final int length;
     private final Double[] queueWeights;
+    private boolean sendingFrozen;
 
     public final String id;
-    private boolean sendingFrozen;
     //public Integer highestPriorityConnection = null;
     public Conveyor[] connections;
 
@@ -376,9 +376,9 @@ public abstract class Conveyor extends BlockContainer {
         return length * (double) Main.config.getI("conveyor.sizeUnit") / Main.config.getD("timing.conveyor.speed") * 1000; // *1000 to convert to milliseconds
     }
 
-    public void setSendingFrozen(boolean sendingFrozen)
-    {
+    public void setSendingFrozen(boolean sendingFrozen) {
         this.sendingFrozen = sendingFrozen;
+        
     }
     
     protected abstract boolean transferMotorDirection(Conveyor partner, boolean sending);
