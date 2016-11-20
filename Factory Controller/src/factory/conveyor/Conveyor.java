@@ -1,12 +1,12 @@
 package factory.conveyor;
 
 import control.*;
-import factory.other.Motor;
-import factory.other.Sensor;
+import factory.*;
+import factory.other.*;
 import java.util.*;
 import main.*;
 
-public abstract class Conveyor {
+public abstract class Conveyor extends BlockContainer {
 
     /**
      * Contains a conveyor that is to transfer a block to this conveyor when
@@ -23,7 +23,7 @@ public abstract class Conveyor {
     private final Double[] queueWeights;
     
     public final String id;
-    public boolean sendingFrozen;
+    private boolean sendingFrozen;
     //public Integer highestPriorityConnection = null;
     public Conveyor[] connections;
 
@@ -388,6 +388,11 @@ public abstract class Conveyor {
         return length * (double) Main.config.getI("conveyor.sizeUnit") / Main.config.getD("timing.conveyor.speed") * 1000; // *1000 to convert to milliseconds
     }
 
+    public void setSendingFrozen(boolean sendingFrozen)
+    {
+        this.sendingFrozen = sendingFrozen;
+    }
+    
     protected abstract boolean transferMotorDirection(Conveyor partner, boolean sending);
 
     protected abstract void blockTransferFinished();

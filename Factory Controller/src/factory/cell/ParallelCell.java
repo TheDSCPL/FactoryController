@@ -56,7 +56,7 @@ public class ParallelCell extends Cell {
         t8 = new Mover(id + "T8", 1);
         t9 = new Rotator(id + "T9");
         t10 = new Mover(id + "T10", 2);
-        conveyorList = new Conveyor[]{t1, t2, t3, t4, t5, t6, t7, t8, t9, t10};
+        conveyors = new Conveyor[]{t1, t2, t3, t4, t5, t6, t7, t8, t9, t10};
 
         // Connect conveyors
         t1.connections = new Conveyor[]{null, t2};
