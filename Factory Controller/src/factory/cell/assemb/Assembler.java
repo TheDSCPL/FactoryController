@@ -6,7 +6,7 @@ import factory.other.*;
 import java.util.*;
 import main.*;
 
-public class Assembler extends Cell {
+public final class Assembler extends Cell {
 
     private final Mover t1;
     private final Rotator t2;
@@ -68,9 +68,9 @@ public class Assembler extends Cell {
 
     @Override
     public void update() {
-        super.update();
-        if(!gantry.update())
-            return;
+        //super.update();
+        /*if(!gantry.update())
+            return;*/
 
         /*// DEMO
         if (t1.isPresenceSensorOn(0) && pendingTransfers.isEmpty()) {
@@ -83,12 +83,12 @@ public class Assembler extends Cell {
             transferBlock(1, 3, 0, 2);
         }*/
 
-        if (!pendingTransfers.isEmpty()) {
+        /*if (!pendingTransfers.isEmpty()) {
             if (pendingTransfers.get(0).update()) { // if transaction completed
                 System.out.println("pop");
                 pendingTransfers.remove(0);
             }
-        }
+        }*/
     }
 
     @Override
