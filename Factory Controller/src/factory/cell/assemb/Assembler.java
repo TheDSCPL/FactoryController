@@ -22,6 +22,8 @@ public final class Assembler extends Cell {
     public final Table table2;
     public final Table table3;
 
+    public final Table[] tables;
+    
     public final Gantry gantry;
 
     private final List<Transfer> pendingTransfers;  //add at the end. get from the front
@@ -35,7 +37,7 @@ public final class Assembler extends Cell {
         t4 = new Mover(id + "T4", 1);
         t5 = new Rotator(id + "T6");
         t6 = new Mover(id + "T5", 1);
-        conveyorList = new Conveyor[]{t1, t2, t3, t4, t5, t6};
+        conveyors = new Conveyor[]{t1, t2, t3, t4, t5, t6};
 
         t1.connections = new Conveyor[]{null, t2};
         t2.connections = new Conveyor[]{t1, null, null, t3};
@@ -47,6 +49,7 @@ public final class Assembler extends Cell {
         table1 = new Table(Main.config.getBaseInput(id + "M") + 0);
         table2 = new Table(Main.config.getBaseInput(id + "M") + 1);
         table3 = new Table(Main.config.getBaseInput(id + "M") + 2);
+        tables = new Table[]{table1, table2, table3};
 
         gantry = new Gantry(id);
 
@@ -130,6 +133,34 @@ public final class Assembler extends Cell {
     //TODO: add Transfer field to Block
     public class Transfer {
 
+        private final class Coordinates {
+
+            public int x;
+            public int y;
+            public int z;
+
+            public Coordinates(int x, int y, int z) {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+
+            public Coordinates(int x, int y) {
+                this(x, y, -1);
+            }
+            
+            public BlockContainer getBlockContainerFromCoordinates(int x, int y)
+            {
+                switch(x)
+                {
+                    case 0:
+                        break;
+                }
+                //TODO
+                return null;
+            }
+        }
+        
         private final int fromX, fromY, toX, toY;
         private int whereToX;   //where the gantry is supposed to be going atm in the X direction
         private int whereToY;   //where the gantry is supposed to be going atm in the X direction
@@ -327,7 +358,13 @@ public final class Assembler extends Cell {
             return true;
         }
     }
-
+    
+    public Transfer transferBlock(Table t, Conveyor c)
+    {
+        //TODO
+        return null;
+    }
+    
     public Transfer transferBlock(int fromX, int fromY, int toX, int toY) {
         Transfer transfer = new Transfer(fromX, fromY, toX, toY);
         pendingTransfers.add(transfer);

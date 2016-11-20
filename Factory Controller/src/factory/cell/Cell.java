@@ -24,7 +24,7 @@ public abstract class Cell {
     }
 
     public final String id;
-    protected Conveyor[] conveyorList;
+    protected Conveyor[] conveyors;
     protected final Set<Block> blocksInside = new HashSet<>();
     protected final Set<Block> blocksIncoming = new HashSet<>();
 
@@ -90,7 +90,7 @@ public abstract class Cell {
      */
     public void update() {
         // Update all conveyors in the cell
-        for (Conveyor conveyor : conveyorList) {
+        for (Conveyor conveyor : conveyors) {
             conveyor.update();
         }
 
@@ -132,7 +132,7 @@ public abstract class Cell {
     }
 
     private void processToolPreSelection() {
-        for (Conveyor c : conveyorList) {
+        for (Conveyor c : conveyors) {
             if (c instanceof Machine) {
                 Machine m = (Machine) c;
                 if (m.canPreSelectTool()) {
@@ -181,7 +181,7 @@ public abstract class Cell {
         StringBuilder sb = new StringBuilder();
 
         sb.append(id).append(": ");
-        for (Conveyor conv : conveyorList) {
+        for (Conveyor conv : conveyors) {
             sb.append(conv.id).append("(").append(conv.getClass().getSimpleName()).append(")").append(" ");
         }
 

@@ -3,7 +3,7 @@ package factory.other;
 import control.*;
 import factory.*;
 
-public class Table
+public class Table extends BlockContainer
 {
     public Block block;
     private final Sensor sensor;

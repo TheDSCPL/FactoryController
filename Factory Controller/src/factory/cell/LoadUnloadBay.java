@@ -31,7 +31,7 @@ public class LoadUnloadBay extends Cell {
         t6 = new Mover(id + "T6", 1);
         t7 = new Rotator(id + "T7");
         t8 = new Mover(id + "T8", 1);
-        conveyorList = new Conveyor[]{t1, t2, t3, t4, t5, t6, t7, t8};
+        conveyors = new Conveyor[]{t1, t2, t3, t4, t5, t6, t7, t8};
 
         // Connect conveyors
         t1.connections = new Conveyor[]{null, t2};

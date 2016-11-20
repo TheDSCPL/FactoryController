@@ -33,7 +33,7 @@ public class Warehouse extends Cell {
 
         out = new Mover(id + "T1", 1);
         in = new Mover(id + "T2", 1);
-        conveyorList = new Conveyor[]{in, out};
+        conveyors = new Conveyor[]{in, out};
 
         blockOutQueue = new LinkedList<>();
         warehouseInID = Main.config.getBaseOutput(id + "T2") + 2;
