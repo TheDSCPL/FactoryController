@@ -87,9 +87,15 @@ public abstract class Conveyor extends BlockContainer {
                 break;
             case PrepareToReceive:
                 if (isBlockTransferReady()) {
-                    receivingFinishedSensor = presenceSensors[0];
-                    blockTransferStart();
-                    transferPartner.blockTransferStart();
+                    if (!transferPartner.sendingFrozen) {
+                        receivingFinishedSensor = presenceSensors[0];
+                        blockTransferStart();
+                        transferPartner.blockTransferStart();
+                    }
+                    else {
+                        transferPartner = null;
+                        conveyorState = State.Standby;
+                    }
                 }
                 break;
             case Receiving:
@@ -103,7 +109,13 @@ public abstract class Conveyor extends BlockContainer {
                 }
                 break;
             case ReadyToSend:
-                transferPartner.blockTransferRegister(this);
+                if (!sendingFrozen) {
+                    transferPartner.blockTransferRegister(this);
+                }
+                else {
+                    transferPartner = null;
+                    conveyorState = State.Standby;
+                }
                 break;
             case Sending:
                 break;
@@ -372,15 +384,14 @@ public abstract class Conveyor extends BlockContainer {
             throw new Error("XXX"); // TODO: error message
         }
 
-        // TODO: not finished
+        // TODO: not finished on subclasses
         return length * (double) Main.config.getI("conveyor.sizeUnit") / Main.config.getD("timing.conveyor.speed") * 1000; // *1000 to convert to milliseconds
     }
 
     public void setSendingFrozen(boolean sendingFrozen) {
         this.sendingFrozen = sendingFrozen;
-        
     }
-    
+
     protected abstract boolean transferMotorDirection(Conveyor partner, boolean sending);
 
     protected abstract void blockTransferFinished();
