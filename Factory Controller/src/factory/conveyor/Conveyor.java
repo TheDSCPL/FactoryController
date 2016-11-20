@@ -21,7 +21,7 @@ public abstract class Conveyor {
     private final Sensor[] presenceSensors;
     private final int length;
     private final Double[] queueWeights;
-    
+
     public final String id;
     public boolean sendingFrozen;
     //public Integer highestPriorityConnection = null;
@@ -67,14 +67,16 @@ public abstract class Conveyor {
 
         switch (conveyorState) {
             case Standby:
-                if (hasBlock() && !sendingFrozen) {
-                    Block block = getOneBlock();
+                if (hasBlock()) {
+                    if (!sendingFrozen) {
+                        Block block = getOneBlock();
 
-                    if (block.path.hasNext()) {
-                        if (isBlockTransferPossible()) {
-                            transferPartner = block.path.getNext();
-                            conveyorState = State.PrepareToSend;
-                            blockTransferPrepare();
+                        if (block.path.hasNext()) {
+                            if (isBlockTransferPossible()) {
+                                transferPartner = block.path.getNext();
+                                conveyorState = State.PrepareToSend;
+                                blockTransferPrepare();
+                            }
                         }
                     }
                 }
@@ -82,7 +84,6 @@ public abstract class Conveyor {
                     blockTransferPrepare();
                     conveyorState = State.PrepareToReceive;
                 }
-
                 break;
             case PrepareToReceive:
                 if (isBlockTransferReady()) {
@@ -189,19 +190,6 @@ public abstract class Conveyor {
         }
 
         return ret;
-    }
-
-    /**
-     * Get block at position <i>position</i> in this conveyor
-     *
-     * @param position
-     * @return Block, or null if no block is present
-     */
-    private Block getBlock(int position) {
-        if (position >= length) {
-            throw new IndexOutOfBoundsException("Invalid block position " + position);
-        }
-        return blocks[position];
     }
 
     private int indexForConveyor(Conveyor c) {
