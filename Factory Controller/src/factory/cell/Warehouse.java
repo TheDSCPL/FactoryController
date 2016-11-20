@@ -23,26 +23,28 @@ public class Warehouse extends Cell {
     private final Queue<Block> blockOutQueue;
     private boolean waitingForOut = false;
     private boolean waitingForIn = false;
-    
+
+    public final double reactionTime = Main.config.getD("timing.warehouse.reactionTime");
+
     public Warehouse(String id) {
         super(id);
-        
+
         out = new Mover(id + "T1", 1);
         in = new Mover(id + "T2", 1);
         conveyorList = new Conveyor[]{in, out};
-        
+
         blockOutQueue = new LinkedList<>();
         warehouseInID = Main.config.getBaseOutput(id + "T2") + 2;
     }
-    
+
     public void addBlockOut(Block block) {
         blockOutQueue.add(block);
     }
-    
+
     public void addBlocksOut(List<Block> blocks) {
         blockOutQueue.addAll(blocks);
     }
-    
+
     public int getBlockOutQueueCount() {
         return blockOutQueue.size();
     }
@@ -56,7 +58,7 @@ public class Warehouse extends Cell {
             Main.modbus.setOutput(warehouseInID, true);
             waitingForIn = true;
         }
-        
+
         // Block in entry conveyor has disappeared in simulator,
         // remove block from conveyor and reset
         if (waitingForIn && in.isIdle() && !in.isPresenceSensorOn(0)) {
@@ -64,13 +66,13 @@ public class Warehouse extends Cell {
             in.removeBlock(0).completeOrder();
             waitingForIn = false;
         }
-        
+
         // Signal simulator to remove block from warehouse
         if (!waitingForOut && blockOutQueue.size() > 0 && out.isIdle() && !out.hasBlock()) {
             Main.modbus.setRegister(warehouseOutRegister, blockOutQueue.element().type.id);
             waitingForOut = true;
         }
-        
+
         // Block has been placed on out conveyor, notify conveyor, remove block from outQueue and reset
         if (waitingForOut && out.isIdle() && out.isPresenceSensorOn(0)) {
             Main.modbus.setRegister(warehouseOutRegister, 0);
@@ -97,16 +99,17 @@ public class Warehouse extends Cell {
 
     @Override
     public void connectWithLeftCell(Cell left) {
-        
+
     }
 
     @Override
-    public Conveyor getEntryConveyor() {
-        return in;
-    }
-    
-    @Override
-    public Conveyor getExitConveyor() {
+    public Conveyor getTopTransferConveyor() {
         return out;
     }
+
+    @Override
+    public Conveyor getBottomTransferConveyor() {
+        return in;
+    }
+
 }

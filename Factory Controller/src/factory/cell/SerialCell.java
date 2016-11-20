@@ -3,7 +3,7 @@ package factory.cell;
 import control.*;
 import control.order.MachiningOrder;
 import control.order.Order;
-import factory.OrderProspect;
+import factory.OrderPossibility;
 import factory.conveyor.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,9 +80,9 @@ public class SerialCell extends Cell {
     }
 
     @Override
-    public List<OrderProspect> getOrderProspects(Set<Order> orders, long arrivalDelayEstimate) {
-        List<OrderProspect> ret = new ArrayList<>();
-        
+    public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
+        List<OrderPossibility> ret = new ArrayList<>();
+
         for (Order o : orders) {
             if (o instanceof MachiningOrder) {
                 MachiningOrder order = (MachiningOrder) o;
@@ -90,14 +90,18 @@ public class SerialCell extends Cell {
                 for (TransformationSequence seq : order.possibleSequences()) {
                     if (seq.machineSet == Machine.Type.Set.AB) {
 
-                        ret.add(new OrderProspect(
-                                this,
-                                order,
-                                1, // TODO: x
-                                seq,
-                                seq.totalDuration(),
-                                blocksIncoming.size() + blocksInside.size() < 3, // TODO: x
-                                1 // TODO: x
+                        int priority = 1; // TODO: x
+                        
+                        
+                        // If the only machine in the sequence is 
+                        int possibleExecutionCount = !seq.containsMachineType(Machine.Type.A) ? 3 : 1; // TODO: x
+                        
+                        double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();
+                        boolean entersImmediately = blocksIncoming.size() + blocksInside.size() < 3; // TODO: x
+
+                        ret.add(new OrderPossibility(
+                                this, order, possibleExecutionCount, seq,
+                                totalDuration, entersImmediately, priority
                         ));
                     }
                 }
@@ -113,17 +117,17 @@ public class SerialCell extends Cell {
             return false;
         }
 
-        block.path.append(getBlockPath(block));
+        block.path.append(blockPathForTransformationSequence(block.transformations));
         return true;
     }
 
-    private Path getBlockPath(Block block) {
+    private Path blockPathForTransformationSequence(TransformationSequence seq) {
         Path path = new Path();
 
         path.push(t3);
         Conveyor current = t3;
 
-        for (Transformation t : block.transformations.sequence) {
+        for (Transformation t : seq.sequence) {
             switch (t.machine) {
                 case A:
                     if (current == t5) {
@@ -175,12 +179,12 @@ public class SerialCell extends Cell {
     }
 
     @Override
-    public Rotator getEntryConveyor() {
+    public Rotator getTopTransferConveyor() {
         return t2;
     }
 
     @Override
-    public Rotator getExitConveyor() {
+    public Rotator getBottomTransferConveyor() {
         return t6;
     }
 }

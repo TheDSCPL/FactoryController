@@ -154,7 +154,7 @@ public class Machine extends Conveyor {
             Idle, Selecting, Machining;
         }
 
-        private static final long toolSelectionTime = ((360 / 3) / (long) Main.config.getI("tool.rotateSpeed")) * 1000;
+        private static final long toolSelectionTime = ((360 / 3) / (long) Main.config.getI("timing.tool.rotationSpeed")) * 1000;
 
         private final Sensor toolPresentSensor;
         private final Motor toolSelectMotor;

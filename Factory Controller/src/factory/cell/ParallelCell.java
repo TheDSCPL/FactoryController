@@ -3,7 +3,7 @@ package factory.cell;
 import control.*;
 import control.order.MachiningOrder;
 import control.order.Order;
-import factory.OrderProspect;
+import factory.OrderPossibility;
 import factory.conveyor.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,11 +83,11 @@ public class ParallelCell extends Cell {
             currentBlockRotation = BlockRotation.Undefined;
         }
     }
-    
+
     @Override
-    public List<OrderProspect> getOrderProspects(Set<Order> orders, long arrivalDelayEstimate) {
-        List<OrderProspect> ret = new ArrayList<>();
-        
+    public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
+        List<OrderPossibility> ret = new ArrayList<>();
+
         for (Order o : orders) {
             if (o instanceof MachiningOrder) {
                 MachiningOrder order = (MachiningOrder) o;
@@ -95,14 +95,14 @@ public class ParallelCell extends Cell {
                 for (TransformationSequence seq : order.possibleSequences()) {
                     if (seq.machineSet == Machine.Type.Set.BC) {
 
-                        ret.add(new OrderProspect(
-                                this,
-                                order,
-                                1, // TODO: x
-                                seq,
-                                seq.totalDuration(),
-                                blocksIncoming.size() + blocksInside.size() < 3, // TODO: x
-                                1 // TODO: x
+                        int priority = 1; // TODO: x
+                        int possibleExecutionCount = 1; // TODO: x
+                        double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();
+                        boolean entersImmediately = blocksIncoming.size() + blocksInside.size() < 3; // TODO: x
+
+                        ret.add(new OrderPossibility(
+                                this, order, possibleExecutionCount, seq,
+                                totalDuration, entersImmediately, priority
                         ));
                     }
                 }
@@ -111,10 +111,10 @@ public class ParallelCell extends Cell {
 
         return ret;
     }
-    
+
     @Override
     protected boolean processBlockIn(Block block) {
-        BlockRotation rotation = getBlockRotation(block);
+        BlockRotation rotation = blockRotationForTransformationSequence(block.transformations);
 
         // Cannot have more than three blocks at once on the cell
         if (blocksInside.size() >= 3) {
@@ -127,15 +127,15 @@ public class ParallelCell extends Cell {
         }
 
         currentBlockRotation = rotation;
-        block.path.append(getBlockPath(block, rotation));
+        block.path.append(blockPathForTransformationSequence(block.transformations));
         //t7.highestPriorityConnection = rotation == BlockRotation.Clockwise ? 1 : 0;
 
         System.out.println("processBlockIn: currentBlockRotation = " + currentBlockRotation);
         return true;
     }
 
-    private BlockRotation getBlockRotation(Block block) {
-        if (block.getNextTransformation().machine == Machine.Type.B) {
+    private BlockRotation blockRotationForTransformationSequence(TransformationSequence seq) {
+        if (seq.getFirstTransformation().machine == Machine.Type.B) {
             return BlockRotation.CounterClockwise;
         }
         else {
@@ -143,13 +143,14 @@ public class ParallelCell extends Cell {
         }
     }
 
-    private Path getBlockPath(Block block, BlockRotation rotation) {
+    private Path blockPathForTransformationSequence(TransformationSequence seq) {
+        BlockRotation rotation = blockRotationForTransformationSequence(seq);
         Path path = new Path();
 
         path.push(t4);
         Conveyor current, next;
 
-        if (block.getNextTransformation().machine == Machine.Type.B) {
+        if (seq.getFirstTransformation().machine == Machine.Type.B) {
             path.push(t5);
             current = t5;
         }
@@ -158,7 +159,7 @@ public class ParallelCell extends Cell {
             current = t6;
         }
 
-        for (Transformation t : block.transformations.sequence) {
+        for (Transformation t : seq.sequence) {
             switch (t.machine) {
                 case C:
                     if (current == t5) {
@@ -229,12 +230,12 @@ public class ParallelCell extends Cell {
     }
 
     @Override
-    public Rotator getEntryConveyor() {
+    public Rotator getTopTransferConveyor() {
         return t2;
     }
 
     @Override
-    public Conveyor getExitConveyor() {
+    public Conveyor getBottomTransferConveyor() {
         return t9;
     }
 }

@@ -70,6 +70,10 @@ public class Configuration {
     public int getI(String key) {
         return Integer.parseInt(general.getProperty(key));
     }
+    
+    public double getD(String key) {
+        return Double.parseDouble(general.getProperty(key));
+    }
 
     public int getBaseInput(String id) {
         int ret = inputIDs.getOrDefault(id, -1);

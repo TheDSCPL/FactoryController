@@ -2,7 +2,7 @@ package factory.cell;
 
 import control.*;
 import control.order.*;
-import factory.OrderProspect;
+import factory.OrderPossibility;
 import factory.conveyor.*;
 import java.util.*;
 import static java.util.stream.Collectors.*;
@@ -80,12 +80,12 @@ public class LoadUnloadBay extends Cell {
     }
     
     @Override
-    public List<OrderProspect> getOrderProspects(Set<Order> orders, long arrivalDelayEstimate) {
+    public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
         return orders
                 .stream()
                 .filter((o) -> o instanceof UnloadOrder)
                 .map((o) -> (UnloadOrder) o)
-                .map((o) -> new OrderProspect(this, o, getPusherForPosition(o.position).roller.isFull() ? 1 : 2, null, 0, !t4.hasBlock(), o.position))
+                .map((o) -> new OrderPossibility(this, o, getPusherForPosition(o.position).roller.isFull() ? 1 : 2, null, 0, !t4.hasBlock(), o.position))
                 .collect(toList());
     }
 
@@ -122,12 +122,12 @@ public class LoadUnloadBay extends Cell {
     }
 
     @Override
-    public Rotator getEntryConveyor() {
+    public Rotator getTopTransferConveyor() {
         return t2;
     }
 
     @Override
-    public Rotator getExitConveyor() {
+    public Rotator getBottomTransferConveyor() {
         return t7;
     }
 }

@@ -27,7 +27,7 @@ public final class Path {
         path.add(c);
 
     }
-    
+
     public void push(Conveyor... list) {
         for (Conveyor c : list) {
             push(c);
@@ -43,7 +43,7 @@ public final class Path {
         if (path == null) {
             return;
         }
-        
+
         if (!path.isEmpty() && !newPath.path.isEmpty()) {
             // If next path starts on the same conveyor this stops, remove one
             // of the conveyors, so that it doesn't repeat
@@ -70,7 +70,7 @@ public final class Path {
     public Conveyor getLast() {
         return path.isEmpty() ? null : path.get(path.size() - 1);
     }
-    
+
     public boolean hasNext() {
         return path.size() > 1;
     }
@@ -80,24 +80,38 @@ public final class Path {
             path.remove(0);
         }
     }
-    
+
     public int length() {
         return path.size();
     }
-    
+
     public Conveyor get(int i) {
         return path.get(i);
     }
-    
+
     public boolean contains(Conveyor c) {
         return path.contains(c);
     }
-    
-    public long timeEstimate() {
-        return 0; // TODO: calculate
+
+    public double timeEstimate() {
+        if (length() <= 1) {
+            return 0;
+        }
+
+        double time = 0;
+
+        for (int i = 1; i < length() - 1; i++) {
+            Conveyor last = path.get(i - 1);
+            Conveyor current = path.get(i);
+            Conveyor next = path.get(i + 1);
+
+            time += current.transferTimeEstimate(last, next);
+        }
+
+        return time;
     }
-    
+
     public String toString() {
-        return path.stream().map(c -> c.id).reduce("Path {", (a,b) -> (a + ", " + b)) + "}";
+        return path.stream().map(c -> c.id).reduce("Path {", (a, b) -> (a + ", " + b)) + "}";
     }
 }

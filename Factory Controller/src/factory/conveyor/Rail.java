@@ -27,7 +27,7 @@ public class Rail extends Conveyor {
     @Override
     public void update() {
         super.update();
-        
+
         if (prefersLeftPosition) {
             if (isIdle()) {
                 if (railSensorPlus.on()) {
@@ -88,4 +88,11 @@ public class Rail extends Conveyor {
         return transferPartner == connections[0] || transferPartner == connections[3];
     }
 
+    /*public long transferTimeEstimate(Conveyor from, Conveyor to) {
+        long added = 0;
+        
+        if (fro)
+        
+        return super.transferTimeEstimate(from, to) + added;
+    }*/
 }

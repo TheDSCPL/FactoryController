@@ -21,7 +21,7 @@ public abstract class Conveyor {
     private final Sensor[] presenceSensors;
     private final int length;
     private final Double[] queueWeights;
-    
+
     public final String id;
     //public Integer highestPriorityConnection = null;
     public Conveyor[] connections;
@@ -376,6 +376,15 @@ public abstract class Conveyor {
     public boolean isReceiving() {
         return conveyorState == State.PrepareToReceive
                || conveyorState == State.Receiving;
+    }
+
+    public double transferTimeEstimate(Conveyor from, Conveyor to) {
+        if (!isConnectedToConveyor(from) || !isConnectedToConveyor(to)) {
+            throw new Error("XXX"); // TODO: error message
+        }
+
+        // TODO: not finished
+        return length * (double) Main.config.getI("conveyor.sizeUnit") / Main.config.getD("timing.conveyor.speed");
     }
 
     protected abstract boolean transferMotorDirection(Conveyor partner, boolean sending);

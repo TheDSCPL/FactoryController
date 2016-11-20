@@ -43,13 +43,13 @@ public abstract class Cell {
      * @return The Conveyor that is the entry point for blocks on this cell
      * (normally, the rotator on the top)
      */
-    public abstract Conveyor getEntryConveyor();
+    public abstract Conveyor getTopTransferConveyor();
 
     /**
      * @return The Conveyor that is the exit point for blocks on this cell
      * (normally, the rotator on the bottom)
      */
-    public abstract Conveyor getExitConveyor();
+    public abstract Conveyor getBottomTransferConveyor();
 
     /**
      * This cell will be connected to a cell on its right
@@ -64,15 +64,15 @@ public abstract class Cell {
      * @param left Cell on the left side of this
      */
     public abstract void connectWithLeftCell(Cell left);
-    
+
     public void addIncomingBlocks(List<Block> blocks) {
         blocksIncoming.addAll(blocks);
     }
-    
-    public List<OrderProspect> getOrderProspects(Set<Order> orders, long arrivalDelayEstimate) {
+
+    public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
         return new ArrayList<>();
     }
-    
+
     protected boolean processBlockIn(Block block) {
         return false;
     }
@@ -91,12 +91,12 @@ public abstract class Cell {
         }
 
         // Process blocks coming in
-        Conveyor entry = getEntryConveyor();
+        Conveyor entry = getTopTransferConveyor();
         if (entry != null) {
             if (entry.isIdle() && entry.hasBlock()) {
                 Block b = entry.getOneBlock();
 
-                if (!b.path.hasNext()) {
+                if (!b.path.hasNext() && blocksIncoming.contains(b)) {
                     if (processBlockIn(b)) {
                         Main.stats.inc(id, Statistics.Type.BlocksReceived, b.type);
                         blocksInside.add(b);
@@ -107,12 +107,13 @@ public abstract class Cell {
         }
 
         // Process blocks going out
-        Conveyor exit = getExitConveyor();
+        Conveyor exit = getBottomTransferConveyor();
         if (exit != null) {
             if (exit.isIdle() && exit.hasBlock()) {
+                Block b = exit.getOneBlock();
+                
                 // If block came from this cell and is not just passing by
-                if (!exit.getOneBlock().path.hasNext()) {
-                    Block b = exit.getOneBlock();
+                if (!b.path.hasNext() && blocksInside.contains(b)) {
                     processBlockOut(b);
                     Main.stats.inc(id, Statistics.Type.BlocksSent, b.type);
                     b.path.append(Main.factory.cellExitPathToWarehouse(this));
@@ -135,7 +136,7 @@ public abstract class Cell {
             }
         }
     }
-    
+
     private void processToolPreSelection(Machine machine) {
 
         // Get next block to go to that machine and be processed there

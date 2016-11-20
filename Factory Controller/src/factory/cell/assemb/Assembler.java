@@ -104,12 +104,12 @@ public class Assembler extends Cell {
     }
 
     @Override
-    public Rotator getEntryConveyor() {
+    public Rotator getTopTransferConveyor() {
         return t2;
     }
 
     @Override
-    public Rotator getExitConveyor() {
+    public Rotator getBottomTransferConveyor() {
         return t5;
     }
 

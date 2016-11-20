@@ -11,8 +11,8 @@ import main.*;
 public class Factory {
 
     private final Warehouse cw;
-    private final Cell[] processingCells;
-    
+    private final Cell[] cells;
+
     public Factory() {
 
         // Create cells
@@ -25,18 +25,14 @@ public class Factory {
         LoadUnloadBay cb = new LoadUnloadBay("C");
 
         // Connect cells
-        Cell[] allCells = new Cell[]{cw, c1, c2, c3, c4, ca, cb};
-        Cell.connect(allCells);
-
-        // Fill lists
-        processingCells = new Cell[]{c1, c2, c3, c4, ca, cb};
+        cells = new Cell[]{cw, c1, c2, c3, c4, ca, cb};
+        Cell.connect(cells);
     }
 
     public void update() {
 
         // Update cells
-        cw.update();
-        for (Cell cell : processingCells) {
+        for (Cell cell : cells) {
             cell.update();
         }
 
@@ -44,17 +40,18 @@ public class Factory {
         if (cw.getBlockOutQueueCount() == 0) {
             Set<Order> orders = Main.orderc.getPendingOrders();
 
-            Arrays.asList(processingCells) // Get all cells
+            Arrays.asList(cells) // Get all cells
                     .stream()
-                    .map((c) -> c.getOrderProspects(orders, cellEntryPathFromWarehouse(c).timeEstimate())) // Get all order prospects from each cell
+                    .filter((c) -> c != cw) // Remove warehouse
+                    .map((c) -> c.getOrderPossibilities(orders, cellEntryPathFromWarehouse(c).timeEstimate() + cw.reactionTime)) // Get all order possibilities from each cell
                     .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll) // Collapse List<List<X>> into List<X>
                     .stream()
-                    .map((op) -> (OrderProspect) op) // Cast from Object to OrderProspect
-                    .sorted(this::orderProspectsSortFunction) // Sort (better prospect becomes first on stream)
-                    .findFirst() // Get first prospect
-                    .ifPresent( // Execute prospect
+                    .map((op) -> (OrderPossibility) op) // Cast from Object to OrderPossibility
+                    .sorted(this::orderPossibilitiesSortFunction) // Sort (better possibility becomes first on stream)
+                    .findFirst() // Get first possibility
+                    .ifPresent( // Execute possibility
                             (op) -> {
-                                System.out.println("Executing prospect: " + op);
+                                System.out.println("Executing possibility: " + op);
                                 for (int i = 0; i < op.possibleExecutionCount; i++) {
                                     List<Block> bl = op.order.execute(cellEntryPathFromWarehouse(op.cell), op.executionInfo);
                                     cw.addBlocksOut(bl);
@@ -66,14 +63,14 @@ public class Factory {
     }
 
     // TODO: sorting algorithm
-    private int orderProspectsSortFunction(OrderProspect op1, OrderProspect op2) {
+    private int orderPossibilitiesSortFunction(OrderPossibility op1, OrderPossibility op2) {
         int value = 0;
 
         // Execute each set of rules, sequentially, from most important to least important
-        // Stop execution when a rule has decided the order between the prospects (value != 0)
+        // Stop execution when a rule has decided the order between the possibilities (value != 0)
         for (int i = 0; i <= 3; i++) {
             switch (i) {
-                case 0: // Leave for last prospects that cannot be processed immediately
+                case 0: // Leave for last possibilities that cannot be processed immediately
                     if (!op1.entersCellImmediately) {
                         value = -1;
                     }
@@ -94,7 +91,7 @@ public class Factory {
                         value = (int) (op2.processingTime - op1.processingTime);
                     }
                     break;
-                case 3: // Prefer prospects that get more done at once
+                case 3: // Prefer possibilities that get more done at once
                     value = op1.possibleExecutionCount - op2.possibleExecutionCount;
                     break;
             }
@@ -108,8 +105,8 @@ public class Factory {
     }
 
     private int indexForCell(Cell c) {
-        for (int i = 0; i < processingCells.length; i++) {
-            if (processingCells[i] == c) {
+        for (int i = 0; i < cells.length; i++) {
+            if (cells[i] == c) {
                 return i;
             }
         }
@@ -117,54 +114,66 @@ public class Factory {
         return -1;
     }
 
-    public Path cellEntryPathFromWarehouse(Cell cell) {
+    public Path blockTransportPath(Cell from, Cell to) {
+        if (from == to) {
+            return null;
+        }
+
         Path path = new Path();
 
-        path.push(cw.getExitConveyor());
+        // Transport block left to right, meaning using top conveyors
+        if (indexForCell(from) < indexForCell(to)) {
+            path.push(from.getTopTransferConveyor());
 
-        while (path.getLast() != cell.getEntryConveyor()) {
-            Conveyor c;
+            while (path.getLast() != to.getTopTransferConveyor()) {
+                Conveyor c;
 
-            // Get conveyor on the right
-            if (path.getLast() instanceof Mover) {
-                c = path.getLast().connections[1];
-            }
-            else if (path.getLast() instanceof Rotator) {
-                c = path.getLast().connections[2];
-            }
-            else {
-                throw new Error("Invalid conveyor type on top distribution path");
-            }
+                // Get conveyor on the right
+                if (path.getLast() instanceof Mover) {
+                    c = path.getLast().connections[1];
+                }
+                else if (path.getLast() instanceof Rotator) {
+                    c = path.getLast().connections[2];
+                }
+                else {
+                    throw new Error("Invalid conveyor type on top distribution path");
+                }
 
-            path.push(c);
+                path.push(c);
+            }
+        }
+
+        // Transport block right to left, meaning using bottom conveyors
+        else {
+            path.push(from.getBottomTransferConveyor());
+
+            while (path.getLast() != to.getBottomTransferConveyor()) {
+                Conveyor c;
+
+                // Get conveyor on the right
+                if (path.getLast() instanceof Mover) {
+                    c = path.getLast().connections[0];
+                }
+                else if (path.getLast() instanceof Rotator) {
+                    c = path.getLast().connections[0];
+                }
+                else {
+                    throw new Error("Invalid conveyor type on bottom return path");
+                }
+
+                path.push(c);
+            }
         }
 
         return path;
     }
 
+    public Path cellEntryPathFromWarehouse(Cell cell) {
+        return blockTransportPath(cw, cell);
+    }
+
     public Path cellExitPathToWarehouse(Cell cell) {
-        Path path = new Path();
-
-        path.push(cell.getExitConveyor());
-
-        while (path.getLast() != cw.getEntryConveyor()) {
-            Conveyor c;
-
-            // Get conveyor on the right
-            if (path.getLast() instanceof Mover) {
-                c = path.getLast().connections[0];
-            }
-            else if (path.getLast() instanceof Rotator) {
-                c = path.getLast().connections[0];
-            }
-            else {
-                throw new Error("Invalid conveyor type on bottom return path");
-            }
-
-            path.push(c);
-        }
-
-        return path;
+        return blockTransportPath(cell, cw);
     }
 
     @Override
@@ -172,7 +181,7 @@ public class Factory {
         StringBuilder sb = new StringBuilder();
 
         sb.append(cw).append("\n");
-        for (Cell cell : processingCells) {
+        for (Cell cell : cells) {
             sb.append(cell).append("\n");
         }
 
