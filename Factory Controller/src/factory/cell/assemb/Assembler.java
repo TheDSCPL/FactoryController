@@ -151,13 +151,20 @@ public final class Assembler extends Cell {
             
             public BlockContainer getBlockContainerFromCoordinates(int x, int y)
             {
-                switch(x)
+                if(x == 0)
                 {
-                    case 0:
-                        break;
+                    if(y == 0)
+                    {
+                        return t1;
+                    }
+                    if(y == 4)
+                    {
+                        return t6;
+                    }
+                    return tables[y-1];
                 }
-                //TODO
-                return null;
+                else
+                    return conveyors[y <= 1 ? y+1 : y];
             }
         }
         
