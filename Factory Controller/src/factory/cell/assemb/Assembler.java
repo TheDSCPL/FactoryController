@@ -1,8 +1,8 @@
 package factory.cell.assemb;
 
-import control.Block;
-import control.order.Order;
-import factory.OrderPossibility;
+import control.*;
+import control.order.*;
+import factory.*;
 import factory.cell.*;
 import factory.conveyor.*;
 import factory.other.*;
@@ -93,18 +93,18 @@ public final class Assembler extends Cell {
     }
 
     @Override
-    public Rotator getTopTransferConveyor() {
-        return t2;
+    public Conveyor getTopTransferConveyor() {
+        return t1;
     }
-
+    
     @Override
-    public Rotator getBottomTransferConveyor() {
+    public Conveyor getBottomTransferConveyor() {
         return t5;
     }
 
     @Override
     public Conveyor getEntryConveyor() {
-        return t2;
+        return t1;
     }
 
     @Override
