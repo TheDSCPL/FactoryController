@@ -16,10 +16,6 @@ public class Gantry {
     private final long maxInitTries = 2;
 
     public final String id;
-    /**
-     * <i>false</i> if openGrab. <i>true</i> if closed
-     */
-    private boolean gripState = false;
     private final int gripOutputId;
     public final Sensor presenceSensor;
     /**
@@ -204,7 +200,7 @@ public class Gantry {
      * Initializes the gantry
      * @return true if the Gantry is initialized
      */
-    private boolean initialize()
+    boolean initialize()
     {
         if(!isInitializing())
             return true;
@@ -266,15 +262,24 @@ public class Gantry {
         return presenceSensor.on();
     }
 
+    /**
+     * Contains the time since when the grab is opened
+     * -1 if closed
+     */
+    private long openSince = -1;
+    
     public void openGrab() {
-        Main.modbus.setOutput(gripOutputId, gripState = false);
+        if(openSince < 0)
+            openSince = Main.time();
+        Main.modbus.setOutput(gripOutputId, false);
     }
 
     public void closeGrab() {
-        Main.modbus.setOutput(gripOutputId, gripState = true);
+        openSince = -1;
+        Main.modbus.setOutput(gripOutputId, true);
     }
 
     public boolean isOpen() {
-        return !gripState;
+        return Main.time() - openSince >= 1100;
     }
 }
