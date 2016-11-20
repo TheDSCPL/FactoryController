@@ -21,9 +21,9 @@ public abstract class Conveyor extends BlockContainer {
     private final Sensor[] presenceSensors;
     private final int length;
     private final Double[] queueWeights;
-    
-    public final String id;
     private boolean sendingFrozen;
+
+    public final String id;
     //public Integer highestPriorityConnection = null;
     public Conveyor[] connections;
 
@@ -67,14 +67,16 @@ public abstract class Conveyor extends BlockContainer {
 
         switch (conveyorState) {
             case Standby:
-                if (hasBlock() && !sendingFrozen) {
-                    Block block = getOneBlock();
+                if (hasBlock()) {
+                    if (!sendingFrozen) {
+                        Block block = getOneBlock();
 
-                    if (block.path.hasNext()) {
-                        if (isBlockTransferPossible()) {
-                            transferPartner = block.path.getNext();
-                            conveyorState = State.PrepareToSend;
-                            blockTransferPrepare();
+                        if (block.path.hasNext()) {
+                            if (isBlockTransferPossible()) {
+                                transferPartner = block.path.getNext();
+                                conveyorState = State.PrepareToSend;
+                                blockTransferPrepare();
+                            }
                         }
                     }
                 }
@@ -82,7 +84,6 @@ public abstract class Conveyor extends BlockContainer {
                     blockTransferPrepare();
                     conveyorState = State.PrepareToReceive;
                 }
-
                 break;
             case PrepareToReceive:
                 if (isBlockTransferReady()) {
@@ -189,19 +190,6 @@ public abstract class Conveyor extends BlockContainer {
         }
 
         return ret;
-    }
-
-    /**
-     * Get block at position <i>position</i> in this conveyor
-     *
-     * @param position
-     * @return Block, or null if no block is present
-     */
-    private Block getBlock(int position) {
-        if (position >= length) {
-            throw new IndexOutOfBoundsException("Invalid block position " + position);
-        }
-        return blocks[position];
     }
 
     private int indexForConveyor(Conveyor c) {
@@ -388,9 +376,9 @@ public abstract class Conveyor extends BlockContainer {
         return length * (double) Main.config.getI("conveyor.sizeUnit") / Main.config.getD("timing.conveyor.speed") * 1000; // *1000 to convert to milliseconds
     }
 
-    public void setSendingFrozen(boolean sendingFrozen)
-    {
+    public void setSendingFrozen(boolean sendingFrozen) {
         this.sendingFrozen = sendingFrozen;
+        
     }
     
     protected abstract boolean transferMotorDirection(Conveyor partner, boolean sending);
