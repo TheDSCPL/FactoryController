@@ -187,20 +187,22 @@ public class Assembler extends Cell {
                     break;
                 case GO_DOWN_ORIGIN:
                     gantry.openGrab();
-                    gantry.ZMotor.turnOnMinus();
 
                     if (gantry.downZ.on()) //fully down
                     {
                         gantry.ZMotor.turnOff();
-                        grabTimer = System.currentTimeMillis();
-                        if(gantry.presenceSensor.on())
-                            status = TRANSFER_STATE.GRAB_ORIGIN;
+                        grabTimer = Main.time();
+                        status = TRANSFER_STATE.GRAB_ORIGIN;
+                    }
+                    else
+                    {
+                        gantry.ZMotor.turnOnMinus();
                     }
                     break;
                 case GRAB_ORIGIN: //espera 1 segundo, como indicado na descrição da fábrica
                     //System.err.println("GRAB " + gantry.presenceSensor.on());
                     gantry.closeGrab();
-                    if (System.currentTimeMillis() - grabTimer >= 1200) {
+                    if (Main.time() - grabTimer >= 1200) {
                         status = TRANSFER_STATE.GO_UP_ORIGIN;
                     }
                     break;
@@ -250,13 +252,13 @@ public class Assembler extends Cell {
                     {
                         gantry.XMotor.turnOff();
                         gantry.YMotor.turnOff();
-                        grabTimer = System.currentTimeMillis();
+                        grabTimer = Main.time();
                         status = TRANSFER_STATE.DROP_DESTINATION;
                     }
                     break;
                 case DROP_DESTINATION:
                     gantry.openGrab();
-                    if (System.currentTimeMillis() - grabTimer >= 1000) {
+                    if (Main.time() - grabTimer >= 1000) {
                         status = TRANSFER_STATE.FINISHED;
                     }
                     break;

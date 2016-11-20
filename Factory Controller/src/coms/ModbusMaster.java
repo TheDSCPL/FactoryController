@@ -71,7 +71,20 @@ public class ModbusMaster {
         return inputs.getBit(index);
     }
 
+    private boolean[] lastValue = new boolean[7];
+
     public void setOutput(int index, boolean value) {
+        /*if (index >= 169 && index <= 175) {
+            System.out.println("" + index + " " + value);
+        }*/
+
+        if (index == 175) {
+            if (value != lastValue[index - 169]) {
+                System.out.println("Index changed: " + index + " " + value);
+            }
+            lastValue[index - 169] = value;
+        }
+        
         outputs.setBit(index, value);
     }
 

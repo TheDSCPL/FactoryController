@@ -1,17 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and openGrab the template in the editor.
- */
 package factory.cell.assemb;
 
 import factory.other.*;
 import main.*;
 
-/**
- *
- * @author luisp
- */
 public class Gantry {
 
     //Outputs
@@ -138,8 +129,8 @@ public class Gantry {
         if(!isInitializingX())
             return;
         if(initXTimer == -1)    //new attempt
-            initXTimer = System.currentTimeMillis();
-        if(System.currentTimeMillis() - initXTimer >= initializationTimeoutMillis)  //the current attempt timed out
+            initXTimer = Main.time();
+        if(Main.time() - initXTimer >= initializationTimeoutMillis)  //the current attempt timed out
         {
             if(initXTries < maxInitTries)   //switch between attemps and change motor direction (by incrementing the number of tries)
             {
@@ -169,8 +160,8 @@ public class Gantry {
         if(!isInitializingY())
             return;
         if(initYTimer == -1)    //new attempt
-            initYTimer = System.currentTimeMillis();
-        if(System.currentTimeMillis() - initYTimer >= initializationTimeoutMillis)  //the current attempt timed out
+            initYTimer = Main.time();
+        if(Main.time() - initYTimer >= initializationTimeoutMillis)  //the current attempt timed out
         {
             if(initYTries < maxInitTries)   //switch between attemps and change motor direction (by incrementing the number of tries)
             {
@@ -185,7 +176,7 @@ public class Gantry {
                 throw new Error("Gantry initialization timed out");
             }
         }
-        if(getActiveXSensor() != -1)    //found sensor. done initializing Y
+        if(getActiveYSensor() != -1)    //found sensor. done initializing Y
         {
             YMotor.turnOff();
             initYTimer = -1;
@@ -194,6 +185,8 @@ public class Gantry {
         else    //if still initializing
             YMotor.turnOn( initYTries%2 == 1);  //plus in odd tries and minus in even tries
     }
+    
+    private int _i_ = 0;
     
     private void initializeZ()
     {
