@@ -5,6 +5,7 @@ import control.order.*;
 import factory.*;
 import factory.conveyor.*;
 import java.util.*;
+import static java.util.stream.Collectors.toList;
 import main.Main;
 import transformation.*;
 
@@ -81,20 +82,6 @@ public class SerialCell extends Cell {
     public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
         List<OrderPossibility> ret = new ArrayList<>();
 
-        /*Set<Block> blocksInsideEstimate = new HashSet<>();
-
-        for (Block b : blocksInside) {
-            if (b.path.timeEstimate() + transformation time 0 > arrivalDelayEstimate) {
-                blocksInsideEstimate.add(b);
-            }
-        }
-        for (Block b : blocksIncoming) {
-            if (b.path.timeEstimate() < arrivalDelayEstimate) {
-                blocksInsideEstimate.add(b);
-            }
-        }*/
-        //System.out.println("getOrderPossibilities.arrivalDelayEstimate = " + arrivalDelayEstimate);
-        //System.out.println("getOrderPossibilities.blocksInsideEstimate = " + blocksInsideEstimate);
         for (Order o : orders) {
             if (o instanceof MachiningOrder) {
                 MachiningOrder order = (MachiningOrder) o;
@@ -106,16 +93,16 @@ public class SerialCell extends Cell {
                         if (!seq.containsMachineType(Machine.Type.A)) {
                             priority = 1;
                         }
-                        /*else if () {
+                        else if (Collections.indexOfSubList(
+                                seq.sequence.stream().map((t) -> t.machine).collect(toList()),
+                                Arrays.asList(Machine.Type.B, Machine.Type.A)) != -1)
+                        { // If the sequence contains somehwer machine A after machine B, then that has a lower priority because it means the conveyors will be blocked
                             priority = -1;
                         }
-                        else {
-                            priority = 0;
-                        }*/ // TODO: finish
-                        
+
                         int possibleExecutionCount = seq.containsMachineType(Machine.Type.A) ? 1 : 3;
 
-                        boolean entersImmediately = !(firstConveyorsBlocked || t3.hasBlock());//blocksIncoming.size() + blocksInside.size() < 3;
+                        boolean entersImmediately = !(firstConveyorsBlocked || t3.hasBlock()) && blocksIncoming.isEmpty(); //blocksIncoming.size() + blocksInside.size() < 3;
 
                         double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();
 
@@ -128,7 +115,7 @@ public class SerialCell extends Cell {
             }
         }
 
-        System.out.println("getOrderPossibilities.ret = " + ret);
+        //System.out.println("getOrderPossibilities.ret = " + ret);
 
         return ret;
     }
@@ -222,6 +209,6 @@ public class SerialCell extends Cell {
 
     @Override
     protected Cell processBlockOut(Block block) {
-        return Main.factory.warehouseCell;
+        return Main.factory.warehouse;
     }
 }

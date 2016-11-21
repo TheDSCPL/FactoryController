@@ -128,7 +128,7 @@ public abstract class Cell {
         }
 
         // Process any pre-selection of tools on machines
-        processToolPreSelection();
+        //processToolPreSelection();
     }
 
     private void processToolPreSelection() {

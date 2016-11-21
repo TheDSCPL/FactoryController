@@ -47,8 +47,8 @@ public class Warehouse extends Cell {
         blockOutQueue.addAll(blocks);
     }
 
-    public int getBlockOutQueueCount() {
-        return blockOutQueue.size();
+    public boolean isBlockOutQueueEmpty() {
+        return blockOutQueue.isEmpty();
     }
 
     @Override
@@ -68,9 +68,9 @@ public class Warehouse extends Cell {
             in.removeBlock(0).completeOrder();
             waitingForIn = false;
         }
-
+        
         // Signal simulator to remove block from warehouse
-        if (!waitingForOut && blockOutQueue.size() > 0 && out.isIdle() && !out.hasBlock()) {
+        if (!waitingForOut && blockOutQueue.size() > 0 && isOutConveyorEmpty()) {
             Main.modbus.setRegister(warehouseOutRegister, blockOutQueue.element().type.id);
             waitingForOut = true;
         }
@@ -81,6 +81,10 @@ public class Warehouse extends Cell {
             out.placeBlock(blockOutQueue.remove(), 0);
             waitingForOut = false;
         }
+    }
+    
+    public boolean isOutConveyorEmpty() {
+        return !waitingForOut && out.isIdle() && !out.hasBlock();
     }
 
     @Override

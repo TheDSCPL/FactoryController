@@ -15,7 +15,7 @@ public class AssemblyOrder extends Order {
     }
 
     /*public Block[] execute(Path blockPath) {
-        if (!isPending()) {
+        if (!canBeExecuted()) {
             return new ArrayList<>();
         }
 

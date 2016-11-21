@@ -25,7 +25,7 @@ public class MachiningOrder extends Order {
             throw new Error("Invalid info type passed to Order::execute");
         }
 
-        if (!isPending()) {
+        if (!canBeExecuted()) {
             return new ArrayList<>();
         }
 

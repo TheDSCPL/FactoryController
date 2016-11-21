@@ -52,6 +52,12 @@ public class Block {
         }
     }
 
+    @Override
+    public String toString() {
+        return "Block." + type;
+    }
+    
+
     /**
      * For blocks used in MachiningOrder
      */

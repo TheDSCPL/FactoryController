@@ -47,8 +47,6 @@ public class LoadUnloadBay extends Cell {
     @Override
     public void update() {
         super.update();
-        
-        t1.setSendingFrozen(t6.isPresenceSensorOn(0));
 
         // Detect load orders on pusher t4 -> send block to warehouse in
         if (t3.isPresenceSensorOn(0)) {
@@ -152,6 +150,6 @@ public class LoadUnloadBay extends Cell {
 
     @Override
     protected Cell processBlockOut(Block block) {
-        return Main.factory.warehouseCell;
+        return Main.factory.warehouse;
     }
 }

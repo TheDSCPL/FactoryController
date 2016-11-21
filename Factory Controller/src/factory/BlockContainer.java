@@ -1,6 +1,3 @@
-/*
- * Class that represents a 
- */
 package factory;
 
 /**

@@ -35,11 +35,15 @@ public class ParallelCell extends Cell {
 
     @Override
     protected Cell processBlockOut(Block block) {
-        return Main.factory.warehouseCell;
+        return Main.factory.warehouse;
     }
 
     private enum BlockRotation {
         Clockwise, CounterClockwise, Undefined;
+
+        public boolean compatibleWith(BlockRotation other) {
+            return this == Undefined || other == Undefined || this == other;
+        }
     }
 
     public ParallelCell(String id) {
@@ -99,7 +103,7 @@ public class ParallelCell extends Cell {
     @Override
     public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
         List<OrderPossibility> ret = new ArrayList<>();
-        
+
         for (Order o : orders) {
             if (o instanceof MachiningOrder) {
                 MachiningOrder order = (MachiningOrder) o;
@@ -108,9 +112,17 @@ public class ParallelCell extends Cell {
                     if (seq.machineSet == Machine.Type.Set.BC) {
 
                         int priority = 1; // TODO: x
-                        int possibleExecutionCount = 1; // TODO: x
+
+                        int possibleExecutionCount = 3 - blocksIncoming.size() - blocksInside.size();
+                        if (possibleExecutionCount < 1) {
+                            possibleExecutionCount = 1;
+                        }
+
+                        boolean entersImmediately = blocksIncoming.size() + blocksInside.size() < 3
+                                                    && blockRotationForTransformationSequence(seq).compatibleWith(currentBlockRotation)
+                                                    && !t4.hasBlock();
+
                         double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();
-                        boolean entersImmediately = blocksIncoming.size() + blocksInside.size() < 3; // TODO: x
 
                         ret.add(new OrderPossibility(
                                 this, order, possibleExecutionCount, seq,
@@ -134,7 +146,7 @@ public class ParallelCell extends Cell {
         }
 
         // Cannot have two blocks with opposite rotations
-        if (currentBlockRotation != BlockRotation.Undefined && currentBlockRotation != rotation) {
+        if (!currentBlockRotation.compatibleWith(rotation)) {
             return false;
         }
 

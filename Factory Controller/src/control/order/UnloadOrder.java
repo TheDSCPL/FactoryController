@@ -20,7 +20,7 @@ public class UnloadOrder extends Order {
     }
 
     public List<Block> execute(Path path, Object info) {
-        if (!isPending()) {
+        if (!canBeExecuted()) {
             return new ArrayList<>();
         }
 

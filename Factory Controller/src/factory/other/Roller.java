@@ -1,8 +1,9 @@
 package factory.other;
 
-import main.Main;
+import factory.*;
+import main.*;
 
-public class Roller {
+public class Roller extends BlockContainer{
     public final String id;
     private final Sensor sensor;
     

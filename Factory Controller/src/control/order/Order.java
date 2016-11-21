@@ -23,7 +23,7 @@ public abstract class Order {
         dateReceived = new Date();
     }
 
-    public final boolean isPending() {
+    public final boolean canBeExecuted() {
         return placedCount + completedCount < count;
     }
     
@@ -34,7 +34,7 @@ public abstract class Order {
     public abstract List<Block> execute(Path path, Object info);
     
     protected final void incrementPlacement() {
-        if (!isPending()) {
+        if (!canBeExecuted()) {
             return;
         }
 
@@ -88,5 +88,9 @@ public abstract class Order {
 
     public String orderTypeString() {
         return this.getClass().getSimpleName().replaceFirst("Order", "") + "(" + orderDescription() + ")";
+    }
+
+    public boolean isCompleted() {
+        return completedCount == count;
     }
 }

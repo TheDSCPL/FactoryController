@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package control;
 
 import coms.*;
@@ -11,10 +6,6 @@ import java.util.*;
 import static java.util.stream.Collectors.*;
 import main.*;
 
-/**
- *
- * @author Alex
- */
 public class OrderController {
 
     /**
@@ -30,13 +21,20 @@ public class OrderController {
         socket.start();
     }
 
+    private Long firstOrderTime;
+    
     public void update() {
         // Get new orders from socket and process them
         socket.getNewPackets().stream().forEach(this::processNewOrder);
+        
+        if (orders.stream().filter(o -> !o.isCompleted()).count() == 0 && firstOrderTime != null) {
+            System.out.println("TESTBENCH: TOTAL TIME FOR ORDERS = " + ((double)(Main.time() - firstOrderTime)/1000.0) + "s");
+            firstOrderTime = null;
+        }
     }
 
     public Set<Order> getPendingOrders() {
-        return orders.stream().filter(o -> o.isPending()).collect(toSet());
+        return orders.stream().filter(o -> o.canBeExecuted()).collect(toSet());
     }
 
     private void processNewOrder(byte[] packet) {
@@ -66,6 +64,10 @@ public class OrderController {
                 default:
                     System.out.println("Invalid order type: '" + orderString.charAt(1) + "'");
                     return;
+            }
+            
+            if (orders.isEmpty()) {
+                firstOrderTime = Main.time();
             }
 
             orders.add(order);

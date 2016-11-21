@@ -307,7 +307,7 @@ public abstract class Conveyor extends BlockContainer {
      */
     public boolean placeBlock(Block b, int position) {
         if (position >= length) {
-            throw new IndexOutOfBoundsException("Inavlid block position " + position);
+            throw new IndexOutOfBoundsException("Invalid block position " + position);
         }
         if (blocks[position] == null) {
             blocks[position] = b;

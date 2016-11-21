@@ -351,7 +351,7 @@ public final class Assembler extends Cell {
         
         /**
          * cancels this transfer
-         * @return <p>Wether the transfer was sucessfully canceled.</p> <p>If the transfer was already happening, this will fail and return false</p> <p>If the transfer has already finished, returns true</p>
+         * @return <p>Whether the transfer was successfully canceled.</p> <p>If the transfer was already happening, this will fail and return false</p> <p>If the transfer has already finished, returns true</p>
          */
         boolean cancel()
         {
