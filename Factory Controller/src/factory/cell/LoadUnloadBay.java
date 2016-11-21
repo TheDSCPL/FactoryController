@@ -56,7 +56,7 @@ public class LoadUnloadBay extends Cell {
 
             // Place block on this conveyor
             t3.placeBlock(block, 0);
-            
+
             // Add block to cell
             blocksInside.add(block);
         }
@@ -68,7 +68,7 @@ public class LoadUnloadBay extends Cell {
 
             // Place block on this conveyor
             t8.placeBlock(block, 0);
-            
+
             // Add block to cell
             blocksInside.add(block);
         }
@@ -76,9 +76,8 @@ public class LoadUnloadBay extends Cell {
 
     @Override
     protected boolean processBlockIn(Block block) {
-        
+
         // TODO: stacked blocks also need to be unloaded but they have no UnloadOrder
-        
         UnloadOrder order = (UnloadOrder) block.order;
 
         block.path.push(t4); // Position == 1 or 2
@@ -88,14 +87,18 @@ public class LoadUnloadBay extends Cell {
 
         return true;
     }
-    
+
     @Override
     public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
         return orders
                 .stream()
                 .filter((o) -> o instanceof UnloadOrder)
                 .map((o) -> (UnloadOrder) o)
-                .map((o) -> new OrderPossibility(this, o, getPusherForPosition(o.position).roller.isFull() ? 1 : 2, null, 0, !t4.hasBlock(), o.position))
+                .map((o) -> new OrderPossibility(
+                        this, o, getPusherForPosition(o.position).roller.isFull() ? 1 : 2, null, 0,
+                        blocksIncoming.size() + blocksInside.size() + (t4.roller.isFull() ? 2 : 0) + (t5.roller.isFull() ? 2 : 0) < 6,
+                        o.position
+                ))
                 .collect(toList());
     }
 
@@ -106,7 +109,7 @@ public class LoadUnloadBay extends Cell {
             default: throw new IndexOutOfBoundsException("XXX"); // TODO: error string
         }
     }
-    
+
     @Override
     public Conveyor getCornerConveyor(int position) {
         switch (position) {
