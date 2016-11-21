@@ -76,6 +76,9 @@ public class LoadUnloadBay extends Cell {
 
     @Override
     protected boolean processBlockIn(Block block) {
+        
+        // TODO: stacked blocks also need to be unloaded but they have no UnloadOrder
+        
         UnloadOrder order = (UnloadOrder) block.order;
 
         block.path.push(t4); // Position == 1 or 2
