@@ -128,7 +128,7 @@ public class SerialCell extends Cell {
             }
         }
 
-        System.out.println("getOrderPossibilities.ret = " + ret);
+        //System.out.println("getOrderPossibilities.ret = " + ret);
 
         return ret;
     }
