@@ -87,12 +87,12 @@ public class Machine extends Conveyor {
     }
 
     public boolean canPreSelectTool() {
-        return tool.isIdle();
+        return tool.canSelect();
     }
 
     public void preSelectTool(Tool.Type type) {
-        if (id.startsWith("PaT6")) {
-            //System.out.format("[machine %s] pre-select tool %s%n", id, type);
+        if (id.startsWith("P")) {
+            System.out.format("[machine %s] pre-select tool %s%n", id, type);
         }
         tool.select(type);
     }
@@ -101,8 +101,8 @@ public class Machine extends Conveyor {
         Block block = getOneBlock();
         holdBlock = false;
 
-        if (id.startsWith("PaT6")) {
-            //System.out.format("[machine %s] startMachiningIfNecessary %s%n", id, block);
+        if (id.startsWith("P")) {
+            System.out.format("[machine %s] startMachiningIfNecessary %s%n", id, block);
         }
         if (block.order instanceof MachiningOrder) {
             if (block.hasNextTransformation()) {
@@ -175,7 +175,7 @@ public class Machine extends Conveyor {
 
         private Type toolSelectTarget;
         private long machiningDuration;
-        private long startTime;
+        private long stopTime;
 
         public Tool(Sensor toolPresentSensor, Motor toolSelectMotor, int toolActivationMotorID) {
             this.toolPresentSensor = toolPresentSensor;
@@ -187,26 +187,26 @@ public class Machine extends Conveyor {
             switch (state) {
                 case Idle: break;
                 case Selecting:
-                    if (toolPresentSensor.on() && Main.time() - startTime > toolSelectionTime / 2) {
+                    if (toolPresentSensor.on() && Main.time() > stopTime) {
                         toolSelectMotor.turnOff();
                         currentTool = toolSelectTarget;
                         state = State.Idle;
 
                         if (machiningDuration != -1) {
                             activate(machiningDuration);
-                            if (machineID.startsWith("PaT6")) {
-                                //System.out.format("[tool %s] update: done selecting tool=%s, start machining duration=%d%n", machineID, toolSelectTarget, machiningDuration);
+                            if (machineID.startsWith("P")) {
+                                System.out.format("[tool %s] update: done selecting tool=%s, start machining duration=%d%n", machineID, toolSelectTarget, machiningDuration);
                             }
                         }
-                        else if (machineID.startsWith("PaT6")) {
-                            //System.out.format("[tool %s] update: done selecting tool=%s, no machining%n", machineID, toolSelectTarget);
+                        else if (machineID.startsWith("P")) {
+                            System.out.format("[tool %s] update: done selecting tool=%s, no machining%n", machineID, toolSelectTarget);
                         }
                     }
                     break;
                 case Machining:
-                    if (Main.time() - startTime > machiningDuration) {
-                        if (machineID.startsWith("Pa")) {
-                            //System.out.format("[tool %s] update: done machining duration=%d%n", machineID, machiningDuration);
+                    if (Main.time() > stopTime) {
+                        if (machineID.startsWith("P")) {
+                            System.out.format("[tool %s] update: done machining duration=%d%n", machineID, machiningDuration);
                         }
                         Main.modbus.setOutput(toolActivationMotorID, false);
                         state = State.Idle;
@@ -216,80 +216,100 @@ public class Machine extends Conveyor {
         }
 
         public void select(Type type) {
-            if (machineID.startsWith("PaT6")) {
-                //System.out.format("[tool %s] select: tool=%s%n", machineID, type);
+            if (machineID.startsWith("P")) {
+                System.out.format("[tool %s] select: tool=%s%n", machineID, type);
             }
 
-            // If already selecting that tool, do nothing
-            if (state == State.Selecting && toolSelectTarget == type) {
-                if (machineID.startsWith("PaT6")) {
-                    //System.out.format("[tool %s] select: do nothing%n", machineID);
-                }
-                return;
-            }
-
-            // If doing something else, throw error
-            if (state != State.Idle) {
-                throw new Error("Select called on tool when tool is not on Idle state; state =  " + state + ",selecting = " + toolSelectTarget);
+            // If machining, throw error
+            if (state == State.Machining) {
+                throw new Error("Tool::select called when tool is machining");
             }
 
             // If Idle and needs to select new tool, start tool selecting process
             if (state == State.Idle && currentTool != type) {
-                if (machineID.startsWith("PaT6")) {
-                    //System.out.format("[tool %s] select: start selection%n", machineID);
-                }
-                toolSelectTarget = type;
-
-                boolean direction;
-                switch (currentTool) {
-                    case T1:
-                        direction = toolSelectTarget == Type.T2;
-                        break;
-                    case T2:
-                        direction = toolSelectTarget == Type.T3;
-                        break;
-                    case T3:
-                        direction = toolSelectTarget == Type.T1;
-                        break;
-                    default: throw new Error("Invalid tool type");
-                }
-
-                machiningDuration = -1;
-                state = State.Selecting;
-                startTime = Main.time();
-                toolSelectMotor.turnOn(direction);
+                startSelection(type);
             }
+            else if (state == State.Selecting && toolSelectTarget != type) {
+                System.out.format("[tool %s] tool on %s, already selecting %s, changing to selecting %s%n", machineID, currentTool, toolSelectTarget, type);
+
+                if (toolPresentSensor.on()) {
+                    if (Main.time() > stopTime) { // Already on toolSelectTarget
+                        currentTool = toolSelectTarget;
+                    }
+
+                    startSelection(type);
+                }
+                else if (type == currentTool) {
+                    currentTool = toolSelectTarget;
+                    startSelection(type);
+                    stopTime = Main.time();
+                }
+                else {
+                    // currentTool = currentTool;
+                    startSelection(type);
+                    stopTime = Main.time() + toolSelectionTime;
+                }
+            }
+        }
+        
+        private void startSelection(Type type) {
+            if (machineID.startsWith("P")) {
+                System.out.format("[tool %s] startSelection type = %s%n", machineID, type);
+            }
+            toolSelectTarget = type;
+
+            boolean direction;
+            switch (currentTool) {
+                case T1:
+                    direction = toolSelectTarget == Type.T2;
+                    break;
+                case T2:
+                    direction = toolSelectTarget == Type.T3;
+                    break;
+                case T3:
+                    direction = toolSelectTarget == Type.T1;
+                    break;
+                default: throw new Error("Invalid tool type");
+            }
+
+            machiningDuration = -1;
+            state = State.Selecting;
+            stopTime = Main.time() + toolSelectionTime / 2;
+            toolSelectMotor.turnOn(direction);
         }
 
         public void activate(long duration) {
             switch (state) {
                 case Idle:
-                    if (machineID.startsWith("PaT6")) {
-                        //System.out.format("[tool %s] activate: start machining with duration=%d%n", machineID, duration);
+                    if (machineID.startsWith("P")) {
+                        System.out.format("[tool %s] activate: start machining with duration=%d%n", machineID, duration);
                     }
-                    machiningDuration = duration;
                     state = State.Machining;
-                    startTime = Main.time();
+                    stopTime = Main.time() + duration;
                     Main.modbus.setOutput(toolActivationMotorID, true);
                     break;
                 case Selecting:
-                    if (machineID.startsWith("PaT6")) {
-                        //System.out.format("[tool %s] activate: still selecting, set duration=%d%n", machineID, duration);
+                    if (machineID.startsWith("P")) {
+                        System.out.format("[tool %s] activate: still selecting, set duration=%d%n", machineID, duration);
                     }
                     machiningDuration = duration;
                     break;
                 case Machining:
-                    throw new Error("activate called on tool when machining is already in progress");
+                    throw new Error("Tool::activate called when machining is already in progress");
             }
 
         }
 
         public void selectAndActivate(Type type, long duration) {
-            if (machineID.startsWith("PaT6")) {
-                //System.out.format("[tool %s] selectAndActivate: tool=%s duration=%d%n", machineID, type, duration);
+            if (machineID.startsWith("P")) {
+                System.out.format("[tool %s] selectAndActivate: tool=%s duration=%d%n", machineID, type, duration);
             }
             select(type);
             activate(duration);
+        }
+
+        public boolean canSelect() {
+            return state != State.Machining;
         }
 
         public boolean isIdle() {

@@ -28,7 +28,7 @@ public class OrderController {
         socket.getNewPackets().stream().forEach(this::processNewOrder);
         
         if (orders.stream().filter(o -> !o.isCompleted()).count() == 0 && firstOrderTime != null) {
-            //System.out.println("TESTBENCH: TOTAL TIME FOR ORDERS = " + ((double)(Main.time() - firstOrderTime)/1000.0) + "s");
+            System.out.println("TESTBENCH: TOTAL TIME FOR ORDERS = " + ((double)(Main.time() - firstOrderTime)/1000.0) + "s");
             firstOrderTime = null;
         }
     }

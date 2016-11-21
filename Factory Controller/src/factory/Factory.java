@@ -57,19 +57,21 @@ public class Factory {
             Set<Order> orders = Main.orderc.getPendingOrders();
 
             OrderPossibility bestOP = cells.stream()
-                    .filter((c) -> c != warehouse) // Warehouse does not process Orders
-                    .map((c) -> c.getOrderPossibilities(orders, cellEntryPathFromWarehouse(c).timeEstimate() + warehouse.reactionTime)) // Get all order possibilities from each cell
+                    .filter(c -> c != warehouse) // Warehouse does not process Orders
+                    .map(c -> c.getOrderPossibilities(orders, cellEntryPathFromWarehouse(c).timeEstimate() + warehouse.reactionTime)) // Get all order possibilities from each cell
                     .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll).stream() // Collapse List<List<X>> into List<X>
                     .map(v -> (OrderPossibility) v) // Cast from Object to OrderPossibility
                     .reduce(null, this::compareOrderPossibilities); // Get best OrderPossibility
 
-            System.out.println("Executing possibility: " + bestOP);
-            for (int i = 0; i < bestOP.possibleExecutionCount; i++) {
-                List<Block> bl = bestOP.order.execute(bestOP.executionInfo);
+            if (bestOP != null) {
+                System.out.println("Executing possibility: " + bestOP);
+                for (int i = 0; i < bestOP.possibleExecutionCount; i++) {
+                    List<Block> bl = bestOP.order.execute(bestOP.executionInfo);
 
-                bl.stream().forEach((b) -> b.path = cellEntryPathFromWarehouse(bestOP.cell));
-                warehouse.addBlocksOut(bl);
-                bestOP.cell.addIncomingBlocks(bl);
+                    bl.stream().forEach(b -> b.path = cellEntryPathFromWarehouse(bestOP.cell));
+                    warehouse.addBlocksOut(bl);
+                    bestOP.cell.addIncomingBlocks(bl);
+                }
             }
         }
     }

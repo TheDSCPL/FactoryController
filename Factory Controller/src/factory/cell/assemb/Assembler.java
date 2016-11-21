@@ -55,7 +55,7 @@ public final class Assembler extends Cell {
         gantry = new Gantry(id);
 
         pendingTransfers = new ArrayList<>();
-        Transfer _transfer = transferBlock(t1, table2);
+        /*Transfer _transfer = transferBlock(t1, table2);
         t3.placeBlock(new Block(Block.Type.P1), 0);
         Thread _t = new Thread(()->{
             try {
@@ -90,7 +90,7 @@ public final class Assembler extends Cell {
             catch(Throwable ignored) {}
         });
         _t.setDaemon(true);
-        _t.start();
+        _t.start();*/
     }
 
     @Override

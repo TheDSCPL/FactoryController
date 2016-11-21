@@ -113,12 +113,12 @@ public class ParallelCell extends Cell {
 
                         int priority = 1; // TODO: x
 
-                        int possibleExecutionCount = 3 - blocksIncoming.size() - blocksInside.size();
+                        int possibleExecutionCount = 2 - blocksIncoming.size() - blocksInside.size();
                         if (possibleExecutionCount < 1) {
                             possibleExecutionCount = 1;
                         }
 
-                        boolean entersImmediately = blocksIncoming.size() + blocksInside.size() < 3
+                        boolean entersImmediately = blocksIncoming.size() + blocksInside.size() < 2
                                                     && blockRotationForTransformationSequence(seq).compatibleWith(currentBlockRotation)
                                                     && !t4.hasBlock();
 
