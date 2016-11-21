@@ -61,7 +61,7 @@ public class Factory {
                     .map(c -> c.getOrderPossibilities(orders, cellEntryPathFromWarehouse(c).timeEstimate() + warehouse.reactionTime)) // Get all order possibilities from each cell
                     .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll).stream() // Collapse List<List<X>> into List<X>
                     .map(v -> (OrderPossibility) v) // Cast from Object to OrderPossibility
-                    .reduce(null, this::compareOrderPossibilities); // Get best OrderPossibility
+                    .reduce(null, this::bestOrderPossibility); // Get best OrderPossibility
 
             if (bestOP != null) {
                 System.out.println("Executing possibility: " + bestOP);
@@ -76,8 +76,7 @@ public class Factory {
         }
     }
 
-    // TODO: sorting algorithm
-    private OrderPossibility compareOrderPossibilities(OrderPossibility op1, OrderPossibility op2) {
+    private OrderPossibility bestOrderPossibility(OrderPossibility op1, OrderPossibility op2) {
         if (op1 == null) {
             return op2;
         }
