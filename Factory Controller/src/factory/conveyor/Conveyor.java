@@ -125,7 +125,7 @@ public abstract class Conveyor extends BlockContainer {
     private void blockTransferRegister(Conveyor c) {
         if (!isSending() && !isReceiving()) {
             if (transferPartner != null && transferPartner != c) {
-                System.out.println("blockTransferRegister chooseNextConveyor id = " + id + " transferPartner = " + transferPartner.id + " c = " + c.id);
+                //System.out.println("blockTransferRegister chooseNextConveyor id = " + id + " transferPartner = " + transferPartner.id + " c = " + c.id);
                 transferPartner = chooseNextConveyor(transferPartner, c);
             }
             else {

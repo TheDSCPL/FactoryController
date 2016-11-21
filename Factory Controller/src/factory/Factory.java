@@ -19,7 +19,7 @@ public class Factory {
         // Create cells
         warehouse = new Warehouse(Main.config.getS("cell.warehouse.id"));
         loadUnloadCell = new LoadUnloadBay(Main.config.getS("cell.loadunload.id"));
-        
+
         cells.add(warehouse);
         for (int i = 1; Main.config.getS("cell." + i + ".type") != null; i++) {
             String type = Main.config.getS("cell." + i + ".type");
@@ -42,42 +42,47 @@ public class Factory {
             cells.add(cell);
         }
         cells.add(loadUnloadCell);
-        
+
         // Connect cells
         Cell.connect(cells);
     }
 
     public void update() {
-        
+
         // Update cells
         cells.stream().forEach(Cell::update);
-        
+
         // Choose next order to be executed
         if (warehouse.isBlockOutQueueEmpty() && warehouse.isOutConveyorEmpty()) {
             Set<Order> orders = Main.orderc.getPendingOrders();
-            
-            cells.stream()
+
+            OrderPossibility bestOP = cells.stream()
                     .filter((c) -> c != warehouse) // Warehouse does not process Orders
                     .map((c) -> c.getOrderPossibilities(orders, cellEntryPathFromWarehouse(c).timeEstimate() + warehouse.reactionTime)) // Get all order possibilities from each cell
                     .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll).stream() // Collapse List<List<X>> into List<X>
-                    .map((op) -> (OrderPossibility) op) // Cast from Object to OrderPossibility
-                    .sorted(this::orderPossibilitiesSortFunction) // Sort (better possibility becomes first on stream)
-                    .findFirst() // Get first possibility
-                    .ifPresent(// Execute possibility
-                            (op) -> {
-                                System.out.println("Executing possibility: " + op);
-                                for (int i = 0; i < op.possibleExecutionCount; i++) {
-                                    List<Block> bl = op.order.execute(cellEntryPathFromWarehouse(op.cell), op.executionInfo);
-                                    warehouse.addBlocksOut(bl);
-                                    op.cell.addIncomingBlocks(bl);
-                                }
-                            }
-                    );
+                    .map(v -> (OrderPossibility) v) // Cast from Object to OrderPossibility
+                    .reduce(null, this::compareOrderPossibilities); // Get best OrderPossibility
+
+            System.out.println("Executing possibility: " + bestOP);
+            for (int i = 0; i < bestOP.possibleExecutionCount; i++) {
+                List<Block> bl = bestOP.order.execute(bestOP.executionInfo);
+
+                bl.stream().forEach((b) -> b.path = cellEntryPathFromWarehouse(bestOP.cell));
+                warehouse.addBlocksOut(bl);
+                bestOP.cell.addIncomingBlocks(bl);
+            }
         }
     }
 
     // TODO: sorting algorithm
-    private int orderPossibilitiesSortFunction(OrderPossibility op1, OrderPossibility op2) {
+    private OrderPossibility compareOrderPossibilities(OrderPossibility op1, OrderPossibility op2) {
+        if (op1 == null) {
+            return op2;
+        }
+        if (op2 == null) {
+            return op1;
+        }
+
         int value = 0;
 
         // Execute each set of rules, sequentially, from most important to least important
@@ -115,7 +120,12 @@ public class Factory {
             }
         }
 
-        return -value; // Apparently, sorting order needs to be reversed
+        if (value == 1) {
+            return op1;
+        }
+        else {
+            return op2;
+        }
     }
 
     private int indexForCell(Cell c) {

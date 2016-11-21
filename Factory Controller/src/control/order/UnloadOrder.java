@@ -19,13 +19,12 @@ public class UnloadOrder extends Order {
         this.blockType = blockType;
     }
 
-    public List<Block> execute(Path path, Object info) {
+    public List<Block> execute(Object info) {
         if (!canBeExecuted()) {
             return new ArrayList<>();
         }
 
         Block b = new Block(blockType);
-        b.path = path;
         b.order = this;
 
         incrementPlacement();

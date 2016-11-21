@@ -50,6 +50,8 @@ public class Machine extends Conveyor {
                 Main.config.getBaseOutput(id) + 4
         );
 
+        tool.machineID = id;
+
         xMotor = new Motor(Main.config.getBaseOutput(id) + 5);
         zMotor = new Motor(Main.config.getBaseOutput(id) + 7);
 
@@ -89,15 +91,19 @@ public class Machine extends Conveyor {
     }
 
     public void preSelectTool(Tool.Type type) {
-        System.out.format("[machine %s] pre-select tool %s%n", id, type);
+        if (id.startsWith("PaT6")) {
+            //System.out.format("[machine %s] pre-select tool %s%n", id, type);
+        }
         tool.select(type);
     }
 
     private void startMachiningIfNecessary() {
         Block block = getOneBlock();
         holdBlock = false;
-        
-        System.out.format("[machine %s] startMachiningIfNecessary %s%n", id, block);
+
+        if (id.startsWith("PaT6")) {
+            //System.out.format("[machine %s] startMachiningIfNecessary %s%n", id, block);
+        }
         if (block.order instanceof MachiningOrder) {
             if (block.hasNextTransformation()) {
                 Transformation next = block.getNextTransformation();
@@ -148,6 +154,8 @@ public class Machine extends Conveyor {
 
     public static class Tool {
 
+        public String machineID;
+
         public enum Type {
             T1, T2, T3
         }
@@ -186,16 +194,20 @@ public class Machine extends Conveyor {
 
                         if (machiningDuration != -1) {
                             activate(machiningDuration);
-                            System.out.format("[tool] update: done selecting tool=%s, start machining duration=%d%n", toolSelectTarget, machiningDuration);
+                            if (machineID.startsWith("PaT6")) {
+                                //System.out.format("[tool %s] update: done selecting tool=%s, start machining duration=%d%n", machineID, toolSelectTarget, machiningDuration);
+                            }
                         }
-                        else {
-                            System.out.format("[tool] update: done selecting tool=%s, no machining%n", toolSelectTarget);
+                        else if (machineID.startsWith("PaT6")) {
+                            //System.out.format("[tool %s] update: done selecting tool=%s, no machining%n", machineID, toolSelectTarget);
                         }
                     }
                     break;
                 case Machining:
                     if (Main.time() - startTime > machiningDuration) {
-                        System.out.format("[tool] update: done machining duration=%d%n", machiningDuration);
+                        if (machineID.startsWith("Pa")) {
+                            //System.out.format("[tool %s] update: done machining duration=%d%n", machineID, machiningDuration);
+                        }
                         Main.modbus.setOutput(toolActivationMotorID, false);
                         state = State.Idle;
                     }
@@ -204,22 +216,28 @@ public class Machine extends Conveyor {
         }
 
         public void select(Type type) {
-            System.out.format("[tool] select: tool=%s%n", type);
+            if (machineID.startsWith("PaT6")) {
+                //System.out.format("[tool %s] select: tool=%s%n", machineID, type);
+            }
 
             // If already selecting that tool, do nothing
             if (state == State.Selecting && toolSelectTarget == type) {
-                System.out.format("[tool] select: do nothing%n");
+                if (machineID.startsWith("PaT6")) {
+                    //System.out.format("[tool %s] select: do nothing%n", machineID);
+                }
                 return;
             }
 
             // If doing something else, throw error
             if (state != State.Idle) {
-                throw new Error("Select called on tool when tool is not on Idle state; state = " + state);
+                throw new Error("Select called on tool when tool is not on Idle state; state =  " + state + ",selecting = " + toolSelectTarget);
             }
 
             // If Idle and needs to select new tool, start tool selecting process
             if (state == State.Idle && currentTool != type) {
-                System.out.format("[tool] select: start selection%n");
+                if (machineID.startsWith("PaT6")) {
+                    //System.out.format("[tool %s] select: start selection%n", machineID);
+                }
                 toolSelectTarget = type;
 
                 boolean direction;
@@ -246,14 +264,18 @@ public class Machine extends Conveyor {
         public void activate(long duration) {
             switch (state) {
                 case Idle:
-                    System.out.format("[tool] activate: start machining with duration=%d%n", duration);
+                    if (machineID.startsWith("PaT6")) {
+                        //System.out.format("[tool %s] activate: start machining with duration=%d%n", machineID, duration);
+                    }
                     machiningDuration = duration;
                     state = State.Machining;
                     startTime = Main.time();
                     Main.modbus.setOutput(toolActivationMotorID, true);
                     break;
                 case Selecting:
-                    System.out.format("[tool] activate: still selecting, set duration=%d%n", duration);
+                    if (machineID.startsWith("PaT6")) {
+                        //System.out.format("[tool %s] activate: still selecting, set duration=%d%n", machineID, duration);
+                    }
                     machiningDuration = duration;
                     break;
                 case Machining:
@@ -263,7 +285,9 @@ public class Machine extends Conveyor {
         }
 
         public void selectAndActivate(Type type, long duration) {
-            System.out.format("[tool] selectAndActivate: tool=%s duration=%d%n", type, duration);
+            if (machineID.startsWith("PaT6")) {
+                //System.out.format("[tool %s] selectAndActivate: tool=%s duration=%d%n", machineID, type, duration);
+            }
             select(type);
             activate(duration);
         }

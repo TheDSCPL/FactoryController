@@ -20,7 +20,7 @@ public class MachiningOrder extends Order {
         return Main.transfm.getTransformationSequences(startType, endType, null);
     }
 
-    public List<Block> execute(Path path, Object info) {
+    public List<Block> execute(Object info) {
         if (!(info instanceof TransformationSequence)) {
             throw new Error("Invalid info type passed to Order::execute");
         }
@@ -30,7 +30,6 @@ public class MachiningOrder extends Order {
         }
 
         Block b = new Block(startType);
-        b.path = path;
         b.order = this;
         b.transformations = (TransformationSequence) info;
 

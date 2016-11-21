@@ -31,7 +31,7 @@ public abstract class Order {
         return count - placedCount - completedCount;
     }
     
-    public abstract List<Block> execute(Path path, Object info);
+    public abstract List<Block> execute(Object info);
     
     protected final void incrementPlacement() {
         if (!canBeExecuted()) {

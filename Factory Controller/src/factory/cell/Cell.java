@@ -128,7 +128,7 @@ public abstract class Cell {
         }
 
         // Process any pre-selection of tools on machines
-        //processToolPreSelection();
+        processToolPreSelection();
     }
 
     private void processToolPreSelection() {
@@ -144,6 +144,10 @@ public abstract class Cell {
 
     private void processToolPreSelection(Machine machine) {
 
+        if (machine.id.equals("PaT6")) {
+            //System.out.format("[cell %s] processToolPreSelection machine = %s%n", id, machine.id);
+        }
+
         // Get next block to go to that machine and be processed there
         Block closestBlockToBeProcessed = null;
         int minStepCount = Integer.MAX_VALUE;
@@ -157,21 +161,43 @@ public abstract class Cell {
                 int count = 0;
                 for (int i = 0; i < b.path.length(); i++) {
                     count++;
+
                     if (b.path.get(i) == machine) {
-                        break;
+                        if ((i == 0 && b.getNextTransformation().machine == machine.type) || i != 0) {
+                            break;
+                        }
+
+                    }
+
+                    // If this block is closest, save that information
+                    if (machine.id.equals("PaT6")) {
+                        //System.out.format("[cell %s] processToolPreSelection loop: block = %s; steps = %d; path = %s%n", id, b, count, b.path);
+                    }
+
+                    if (count < minStepCount) {
+                        if (machine.id.equals("PaT6")) {
+                            //System.out.format("[cell %s] count < minStepCount: set closestBlockToBeProcessed = %s%n", id, b);
+                        }
+
+                        minStepCount = count;
+                        closestBlockToBeProcessed = b;
                     }
                 }
 
-                // If this block is closest, save that information
-                if (count < minStepCount) {
-                    minStepCount = count;
-                    closestBlockToBeProcessed = b;
-                }
             }
         }
 
         // Get next transformation that block will have on that machine, and pre-select the apropriate tool
-        if (closestBlockToBeProcessed != null) {
+        if (closestBlockToBeProcessed
+            != null) {
+            if (machine.id.equals("PaT6")) {
+                /*System.out.format("[cell %s] machine %s preSelectTool %s for block %s%n",
+                                  id,
+                                  machine.id,
+                                  closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool,
+                                  closestBlockToBeProcessed);*/
+            }
+
             machine.preSelectTool(closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool);
         }
     }

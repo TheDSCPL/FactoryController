@@ -54,7 +54,7 @@ public class Block {
 
     @Override
     public String toString() {
-        return "Block." + type;
+        return super.toString() + "/" + type;
     }
     
 

@@ -38,7 +38,7 @@ public class AssemblyOrder extends Order {
     }*/
     
     @Override
-    public List<Block> execute(Path path, Object info) {
+    public List<Block> execute(Object info) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

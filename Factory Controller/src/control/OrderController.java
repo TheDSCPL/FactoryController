@@ -28,7 +28,7 @@ public class OrderController {
         socket.getNewPackets().stream().forEach(this::processNewOrder);
         
         if (orders.stream().filter(o -> !o.isCompleted()).count() == 0 && firstOrderTime != null) {
-            System.out.println("TESTBENCH: TOTAL TIME FOR ORDERS = " + ((double)(Main.time() - firstOrderTime)/1000.0) + "s");
+            //System.out.println("TESTBENCH: TOTAL TIME FOR ORDERS = " + ((double)(Main.time() - firstOrderTime)/1000.0) + "s");
             firstOrderTime = null;
         }
     }
@@ -62,7 +62,7 @@ public class OrderController {
                     order = new UnloadOrder(orderId, quantity, Block.Type.getType(value1), value2);
                     break;
                 default:
-                    System.out.println("Invalid order type: '" + orderString.charAt(1) + "'");
+                    //System.out.println("Invalid order type: '" + orderString.charAt(1) + "'");
                     return;
             }
             
@@ -73,7 +73,7 @@ public class OrderController {
             orders.add(order);
         }
         catch (NumberFormatException ex) {
-            System.out.println("Invalid order string: '" + orderString + "'");
+            //System.out.println("Invalid order string: '" + orderString + "'");
         }
     }
 

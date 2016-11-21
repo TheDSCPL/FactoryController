@@ -154,7 +154,7 @@ public class ParallelCell extends Cell {
         block.path.append(blockPathForTransformationSequence(block.transformations));
         //t7.highestPriorityConnection = rotation == BlockRotation.Clockwise ? 1 : 0;
 
-        System.out.println("processBlockIn: currentBlockRotation = " + currentBlockRotation);
+        //System.out.println("processBlockIn: currentBlockRotation = " + currentBlockRotation);
         return true;
     }
 
