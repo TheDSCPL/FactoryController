@@ -31,6 +31,12 @@ public abstract class Order {
         return count - placedCount - completedCount;
     }
     
+    /**
+     * 
+     * @param path
+     * @param info Object that contains necessary information about that order. For example, in TransformationOrder, this should be a TransformationSequence object.
+     * @return List of blocks that the warehouse is supposed to put on its exit conveyor
+     */
     public abstract List<Block> execute(Path path, Object info);
     
     protected final void incrementPlacement() {
