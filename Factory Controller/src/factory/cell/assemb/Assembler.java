@@ -7,6 +7,7 @@ import factory.cell.*;
 import factory.conveyor.*;
 import factory.other.*;
 import java.util.*;
+import java.util.logging.*;
 import main.*;
 
 public final class Assembler extends Cell {
@@ -54,6 +55,42 @@ public final class Assembler extends Cell {
         gantry = new Gantry(id);
 
         pendingTransfers = new ArrayList<>();
+        /*Transfer _transfer = transferBlock(t1, table2);
+        t3.placeBlock(new Block(Block.Type.P1), 0);
+        Thread _t = new Thread(()->{
+            try {
+                while(_transfer.status == TRANSFER_STATE.WAITING_FOR_START)
+                    Thread.sleep(1);
+                Thread.sleep(2000);
+                
+                if(!_transfer.changeOrigin(t2))
+                    System.err.println("Error changing origin!");
+                else
+                    System.err.println("Changed origin to t2");
+                
+                Thread.sleep(3*1000);
+                
+                t2.placeBlock(new Block(Block.Type.P1), 0);
+                System.err.println("Placed block at t2!");
+                
+                while(_transfer.status != TRANSFER_STATE.MOVING_TO_DESTINATION)
+                    Thread.sleep(1);
+                Thread.sleep(3000);
+                
+                if(!_transfer.changeDestination(t3))
+                    System.err.println("Error changing destination!");
+                else
+                    System.err.println("Changed destination to t3");
+                
+                Thread.sleep(5*1000);
+                
+                t3.removeBlock(0);
+                System.err.println("Removed block from t3!");
+            }
+            catch(Throwable ignored) {}
+        });
+        _t.setDaemon(true);
+        _t.start();*/
     }
 
     @Override
@@ -76,7 +113,6 @@ public final class Assembler extends Cell {
 
         if (!pendingTransfers.isEmpty()) {
             if (pendingTransfers.get(0).update()) { // if transaction completed
-                System.out.println("pop");
                 pendingTransfers.remove(0);
                 System.gc();
             }
@@ -130,59 +166,107 @@ public final class Assembler extends Cell {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    //TODO: add Transfer field to Block
-    public class Transfer {
+    public final class Coordinates {
 
-        private final class Coordinates {
+        public final int x;
+        public final int y;
+        public final int z;
 
-            public int x;
-            public int y;
-            public int z;
+        public Coordinates(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
 
-            public Coordinates(int x, int y, int z) {
-                this.x = x;
-                this.y = y;
-                this.z = z;
-            }
+        public Coordinates(int x, int y) {
+            this(x, y, 0);
+        }
 
-            public Coordinates(int x, int y) {
-                this(x, y, -1);
-            }
-            
-            public BlockContainer getBlockContainerFromCoordinates(int x, int y)
-            {
-                if(x == 0)
-                {
-                    if(y == 0)
-                    {
-                        return t1;
+        public Coordinates(BlockContainer bc) {
+            this.z = 0;
+            if (bc instanceof Table) {
+                this.x = 0; //all tables are at x=0
+                for (int i = 0; i < tables.length; i++) {
+                    if (tables[i] == bc) {
+                        this.y = i + 1;
+                        return;
                     }
-                    if(y == 4)
-                    {
-                        return t6;
-                    }
-                    return tables[y-1];
                 }
-                else
-                    return conveyors[y <= 1 ? y+1 : y];
+                throw new Error("Table passed is not contained in this Assembler.");
+            } else if (bc instanceof Conveyor) {
+                int totalLengthSoFar = 0;
+                for (int i = 0; i < conveyors.length; i++) {
+                    if (conveyors[i] == bc) //found a match
+                    {
+                        this.x = (i == 0 || i == conveyors.length - 1) ? 0 : 1;   //only the 1st and last conveyors have x=0. the others have x=1
+                        if (i == 0) {
+                            this.y = 0;
+                        } else if (i == conveyors.length - 1) {
+                            this.y = conveyors.length - 2;
+                        } else {
+                            this.y = totalLengthSoFar;
+                        }
+                        return;
+                    }
+                    if (i != 0 && i != conveyors.length - 1) //if one of the vertical conveyors
+                    {
+                        totalLengthSoFar += conveyors[i].getLength();   //necessary because not all convayors have size 1
+                    }
+                }
+                throw new Error("Conveyor passed is not contained in this Assembler.");
+            } else {
+                throw new Error("Coordinates constructor received an object that is neither a table nor a conveyor");
             }
         }
-        
-        private final int fromX, fromY, toX, toY;
+
+        @Override
+        public String toString() {
+            return "(" + x + "," + y + ")";
+        }
+
+        public BlockContainer getBlockContainer()
+        {
+            return getBlockContainerFromCoordinates(this.x, this.y);
+        }
+    }
+    
+    public BlockContainer getBlockContainerFromCoordinates(int x, int y) {
+        if (x == 0) {
+            if (y == 0) {
+                return t1;
+            }
+            if (y == 4) {
+                return t6;
+            }
+            return tables[y - 1];
+        } else {
+            return conveyors[y <= 1 ? y + 1 : y];
+        }
+    }
+    
+    //TODO: add Transfer field to Block
+    public final class Transfer {
+
+        private Coordinates from, to;
         private int whereToX;   //where the gantry is supposed to be going atm in the X direction
         private int whereToY;   //where the gantry is supposed to be going atm in the X direction
-        private TRANSFER_STATE status = TRANSFER_STATE.WAITING;
+        private TRANSFER_STATE status = TRANSFER_STATE.WAITING_FOR_START;
 
-        public Transfer(int fromX, int fromY, int toX, int toY) {
-            if ((fromX > 1 || fromX < 0) || (toX > 1 || toX < 0) || (fromY > 4 || fromY < 0) || (toY > 4 || toY < 0)) {
+        public Transfer(Coordinates from, Coordinates to)
+        {
+            if(from == null || to == null)
+                throw new NullPointerException();
+            if ((from.x > 1 || from.x < 0) || (to.x > 1 || to.x < 0) || (from.y > 4 || from.y < 0) || (to.y > 4 || to.y < 0)) {
                 throw new IndexOutOfBoundsException("Tried to transfer a block with Gantry from/to invalid coordinates");
             }
-            this.fromX = fromX;
-            this.fromY = fromY;
-            this.toX = toX;
-            this.toY = toY;
-            this.whereToX = 2 * fromX + 1;
-            this.whereToY = 2 * fromY + 1;
+            this.from = from;
+            this.to = to;
+            this.whereToX = 2 * from.x + 1;
+            this.whereToY = 2 * from.y + 1;
+        }
+        
+        public Transfer(int fromX, int fromY, int toX, int toY) {
+            this(new Coordinates(fromX,fromY), new Coordinates(toX,toY));
         }
 
         boolean isCompleted()
@@ -192,23 +276,139 @@ public final class Assembler extends Cell {
         
         boolean isActive()
         {
-            return status != TRANSFER_STATE.WAITING;
+            return status != TRANSFER_STATE.WAITING_FOR_START;
+        }
+
+        private Conveyor getPreviousConveyor(Conveyor _c)
+        {
+            if(_c == null)
+                throw new NullPointerException();
+            for(int i=0;i<conveyors.length;i++)
+            {
+                if(conveyors[i]==_c)
+                {
+                    if(i > 0)
+                        return conveyors[i-1];
+                    //if i==0, it's not possible to get the previous conveyor
+                    Logger.getLogger(Assembler.class.getSimpleName()).log(Level.WARNING, "Tried (and failed) to get the previous conveyor");
+                    return null;
+                }
+            }
+            return null;
+        }
+        
+        public boolean changeOrigin(Coordinates from)
+        {
+            if(from == null)
+            {
+                return false;
+            }
+            if(from.x <0 | from.x > 1 || from.y < 0 || from.y > 4)
+            {
+                return false;
+            }
+            if(status.id > TRANSFER_STATE.MOVING_TO_ORIGIN.id)
+            {
+                if(status == TRANSFER_STATE.WAITING_FOR_ORIGIN_CONVEYOR_TO_BE_READY)    //the gantry is waiting for the previous origin conveyor to be ready so there is still time to change the origin
+                    status = TRANSFER_STATE.MOVING_TO_ORIGIN;
+                else    //can't change the origin after the gantry has started (or has finished) going down at the previously set origin
+                    return false;
+            }
+            if (this.from.getBlockContainer() instanceof Conveyor) {    //unfreeze the previous origin
+                Conveyor _c = (Conveyor) this.from.getBlockContainer();
+                _c.setSendingFrozen(false);  //freeze the origin conveyor so it doesn't send the block that the gantry is supposed to go fetch to the next conveyor
+            }
+            this.from = from;
+            if (from.getBlockContainer() instanceof Conveyor) { //freeze the new origin
+                Conveyor _c = (Conveyor) from.getBlockContainer();
+                _c.setSendingFrozen(true);  //freeze the origin conveyor so it doesn't send the block that the gantry is supposed to go fetch to the next conveyor
+            }
+            this.whereToX = 2*from.x+1;
+            this.whereToY = 2*from.y+1;
+            return true;
+        }
+        
+        public boolean changeOrigin(BlockContainer bc)
+        {
+            if(bc == null)
+                return false;
+            return changeOrigin(new Coordinates(bc));
+        }
+        
+        public boolean changeDestination(Coordinates to)
+        {
+            if(to == null)
+                return false;
+            if(to.x <0 | to.x > 1 || to.y < 0 || to.y > 4)
+                return false;
+            if(status.id > TRANSFER_STATE.MOVING_TO_DESTINATION.id)    //can't change the destination after the gantry has started (or has finished) going down at the previously set destination
+            {
+                if(status == TRANSFER_STATE.WAITING_FOR_EMPTY_SPACE_TO_DROP)    //the gantry is waiting for having space to drop so there is still time to change destination
+                    status = TRANSFER_STATE.MOVING_TO_DESTINATION;
+                else    //can't change destination because the transfer is almost over
+                    return false;
+            }
+            if (this.to.getBlockContainer() instanceof Conveyor) {  //unfreeze the previous conveyor of the old origin
+                Conveyor _c = getPreviousConveyor((Conveyor) this.to.getBlockContainer());
+                if (_c == null) {
+                    throw new Error("Tried to transfer block to a conveyor that either is the Entry-Conveyor of this Assembler or is not in this Cell at all");
+                }
+                _c.setSendingFrozen(false);
+            }
+            this.to = to;
+            if (to.getBlockContainer() instanceof Conveyor) {   //freeze the previous conveyor of the new origin
+                Conveyor _c = getPreviousConveyor((Conveyor) to.getBlockContainer());
+                if (_c == null) {
+                    throw new Error("Tried to transfer block to a conveyor that either is the Entry-Conveyor of this Assembler or is not in this Cell at all");
+                }
+                _c.setSendingFrozen(true);
+            }
+            this.whereToX = 2*to.x+1;
+            this.whereToY = 2*to.y+1;
+            return true;
+        }
+        
+        public boolean changeDestination(BlockContainer bc)
+        {
+            if(bc == null)
+                return false;
+            return changeDestination(new Coordinates(bc));
         }
         
         private long grabTimer;
 
+        private TRANSFER_STATE prevState  = TRANSFER_STATE.WAITING_FOR_START;
+        
         /**
          * Updates the FSM (to transfer the block)
          *
          * @return
          */
         boolean update() {
+            if(prevState != status)
+            {
+                System.out.println(status.name());
+                prevState = status;
+            }
             boolean Xready;
             boolean Yready;
             switch (status) {
-                case WAITING:
+                case WAITING_FOR_START:
+                    //either the origin is a table or it's a conveyor and it is ready
                     status = TRANSFER_STATE.MOVING_TO_ORIGIN;
-                    //intentional fall-through
+                    if(from.getBlockContainer() instanceof Conveyor)
+                    {
+                        Conveyor _c = (Conveyor)from.getBlockContainer();
+                        _c.setSendingFrozen(true);  //freeze the origin conveyor so it doesn't send the block that the gantry is supposed to go fetch to the next conveyor
+                    }
+                    if(to.getBlockContainer() instanceof Conveyor)
+                    {
+                        Conveyor _c = getPreviousConveyor( (Conveyor)to.getBlockContainer() );
+                        if(_c == null)
+                            throw new Error("Tried to transfer block to a conveyor that either is the Entry-Conveyor of this Assembler or is not in this Cell at all");
+                        _c.setSendingFrozen(true);
+                    }
+                    break;
                 case MOVING_TO_ORIGIN:
                     gantry.openGrab();
                     Xready = (gantry.isAtX == whereToX);
@@ -234,8 +434,25 @@ public final class Assembler extends Cell {
                     }
 
                     if (Xready && Yready) {    //arrived at origin
-                        status = TRANSFER_STATE.GO_DOWN_ORIGIN;
+                        if(from.getBlockContainer() instanceof Conveyor)
+                        {
+                            status = TRANSFER_STATE.WAITING_FOR_ORIGIN_CONVEYOR_TO_BE_READY;
+                        }
+                        else
+                            status = TRANSFER_STATE.GO_DOWN_ORIGIN;
                     }
+                    break;
+                case WAITING_FOR_ORIGIN_CONVEYOR_TO_BE_READY:
+                    if (from.getBlockContainer() instanceof Conveyor)
+                    {
+                        Conveyor _c = (Conveyor) from.getBlockContainer();
+                        if (!_c.isIdle() || !_c.hasBlock()) //if the origin conveyor is not yet ready, wait
+                            return false;
+                        else
+                            status = TRANSFER_STATE.GO_DOWN_ORIGIN;
+                    }
+                    else
+                        throw new IllegalStateException(status.name() + " should only be reached by Conveyor-originated transfers");
                     break;
                 case GO_DOWN_ORIGIN:
                     gantry.openGrab();
@@ -266,8 +483,13 @@ public final class Assembler extends Cell {
                     if (gantry.upZ.on()) //fully up
                     {
                         gantry.ZMotor.turnOff();
-                        whereToX = 2 * toX + 1;
-                        whereToY = 2 * toY + 1;
+                        whereToX = 2 * to.x + 1;
+                        whereToY = 2 * to.y + 1;
+                        if(from.getBlockContainer() instanceof Conveyor)    //release the origin conveyor
+                        {
+                            Conveyor _c = (Conveyor)from.getBlockContainer();
+                            _c.setSendingFrozen(false);
+                        }
                         status = TRANSFER_STATE.MOVING_TO_DESTINATION;
                     }
                     break;
@@ -306,6 +528,18 @@ public final class Assembler extends Cell {
                         gantry.XMotor.turnOff();
                         gantry.YMotor.turnOff();
                         grabTimer = Main.time();
+                        if(to.getBlockContainer() instanceof Conveyor)
+                            status = TRANSFER_STATE.WAITING_FOR_EMPTY_SPACE_TO_DROP;
+                        else
+                            status = TRANSFER_STATE.GO_DOWN_DESTINATION;
+                    }
+                    break;
+                case WAITING_FOR_EMPTY_SPACE_TO_DROP:
+                    if(!(to.getBlockContainer() instanceof Conveyor))
+                        throw new IllegalStateException(status.name() + " should only be reached by Conveyor destinations");
+                    Conveyor _toConveyor = (Conveyor)to.getBlockContainer();
+                    if(_toConveyor.isIdle() && !_toConveyor.hasBlock())
+                    {
                         status = TRANSFER_STATE.GO_DOWN_DESTINATION;
                     }
                     break;
@@ -338,10 +572,19 @@ public final class Assembler extends Cell {
                         gantry.ZMotor.turnOnPlus();
                     }
                     break;
+                case CANCELED:
+                    return true;
                 case FINISHED:
                     gantry.XMotor.turnOff();
                     gantry.YMotor.turnOff();
                     gantry.ZMotor.turnOff();
+                    if(to.getBlockContainer() instanceof Conveyor)
+                    {
+                        Conveyor _c = getPreviousConveyor( (Conveyor)to.getBlockContainer() );
+                        if(_c == null)
+                            throw new Error("Tried to transfer block to a conveyor that either is the Entry-Conveyor of this Assembler or is not in this Cell at all");
+                        _c.setSendingFrozen(false);
+                    }
                     return true;
                 default:
                     throw new IllegalStateException("Illegal state reached at the Transfer FSM");
@@ -366,10 +609,17 @@ public final class Assembler extends Cell {
         }
     }
     
-    public Transfer transferBlock(Table t, Conveyor c)
+    public Transfer transferBlock(BlockContainer from, BlockContainer to)
     {
-        //TODO
-        return null;
+        System.out.println("Registered a transfer");
+        return transferBlock(new Coordinates(from), new Coordinates(to));
+    }
+    
+    public Transfer transferBlock(Coordinates from, Coordinates to)
+    {
+        Transfer transfer = new Transfer(from, to);
+        pendingTransfers.add(transfer);
+        return transfer;
     }
     
     public Transfer transferBlock(int fromX, int fromY, int toX, int toY) {
@@ -379,7 +629,15 @@ public final class Assembler extends Cell {
     }
 
     private enum TRANSFER_STATE {
-        WAITING, MOVING_TO_ORIGIN, GO_DOWN_ORIGIN, GRAB_ORIGIN, GO_UP_ORIGIN, MOVING_TO_DESTINATION, GO_DOWN_DESTINATION, DROP_DESTINATION, GO_UP_DESTINATION, FINISHED, CANCELED; //considering that there is no need for the gantry to go down in the destination
+        
+        WAITING_FOR_START(0), MOVING_TO_ORIGIN(1), WAITING_FOR_ORIGIN_CONVEYOR_TO_BE_READY(2), GO_DOWN_ORIGIN(3), GRAB_ORIGIN(4), GO_UP_ORIGIN(5), MOVING_TO_DESTINATION(6), WAITING_FOR_EMPTY_SPACE_TO_DROP(7), GO_DOWN_DESTINATION(8), DROP_DESTINATION(9), GO_UP_DESTINATION(10), FINISHED(11), CANCELED(12); //considering that there is no need for the gantry to go down in the destination
+        
+        public final int id;
+
+        private TRANSFER_STATE(int id) {
+            this.id = id;
+        }
+        
     }
 
 }

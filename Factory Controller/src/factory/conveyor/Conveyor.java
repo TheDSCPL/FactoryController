@@ -391,7 +391,17 @@ public abstract class Conveyor extends BlockContainer {
     public void setSendingFrozen(boolean sendingFrozen) {
         this.sendingFrozen = sendingFrozen;
     }
+    
+    public boolean isSendingFrozen()
+    {
+        return sendingFrozen;
+    }
 
+    public int getLength()
+    {
+        return length;
+    }
+    
     protected abstract boolean transferMotorDirection(Conveyor partner, boolean sending);
 
     protected abstract void blockTransferFinished();
