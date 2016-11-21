@@ -11,14 +11,14 @@ import main.*;
 public class Factory {
 
     public final Warehouse warehouse;
-    public final LoadUnloadBay loadUnloadCell;
+    public final LoadUnloadCell loadUnloadCell;
     private final List<Cell> cells = new ArrayList<>();
 
     public Factory() {
 
         // Create cells
         warehouse = new Warehouse(Main.config.getS("cell.warehouse.id"));
-        loadUnloadCell = new LoadUnloadBay(Main.config.getS("cell.loadunload.id"));
+        loadUnloadCell = new LoadUnloadCell(Main.config.getS("cell.loadunload.id"));
 
         cells.add(warehouse);
         for (int i = 1; Main.config.getS("cell." + i + ".type") != null; i++) {

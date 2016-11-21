@@ -8,7 +8,7 @@ import java.util.*;
 import static java.util.stream.Collectors.*;
 import main.*;
 
-public class LoadUnloadBay extends Cell {
+public class LoadUnloadCell extends Cell {
 
     private final Mover t1;
     private final Rotator t2;
@@ -19,7 +19,7 @@ public class LoadUnloadBay extends Cell {
     private final Rotator t7;
     private final Mover t8;
 
-    public LoadUnloadBay(String id) {
+    public LoadUnloadCell(String id) {
         super(id);
 
         // Create conveyors
