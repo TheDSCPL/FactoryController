@@ -182,7 +182,7 @@ public final class Assembler extends Cell {
             this(x, y, 0);
         }
 
-        public Coordinates(BlockContainer bc) {
+        public Coordinates(Container bc) {
             this.z = 0;
             if (bc instanceof Table) {
                 this.x = 0; //all tables are at x=0
@@ -224,13 +224,13 @@ public final class Assembler extends Cell {
             return "(" + x + "," + y + ")";
         }
 
-        public BlockContainer getBlockContainer()
+        public Container getBlockContainer()
         {
             return getBlockContainerFromCoordinates(this.x, this.y);
         }
     }
     
-    public BlockContainer getBlockContainerFromCoordinates(int x, int y) {
+    public Container getBlockContainerFromCoordinates(int x, int y) {
         if (x == 0) {
             if (y == 0) {
                 return t1;
@@ -328,7 +328,7 @@ public final class Assembler extends Cell {
             return true;
         }
         
-        public boolean changeOrigin(BlockContainer bc)
+        public boolean changeOrigin(Container bc)
         {
             if(bc == null)
                 return false;
@@ -368,7 +368,7 @@ public final class Assembler extends Cell {
             return true;
         }
         
-        public boolean changeDestination(BlockContainer bc)
+        public boolean changeDestination(Container bc)
         {
             if(bc == null)
                 return false;
@@ -609,7 +609,7 @@ public final class Assembler extends Cell {
         }
     }
     
-    public Transfer transferBlock(BlockContainer from, BlockContainer to)
+    public Transfer transferBlock(Container from, Container to)
     {
         System.out.println("Registered a transfer");
         return transferBlock(new Coordinates(from), new Coordinates(to));

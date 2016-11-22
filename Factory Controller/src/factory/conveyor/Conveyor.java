@@ -1,12 +1,12 @@
 package factory.conveyor;
 
+import factory.Container;
 import control.*;
-import factory.*;
 import factory.other.*;
 import java.util.*;
 import main.*;
 
-public abstract class Conveyor extends BlockContainer {
+public abstract class Conveyor extends Container {
 
     /**
      * Contains a conveyor that is to transfer a block to this conveyor when
@@ -15,11 +15,9 @@ public abstract class Conveyor extends BlockContainer {
     Conveyor transferPartner;
     private Sensor receivingFinishedSensor;
 
-    private final Block[] blocks;
     private State conveyorState;
     private final Motor transferMotor;
     private final Sensor[] presenceSensors;
-    private final int length;
     private final Double[] queueWeights;
     private boolean sendingFrozen;
 
@@ -41,10 +39,9 @@ public abstract class Conveyor extends BlockContainer {
      * conveyors this conveyor has
      */
     public Conveyor(String id, int length, int connectionCount) {
+        super(length);
         this.id = id;
-
-        this.length = length;
-        blocks = new Block[length];
+        
         presenceSensors = new Sensor[length];
         connections = new Conveyor[connectionCount];
         queueWeights = new Double[connectionCount];
@@ -268,68 +265,6 @@ public abstract class Conveyor extends BlockContainer {
     }
 
     /**
-     * Checks if there are blocks in the conveyor
-     *
-     * @return <i>true</i> if there is at least one block. <i>false</i>
-     * otherwise
-     */
-    public boolean hasBlock() {
-        for (Block b : blocks) {
-            if (b != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Returns one block on the conveyor or null if no blocks are present
-     *
-     * @return
-     */
-    public Block getOneBlock() {
-        for (Block b : blocks) {
-            if (b != null) {
-                return b;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Places a block object on the conveyor
-     *
-     * @param b the block to place
-     * @param position the index (from 0 to length-1) of where to place
-     * @return <i>true</i> if there was no other block on that position and the
-     * block was placed. <i>false</i> otherwise
-     */
-    public boolean placeBlock(Block b, int position) {
-        if (position >= length) {
-            throw new IndexOutOfBoundsException("Invalid block position " + position);
-        }
-        if (blocks[position] == null) {
-            blocks[position] = b;
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Removes a block object from the conveyor
-     *
-     * @param position the position where to remove the block
-     * @return the block that was removed, or null if no block was there
-     */
-    public Block removeBlock(int position) {
-        Block ret = blocks[position];
-        blocks[position] = null;
-        return ret;
-    }
-
-    /**
      * Loops for all the conveyors connected to this conveyor and returns true
      * if the given conveyor is on that list
      *
@@ -391,17 +326,15 @@ public abstract class Conveyor extends BlockContainer {
     public void setSendingFrozen(boolean sendingFrozen) {
         this.sendingFrozen = sendingFrozen;
     }
-    
-    public boolean isSendingFrozen()
-    {
+
+    public boolean isSendingFrozen() {
         return sendingFrozen;
     }
 
-    public int getLength()
-    {
+    public int getLength() {
         return length;
     }
-    
+
     protected abstract boolean transferMotorDirection(Conveyor partner, boolean sending);
 
     protected abstract void blockTransferFinished();
