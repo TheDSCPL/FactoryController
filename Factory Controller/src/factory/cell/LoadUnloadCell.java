@@ -106,7 +106,7 @@ public class LoadUnloadCell extends Cell {
         switch (position) {
             case 1: return t4;
             case 2: return t5;
-            default: throw new IndexOutOfBoundsException("XXX"); // TODO: error string
+            default: throw new IndexOutOfBoundsException("No pusher at position " + position);
         }
     }
 

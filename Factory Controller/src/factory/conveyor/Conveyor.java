@@ -1,7 +1,7 @@
 package factory.conveyor;
 
-import factory.Container;
 import control.*;
+import factory.Container;
 import factory.other.*;
 import java.util.*;
 import main.*;
@@ -179,7 +179,7 @@ public abstract class Conveyor extends Container {
             ret = blocks[0];
 
             System.arraycopy(blocks, 1, blocks, 0, blocks.length - 1);
-            // Equivalent to: TODO: verify
+            // Equivalent to:
             //for (int i = blocks.length - 1; i > 0; i--) {
             //    blocks[i - 1] = blocks[i];
             //}
@@ -190,7 +190,7 @@ public abstract class Conveyor extends Container {
             ret = blocks[blocks.length - 1];
 
             System.arraycopy(blocks, 0, blocks, 1, blocks.length - 1);
-            // Equivalent to: TODO: verify
+            // Equivalent to:
             //for (int i = 0; i < blocks.length - 1; i++) {
             //    blocks[i + 1] = blocks[i];
             //}
@@ -316,7 +316,7 @@ public abstract class Conveyor extends Container {
 
     public double transferTimeEstimate(Conveyor from, Conveyor to) {
         if (!isConnectedToConveyor(from) || !isConnectedToConveyor(to)) {
-            throw new Error("XXX"); // TODO: error message
+            throw new Error("Not connected to given conveyors");
         }
 
         // TODO: not finished on subclasses

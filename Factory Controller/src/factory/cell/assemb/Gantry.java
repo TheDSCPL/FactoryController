@@ -12,7 +12,7 @@ public class Gantry {
     public final Sensor upZ, downZ;
     public final Sensor[] Xsensors, Ysensors;
 
-    private final long initializationTimeoutMillis = 1500; // TODO: this should be a property in the config file
+    private final long initializationTimeoutMillis = Main.config.getL("timing.gantry.initializationTimeout");
     private final long maxInitTries = 2;
 
     public final String id;

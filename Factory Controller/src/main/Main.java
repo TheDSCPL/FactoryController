@@ -28,7 +28,7 @@ Alex:
   [X]  Tool pre-selection on Parallel cell (Class: ParallelCell)
   [X]  Statistics module + thread safety! (Class: Main, Statistics)
   [X]  "Select called on tool when tool is not on Idle state" tool pre-selection algorithm bug (Class: Machine)
-  [.]  Order processing algorithm and distribution by the various cells (Class: Factory)
+  [.]  Order processing algorithm and distribution by the various cells (Class: Optimizer)
  ([ ]  Parallel cell opimization: entry of blocks on cell is not prioritized over block being transfer-rotated already on cell)
  ([ ]  Parallel cell opimization: path.length > 3, not 2)
 

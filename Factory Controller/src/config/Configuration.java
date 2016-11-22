@@ -71,6 +71,10 @@ public class Configuration {
         return Integer.parseInt(general.getProperty(key));
     }
     
+    public long getL(String key) {
+        return Long.parseLong(general.getProperty(key));
+    }
+    
     public double getD(String key) {
         return Double.parseDouble(general.getProperty(key));
     }
