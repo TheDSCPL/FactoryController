@@ -2,10 +2,10 @@ package factory.cell;
 
 import control.*;
 import control.order.*;
-import factory.*;
 import factory.conveyor.*;
 import java.util.*;
 import main.*;
+import main.Optimizer.OrderPossibility;
 
 public abstract class Cell {
 

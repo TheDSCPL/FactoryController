@@ -2,11 +2,11 @@ package factory.cell;
 
 import control.*;
 import control.order.*;
-import factory.OrderPossibility;
 import factory.conveyor.*;
 import java.util.*;
 import static java.util.stream.Collectors.*;
 import main.*;
+import main.Optimizer.OrderPossibility;
 
 public class LoadUnloadCell extends Cell {
 

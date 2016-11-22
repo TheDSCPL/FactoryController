@@ -1,10 +1,10 @@
 package main;
 
 import coms.*;
-import config.Configuration;
+import config.*;
 import control.*;
 import factory.*;
-import java.io.IOException;
+import java.io.*;
 import transformation.*;
 
 // PULL -> WORK -> ADD -> COMMIT -> PULL -> PUSH
@@ -48,8 +48,9 @@ public class Main {
     public static final Factory factory = new Factory();
     public static final TransformationManager transfm = new TransformationManager();
     public static final OrderController orderc = new OrderController();
+    public static final Optimizer optimizer = new Optimizer();
     public static final Statistics stats = new Statistics();
-    private static final Console console = new Console();
+    public static final Console console = new Console();
     public static final long controlLoopDelay = (long) config.getI("controlLoopDelay");
 
     /**
@@ -58,11 +59,31 @@ public class Main {
     public static long time() {
         return System.nanoTime() / (long) 1_000_000;
     }
-    
+
     public static void main(String[] args) throws IOException {
         console.setDaemon(true);
         console.start();
         controlLoop();
+    }
+
+    private static void controlLoop() {
+        try {
+            modbus.connect();
+
+            while (true) {
+                modbus.refreshInputs();
+                factory.update();
+                orderc.update();
+                optimizer.distributeNextOrder();
+                modbus.refreshOutputs();
+
+                processCommand();
+                Thread.sleep(controlLoopDelay);
+            }
+        }
+        catch (Throwable ex) {
+            ex.printStackTrace();
+        }
     }
 
     private static void processCommand() {
@@ -87,25 +108,6 @@ public class Main {
             }
 
             console.setOutput(output != null ? output : "Invalid command " + input);
-        }
-    }
-
-    private static void controlLoop() {
-        try {
-            modbus.connect();
-
-            while (true) {
-                modbus.refreshInputs();
-                factory.update();
-                orderc.update();
-                modbus.refreshOutputs();
-
-                processCommand();
-                Thread.sleep(controlLoopDelay);
-            }
-        }
-        catch (Throwable ex) {
-            ex.printStackTrace();
         }
     }
 }

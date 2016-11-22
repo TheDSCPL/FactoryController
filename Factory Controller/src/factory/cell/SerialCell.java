@@ -2,11 +2,11 @@ package factory.cell;
 
 import control.*;
 import control.order.*;
-import factory.*;
 import factory.conveyor.*;
 import java.util.*;
 import static java.util.stream.Collectors.toList;
 import main.Main;
+import main.Optimizer.OrderPossibility;
 import transformation.*;
 
 public class SerialCell extends Cell {

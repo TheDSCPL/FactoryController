@@ -1,7 +1,6 @@
 package factory;
 
 import control.*;
-import control.order.*;
 import factory.cell.*;
 import factory.cell.assemb.*;
 import factory.conveyor.*;
@@ -12,7 +11,7 @@ public class Factory {
 
     public final Warehouse warehouse;
     public final LoadUnloadCell loadUnloadCell;
-    private final List<Cell> cells = new ArrayList<>();
+    public final List<Cell> cells = new ArrayList<>();
 
     public Factory() {
 
@@ -48,88 +47,10 @@ public class Factory {
     }
 
     public void update() {
-
-        // Update cells
         cells.stream().forEach(Cell::update);
-
-        // Choose next order to be executed
-        if (warehouse.isBlockOutQueueEmpty() && warehouse.isOutConveyorEmpty()) {
-            Set<Order> orders = Main.orderc.getPendingOrders();
-
-            OrderPossibility bestOP = cells.stream()
-                    .filter(c -> c != warehouse) // Warehouse does not process Orders
-                    .map(c -> c.getOrderPossibilities(orders, cellEntryPathFromWarehouse(c).timeEstimate() + warehouse.reactionTime)) // Get all order possibilities from each cell
-                    .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll).stream() // Collapse List<List<X>> into List<X>
-                    .map(v -> (OrderPossibility) v) // Cast from Object to OrderPossibility
-                    .reduce(null, this::bestOrderPossibility); // Get best OrderPossibility
-
-            if (bestOP != null) {
-                System.out.println("Executing possibility: " + bestOP);
-                for (int i = 0; i < bestOP.possibleExecutionCount; i++) {
-                    List<Block> bl = bestOP.order.execute(bestOP.executionInfo);
-
-                    bl.stream().forEach(b -> b.path = cellEntryPathFromWarehouse(bestOP.cell));
-                    warehouse.addBlocksOut(bl);
-                    bestOP.cell.addIncomingBlocks(bl);
-                }
-            }
-        }
     }
 
-    private OrderPossibility bestOrderPossibility(OrderPossibility op1, OrderPossibility op2) {
-        if (op1 == null) {
-            return op2;
-        }
-        if (op2 == null) {
-            return op1;
-        }
-
-        int value = 0;
-
-        // Execute each set of rules, sequentially, from most important to least important
-        // Stop execution when a rule has decided the order between the possibilities (value != 0)
-        for (int i = 0; i <= 3; i++) {
-            switch (i) {
-                case 0: // Leave for last possibilities that cannot be processed immediately
-                    if (!op1.entersCellImmediately) {
-                        value = -1;
-                    }
-                    if (!op2.entersCellImmediately) {
-                        value = 1;
-                    }
-                    break;
-                case 1:
-                    if (op1.cell == op2.cell) { // Respect priority of orders in the same cell
-                        value = op1.priority - op2.priority;
-                    }
-                    else { // For different cells, prefer to send blocks to cells far away first
-                        value = indexForCell(op1.cell) - indexForCell(op2.cell);
-                    }
-                    break;
-                case 2: // For the same order, prefer cells that are quicker
-                    if (op1.order == op2.order) {
-                        value = (int) (op2.processingTime - op1.processingTime);
-                    }
-                    break;
-                case 3: // Prefer possibilities that get more done at once
-                    value = op1.possibleExecutionCount - op2.possibleExecutionCount;
-                    break;
-            }
-
-            if (value != 0) {
-                break;
-            }
-        }
-
-        if (value == 1) {
-            return op1;
-        }
-        else {
-            return op2;
-        }
-    }
-
-    private int indexForCell(Cell c) {
+    public int indexForCell(Cell c) {
         for (int i = 0; i < cells.size(); i++) {
             if (cells.get(i) == c) {
                 return i;
@@ -200,7 +121,7 @@ public class Factory {
     public Path cellExitPathToWarehouse(Cell cell) {
         return blockTransportPath(cell, warehouse);
     }
-
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

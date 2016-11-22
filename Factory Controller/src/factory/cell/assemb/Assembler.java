@@ -9,6 +9,7 @@ import factory.other.*;
 import java.util.*;
 import java.util.logging.*;
 import main.*;
+import main.Optimizer.OrderPossibility;
 
 public final class Assembler extends Cell {
 
