@@ -27,8 +27,9 @@ public class UnloadOrder extends Order {
         Block b = new Block(blockType);
         b.order = this;
 
-        incrementPlacement();
-        return Arrays.asList(b);
+        List<Block> l = Arrays.asList(b);
+        addBlocksPlaced(l);
+        return l;
     }
 
     @Override

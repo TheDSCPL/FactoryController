@@ -22,13 +22,13 @@ public class OrderController {
     }
 
     private Long firstOrderTime;
-    
+
     public void update() {
         // Get new orders from socket and process them
         socket.getNewPackets().stream().forEach(this::processNewOrder);
-        
+
         if (orders.stream().filter(o -> !o.isCompleted()).count() == 0 && firstOrderTime != null) {
-            System.out.println("TESTBENCH: TOTAL TIME FOR ORDERS = " + ((double)(Main.time() - firstOrderTime)/1000.0) + "s");
+            System.out.println("TESTBENCH: TOTAL TIME FOR ORDERS = " + ((double) (Main.time() - firstOrderTime) / 1000.0) + "s");
             firstOrderTime = null;
         }
     }
@@ -65,7 +65,7 @@ public class OrderController {
                     //System.out.println("Invalid order type: '" + orderString.charAt(1) + "'");
                     return;
             }
-            
+
             if (orders.isEmpty()) {
                 firstOrderTime = Main.time();
             }
@@ -103,12 +103,15 @@ public class OrderController {
 
         StringBuilder sb = new StringBuilder();
 
-        orders.stream().forEach((order) -> {
-            sb.append("O")
-                    .append(order.id).append(" ")
-                    .append(order.orderTypeString()).append(" ")
-                    .append(order.getStateString()).append("\n");
-        });
+        new ArrayList<>(orders)
+                .stream()
+                .sorted((o1, o2) -> o1.receivedBefore(o2) ? -1 : 1)
+                .forEach((order) -> {
+                    sb.append("O")
+                            .append(order.id).append(" ")
+                            .append(order.orderTypeString()).append(" ")
+                            .append(order.getStateString()).append("\n");
+                });
 
         return sb.toString();
     }

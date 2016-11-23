@@ -314,6 +314,7 @@ public abstract class Conveyor extends Container {
                || conveyorState == State.Receiving;
     }
 
+    // TODO: experimental
     public double transferTimeEstimate(Conveyor from, Conveyor to) {
         if (!isConnectedToConveyor(from) || !isConnectedToConveyor(to)) {
             throw new Error("Not connected to given conveyors");

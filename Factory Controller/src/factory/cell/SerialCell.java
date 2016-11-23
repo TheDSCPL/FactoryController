@@ -82,40 +82,79 @@ public class SerialCell extends Cell {
     public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
         List<OrderPossibility> ret = new ArrayList<>();
 
-        for (Order o : orders) {
-            if (o instanceof MachiningOrder) {
-                MachiningOrder order = (MachiningOrder) o;
+        //System.out.println("SerialCell::getOrderPossibilities: ");
 
-                for (TransformationSequence seq : order.possibleSequences()) {
-                    if (seq.machineSet == Machine.Type.Set.AB) {
+        orders.stream().filter((o) -> (o instanceof MachiningOrder)).map((o) -> (MachiningOrder) o).forEach((order) -> {
+            order.possibleSequences().stream().filter((seq) -> (seq.machineSet == Machine.Type.Set.AB)).forEach((seq) -> {
+                
+                // >>>>> TODO: Calculate entersImmediately using arrivalDelayEstimate
+                boolean entersImmediately = !firstConveyorsBlocked &&
+                                            !blocksIncoming
+                                                    .stream()
+                                                    .filter(b -> b.transformations.containsMachineType(Machine.Type.A))
+                                                    .findFirst()
+                                                    .isPresent() && 
+                                            /*!blocksInside
+                                                    .stream()
+                                                    .filter(b -> b.path.contains(t3))
+                                                    .findFirst()
+                                                    .isPresent() && // tested: makes opimization worse */ 
+                                            blocksIncoming.size() + blocksInside.size() <= 3;
+                
+                /*true;
 
-                        int priority = 0;
-                        if (!seq.containsMachineType(Machine.Type.A)) {
-                            priority = 1;
-                        }
-                        else if (Collections.indexOfSubList(
-                                seq.sequence.stream().map((t) -> t.machine).collect(toList()),
-                                Arrays.asList(Machine.Type.B, Machine.Type.A)) != -1)
-                        { // If the sequence contains somehwer machine A after machine B, then that has a lower priority because it means the conveyors will be blocked
-                            priority = -1;
-                        }
+                Set<Block> blocksOnCellEstimate = new HashSet<>(blocksInside);
 
-                        int possibleExecutionCount = seq.containsMachineType(Machine.Type.A) ? 1 : 3;
+                for (Block b : blocksIncoming) {
+                    Block nb = new Block(b.type);
+                    nb.path = b.path.copy();
+                    nb.path.append(blockPathForTransformationSequence(b.transformations)); // TODO: wrong because blocks may be blocked on entrance
+                    nb.transformations = b.transformations;
+                    blocksOnCellEstimate.add(nb);
+                }
+                
+                System.out.println("\torder:");
 
-                        boolean entersImmediately = !(firstConveyorsBlocked || t3.hasBlock()) && blocksIncoming.isEmpty(); //blocksIncoming.size() + blocksInside.size() < 3;
+                for (Block b : blocksOnCellEstimate) {
+                    System.out.println("\t" + b);
+                    System.out.println("\t\t \\> " + b.timeTravel(arrivalDelayEstimate));
 
-                        double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();
-
-                        ret.add(new OrderPossibility(
-                                this, order, possibleExecutionCount, seq,
-                                totalDuration, entersImmediately, priority
-                        ));
+                    if (b.timeTravel(arrivalDelayEstimate).contains(t3)) {
+                        entersImmediately = false;
+                        //break;
                     }
                 }
-            }
-        }
 
-        //System.out.println("getOrderPossibilities.ret = " + ret);
+                System.out.println("\tentersImmediately: " + entersImmediately);*/
+
+                // >>>>> Calculate totalDuration
+                double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();
+                
+                // >>>>> Calculate priority
+                // Give higher priority to sequences where only machine B is present, since with those 3 blocks can enter the cell at once
+                // Give lower priority to sequences that contain A after B, since with those the top conveyors are blocked
+                int priority = 0;
+                if (!seq.containsMachineType(Machine.Type.A)) {
+                    priority = 1;
+                }
+                else if (Collections.indexOfSubList(
+                        seq.sequence.stream().map((t) -> t.machine).collect(toList()),
+                        Arrays.asList(Machine.Type.B, Machine.Type.A)) != -1) {
+                    priority = -1;
+                }
+
+                // >>>>> Calculate possibleExecutionCount
+                // If sequence only contains machine B, three blocks can enter at once
+                int possibleExecutionCount = seq.containsMachineType(Machine.Type.A) ? 1 : 3;
+
+                // >>>>> Add possibility
+                ret.add(new OrderPossibility(
+                        this, order, possibleExecutionCount, seq,
+                        totalDuration, entersImmediately, priority
+                ));
+
+            });
+        });
 
         return ret;
     }

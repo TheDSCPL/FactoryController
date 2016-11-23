@@ -121,7 +121,7 @@ public class Factory {
     public Path cellExitPathToWarehouse(Cell cell) {
         return blockTransportPath(cell, warehouse);
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

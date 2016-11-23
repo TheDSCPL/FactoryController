@@ -94,10 +94,10 @@ public class LoadUnloadCell extends Cell {
                 .stream()
                 .filter((o) -> o instanceof UnloadOrder)
                 .map((o) -> (UnloadOrder) o)
-                .map((o) -> new OrderPossibility(
-                        this, o, getPusherForPosition(o.position).roller.isFull() ? 1 : 2, null, 0,
+                .map((order) -> new OrderPossibility(
+                        this, order, getPusherForPosition(order.position).roller.isFull() ? 1 : 2, null, 0,
                         blocksIncoming.size() + blocksInside.size() + (t4.roller.isFull() ? 2 : 0) + (t5.roller.isFull() ? 2 : 0) < 6,
-                        o.position
+                        order.position
                 ))
                 .collect(toList());
     }

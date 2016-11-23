@@ -12,28 +12,34 @@ public class Optimizer {
             Set<Order> orders = Main.orderc.getPendingOrders();
 
             OrderPossibility best = Main.factory.cells.stream()
+                    .filter(c -> !(c instanceof Warehouse)) // cellEntryPathFromWarehouse does not work on warehouses
+                    //.filter(c -> !(c instanceof ParallelCell))
                     .map(c -> c.getOrderPossibilities(orders, Main.factory.cellEntryPathFromWarehouse(c).timeEstimate() + Main.factory.warehouse.reactionTime)) // Get all order possibilities from each cell
                     .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll).stream() // Collapse List<List<X>> into List<X>
                     .map(v -> (OrderPossibility) v) // Cast from Object to OrderPossibility
                     .reduce(null, this::bestOrderPossibility); // Get best OrderPossibility
 
             if (best != null) {
-                System.out.println("Executing possibility: " + best);
-                for (int i = 0; i < best.possibleExecutionCount; i++) {
-                    List<Block> bl = best.order.execute(best.executionInfo);
+                if (best.entersCellImmediately) {
+                    System.out.println("Executing possibility: " + best);
 
-                    bl.stream().forEach(b -> b.path = Main.factory.cellEntryPathFromWarehouse(best.cell));
-                    Main.factory.warehouse.addBlocksOut(bl);
-                    best.cell.addIncomingBlocks(bl);
+                    for (int i = 0; i < best.possibleExecutionCount; i++) {
+                        List<Block> bl = best.order.execute(best.executionInfo);
+
+                        bl.stream().forEach(b -> b.path = Main.factory.cellEntryPathFromWarehouse(best.cell));
+                        Main.factory.warehouse.addBlocksOut(bl);
+                        best.cell.addIncomingBlocks(bl);
+                    }
+
                 }
             }
         }
     }
-    
+
     public boolean shouldDistribute() {
         return Main.factory.warehouse.isBlockOutQueueEmpty() && Main.factory.warehouse.isOutConveyorEmpty();
     }
-    
+
     private OrderPossibility bestOrderPossibility(OrderPossibility op1, OrderPossibility op2) {
         if (op1 == null) {
             return op2;
@@ -46,7 +52,7 @@ public class Optimizer {
 
         // Execute each set of rules, sequentially, from most important to least important
         // Stop execution when a rule has decided the order between the possibilities (value != 0)
-        for (int i = 0; i <= 3; i++) {
+        for (int i = 0; i <= 4; i++) {
             switch (i) {
                 case 0: // Leave for last possibilities that cannot be processed immediately
                     if (!op1.entersCellImmediately) {
@@ -56,20 +62,30 @@ public class Optimizer {
                         value = 1;
                     }
                     break;
-                case 1:
-                    if (op1.cell == op2.cell) { // Respect priority of orders in the same cell
-                        value = op1.priority - op2.priority;
-                    }
-                    else { // For different cells, prefer to send blocks to cells far away first
-                        value = Main.factory.indexForCell(op1.cell) - Main.factory.indexForCell(op2.cell);
+                case 1: // For different orders, give priority to those received before
+                    if (op1.order != op2.order) {
+                        if (op1.order.receivedBefore(op2.order)) {
+                            value = 1;
+                        }
+                        else {
+                            value = -1;
+                        }
                     }
                     break;
-                case 2: // For the same order, prefer cells that are quicker
+                case 2:
+                    if (op1.cell == op2.cell) { // For same cell, respect order priority
+                        value = op1.priority - op2.priority;
+                    }
+                    else { // For different cells, prefer to send blocks to cells close by first
+                        value = Main.factory.indexForCell(op2.cell) - Main.factory.indexForCell(op1.cell);
+                    }
+                    break;
+                case 3: // For the same order, prefer cells that are quicker
                     if (op1.order == op2.order) {
                         value = (int) (op2.processingTime - op1.processingTime);
                     }
                     break;
-                case 3: // Prefer possibilities that get more done at once
+                case 4: // Prefer possibilities that get more done at once
                     value = op1.possibleExecutionCount - op2.possibleExecutionCount;
                     break;
             }
@@ -79,7 +95,7 @@ public class Optimizer {
             }
         }
 
-        if (value == 1) {
+        if (value > 0) {
             return op1;
         }
         else {

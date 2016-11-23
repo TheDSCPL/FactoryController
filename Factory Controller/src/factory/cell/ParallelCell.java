@@ -104,34 +104,33 @@ public class ParallelCell extends Cell {
     public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
         List<OrderPossibility> ret = new ArrayList<>();
 
-        for (Order o : orders) {
-            if (o instanceof MachiningOrder) {
-                MachiningOrder order = (MachiningOrder) o;
+        orders.stream().filter((o) -> (o instanceof MachiningOrder)).map((o) -> (MachiningOrder) o).forEach((order) -> {
+            order.possibleSequences().stream().filter((seq) -> (seq.machineSet == Machine.Type.Set.BC)).forEach((seq) -> {
 
-                for (TransformationSequence seq : order.possibleSequences()) {
-                    if (seq.machineSet == Machine.Type.Set.BC) {
+                // >>>>> TODO: Calculate entersImmediately using arrivalDelayEstimate
+                boolean entersImmediately = blockRotationForTransformationSequence(seq).compatibleWith(currentBlockRotation) &&
+                                            blocksIncoming.size() + blocksInside.size() <= 1; // Tested with 2, makes times worse
 
-                        int priority = 1; // TODO: x
+                // >>>>> TODO: Calculate priority
+                int priority = 1;
 
-                        int possibleExecutionCount = 2 - blocksIncoming.size() - blocksInside.size();
-                        if (possibleExecutionCount < 1) {
-                            possibleExecutionCount = 1;
-                        }
-
-                        boolean entersImmediately = blocksIncoming.size() + blocksInside.size() < 2
-                                                    && blockRotationForTransformationSequence(seq).compatibleWith(currentBlockRotation)
-                                                    && !t4.hasBlock();
-
-                        double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();
-
-                        ret.add(new OrderPossibility(
-                                this, order, possibleExecutionCount, seq,
-                                totalDuration, entersImmediately, priority
-                        ));
-                    }
+                // >>>>> TODO: Calculate possibleExecutionCount
+                int possibleExecutionCount = 2 - blocksIncoming.size() - blocksInside.size();
+                if (possibleExecutionCount < 1) {
+                    possibleExecutionCount = 1;
                 }
-            }
-        }
+
+                // >>>>> Calculate totalDuration
+                double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();
+
+                // >>>>> Add possibility
+                ret.add(new OrderPossibility(
+                        this, order, possibleExecutionCount, seq,
+                        totalDuration, entersImmediately, priority
+                ));
+
+            });
+        });
 
         return ret;
     }
@@ -154,7 +153,6 @@ public class ParallelCell extends Cell {
         block.path.append(blockPathForTransformationSequence(block.transformations));
         //t7.highestPriorityConnection = rotation == BlockRotation.Clockwise ? 1 : 0;
 
-        //System.out.println("processBlockIn: currentBlockRotation = " + currentBlockRotation);
         return true;
     }
 

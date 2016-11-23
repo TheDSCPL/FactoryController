@@ -33,8 +33,9 @@ public class MachiningOrder extends Order {
         b.order = this;
         b.transformations = (TransformationSequence) info;
 
-        incrementPlacement();
-        return Arrays.asList(b);
+        List<Block> l = Arrays.asList(b);
+        addBlocksPlaced(l);
+        return l;
     }
 
     @Override

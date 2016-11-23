@@ -93,8 +93,19 @@ public final class Path {
         return path.contains(c);
     }
 
+    /**
+     * @return A new, independent Path object that contains the same Conveyor
+     * list as the callee
+     */
+    public Path copy() {
+        Path p = new Path();
+        p.append(this);
+        return p;
+    }
+
+    // TODO: experimental
     public double timeEstimate() {
-        if (length() <= 1) {
+        if (length() < 2) {
             return 0;
         }
 
@@ -108,7 +119,6 @@ public final class Path {
             time += current.transferTimeEstimate(last, next);
         }
 
-        //System.out.println("timeEstimate.time = " + time);
         return time;
     }
 

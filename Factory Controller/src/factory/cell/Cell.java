@@ -193,7 +193,7 @@ public abstract class Cell {
 //                                  closestBlockToBeProcessed);
             }
 
-            machine.preSelectTool(closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool);
+            machine.preSelectTool(closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool); // TODO: preselection for incomingBlocks too
         }
     }
 
