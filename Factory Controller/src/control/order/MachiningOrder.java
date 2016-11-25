@@ -1,6 +1,7 @@
 package control.order;
 
 import control.*;
+import factory.conveyor.Machine;
 import java.util.*;
 import main.*;
 import transformation.*;
@@ -16,8 +17,8 @@ public class MachiningOrder extends Order {
         this.endType = endType;
     }
 
-    public List<TransformationSequence> possibleSequences() {
-        return Main.transfm.getTransformationSequences(startType, endType, null);
+    public List<TransformationSequence> possibleSequences(Machine.Type.Set mts) {
+        return Main.transfm.getTransformationSequences(startType, endType, mts);
     }
 
     public List<Block> execute(Object info) {

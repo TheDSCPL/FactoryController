@@ -84,7 +84,7 @@ public abstract class Order {
         sb.append(" - ").append("Blocks processing: ").append(placedCount).append("\n");
         
         for (Block b : blocks) {
-            sb.append("\t").append(b.type).append(" on ").append(b.path.getCurrent().id).append("\n");
+            sb.append("\t").append(b.type).append(": ").append(b.path).append("\n");
         }
 
         sb.append(" - ").append("Blocks completed: ").append(completedCount).append("\n");

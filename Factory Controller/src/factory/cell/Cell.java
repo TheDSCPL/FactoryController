@@ -143,11 +143,7 @@ public abstract class Cell {
     }
 
     private void processToolPreSelection(Machine machine) {
-
-//        if (machine.id.startsWith("P")) {
-//            System.out.format("[cell %s] processToolPreSelection machine = %s%n", id, machine.id);
-//        }
-
+        
         // Get next block to go to that machine and be processed there
         Block closestBlockToBeProcessed = null;
         int minStepCount = Integer.MAX_VALUE;
@@ -166,17 +162,34 @@ public abstract class Cell {
                         break;
                     }
                 }
-//                
-//                if (machine.id.startsWith("P")) {
-//                    System.out.format("[cell %s] processToolPreSelection loop: block = %s; steps = %d; path = %s%n", id, b, count, b.path);
-//                }
 
                 // If this block is closest, save that information
                 if (count < minStepCount) {
-//                    if (machine.id.startsWith("P")) {
-//                        System.out.format("[cell %s] count < minStepCount: set closestBlockToBeProcessed = %s%n", id, b);
-//                    }
+                    minStepCount = count;
+                    closestBlockToBeProcessed = b;
+                }
+            }
+        }
+        
+        for (Block b : blocksIncoming) {
+            
+            Path p = b.path.copy();
+            p.append(pathForIncomingBlock(b));
 
+            // Block has to go to that machine in the future and be processed there
+            if (p.contains(machine) && b.getNextTransformationOnMachine(machine.type) != null) {
+
+                // Calculate number of steps to machine for this block
+                int count = 0;
+                for (int i = 0; i < p.length(); i++) {
+                    count++;
+
+                    if (p.get(i) == machine) {
+                        break;
+                    }
+                }
+                
+                if (count < minStepCount) {
                     minStepCount = count;
                     closestBlockToBeProcessed = b;
                 }
@@ -185,16 +198,12 @@ public abstract class Cell {
 
         // Get next transformation that block will have on that machine, and pre-select the apropriate tool
         if (closestBlockToBeProcessed != null) {
-            if (machine.id.startsWith("P")) {
-//                System.out.format("[cell %s] machine %s preSelectTool %s for block %s%n",
-//                                  id,
-//                                  machine.id,
-//                                  closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool,
-//                                  closestBlockToBeProcessed);
-            }
-
             machine.preSelectTool(closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool); // TODO: preselection for incomingBlocks too
         }
+    }
+    
+    protected Path pathForIncomingBlock(Block b) {
+        return new Path();
     }
 
     @Override

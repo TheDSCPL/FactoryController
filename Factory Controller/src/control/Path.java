@@ -2,6 +2,7 @@ package control;
 
 import factory.conveyor.*;
 import java.util.*;
+import static java.util.stream.Collectors.toList;
 
 public final class Path {
 
@@ -123,6 +124,6 @@ public final class Path {
     }
 
     public String toString() {
-        return path.stream().map(c -> c.id).reduce("Path {", (a, b) -> (a + ", " + b)) + "}";
+        return path.stream().map(c -> c.id).collect(toList()).toString();
     }
 }

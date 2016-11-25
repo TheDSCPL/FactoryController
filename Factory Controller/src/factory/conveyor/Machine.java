@@ -92,7 +92,7 @@ public class Machine extends Conveyor {
 
     public void preSelectTool(Tool.Type type) {
         if (id.startsWith("P")) {
-            System.out.format("[machine %s] pre-select tool %s%n", id, type);
+            //System.out.format("[machine %s] pre-select tool %s%n", id, type);
         }
         tool.select(type);
     }
@@ -102,7 +102,7 @@ public class Machine extends Conveyor {
         holdBlock = false;
 
         if (id.startsWith("P")) {
-            System.out.format("[machine %s] startMachiningIfNecessary %s%n", id, block);
+            //System.out.format("[machine %s] startMachiningIfNecessary %s%n", id, block);
         }
         if (block.order instanceof MachiningOrder) {
             if (block.hasNextTransformation()) {
@@ -195,18 +195,18 @@ public class Machine extends Conveyor {
                         if (machiningDuration != -1) {
                             activate(machiningDuration);
                             if (machineID.startsWith("P")) {
-                                System.out.format("[tool %s] update: done selecting tool=%s, start machining duration=%d%n", machineID, toolSelectTarget, machiningDuration);
+                                //System.out.format("[tool %s] update: done selecting tool=%s, start machining duration=%d%n", machineID, toolSelectTarget, machiningDuration);
                             }
                         }
                         else if (machineID.startsWith("P")) {
-                            System.out.format("[tool %s] update: done selecting tool=%s, no machining%n", machineID, toolSelectTarget);
+                            //System.out.format("[tool %s] update: done selecting tool=%s, no machining%n", machineID, toolSelectTarget);
                         }
                     }
                     break;
                 case Machining:
                     if (Main.time() > stopTime) {
                         if (machineID.startsWith("P")) {
-                            System.out.format("[tool %s] update: done machining duration=%d%n", machineID, machiningDuration);
+                            //System.out.format("[tool %s] update: done machining duration=%d%n", machineID, machiningDuration);
                         }
                         Main.modbus.setOutput(toolActivationMotorID, false);
                         state = State.Idle;
@@ -217,7 +217,7 @@ public class Machine extends Conveyor {
 
         public void select(Type type) {
             if (machineID.startsWith("P")) {
-                System.out.format("[tool %s] select: tool=%s%n", machineID, type);
+                //System.out.format("[tool %s] select: tool=%s%n", machineID, type);
             }
 
             // If machining, throw error
@@ -230,7 +230,7 @@ public class Machine extends Conveyor {
                 startSelection(type);
             }
             else if (state == State.Selecting && toolSelectTarget != type) {
-                System.out.format("[tool %s] tool on %s, already selecting %s, changing to selecting %s%n", machineID, currentTool, toolSelectTarget, type);
+                //System.out.format("[tool %s] tool on %s, already selecting %s, changing to selecting %s%n", machineID, currentTool, toolSelectTarget, type);
 
                 if (toolPresentSensor.on()) {
                     if (Main.time() > stopTime) { // Already on toolSelectTarget
@@ -254,7 +254,7 @@ public class Machine extends Conveyor {
         
         private void startSelection(Type type) {
             if (machineID.startsWith("P")) {
-                System.out.format("[tool %s] startSelection type = %s%n", machineID, type);
+                //System.out.format("[tool %s] startSelection type = %s%n", machineID, type);
             }
             toolSelectTarget = type;
 
@@ -282,7 +282,7 @@ public class Machine extends Conveyor {
             switch (state) {
                 case Idle:
                     if (machineID.startsWith("P")) {
-                        System.out.format("[tool %s] activate: start machining with duration=%d%n", machineID, duration);
+                        //System.out.format("[tool %s] activate: start machining with duration=%d%n", machineID, duration);
                     }
                     state = State.Machining;
                     stopTime = Main.time() + duration;
@@ -290,7 +290,7 @@ public class Machine extends Conveyor {
                     break;
                 case Selecting:
                     if (machineID.startsWith("P")) {
-                        System.out.format("[tool %s] activate: still selecting, set duration=%d%n", machineID, duration);
+                        //System.out.format("[tool %s] activate: still selecting, set duration=%d%n", machineID, duration);
                     }
                     machiningDuration = duration;
                     break;
@@ -302,7 +302,7 @@ public class Machine extends Conveyor {
 
         public void selectAndActivate(Type type, long duration) {
             if (machineID.startsWith("P")) {
-                System.out.format("[tool %s] selectAndActivate: tool=%s duration=%d%n", machineID, type, duration);
+                //System.out.format("[tool %s] selectAndActivate: tool=%s duration=%d%n", machineID, type, duration);
             }
             select(type);
             activate(duration);

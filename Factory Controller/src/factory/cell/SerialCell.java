@@ -77,6 +77,11 @@ public class SerialCell extends Cell {
 
         firstConveyorsBlocked = blocked;
     }
+    
+    @Override
+    protected Path pathForIncomingBlock(Block b) {
+        return blockPathForTransformationSequence(b.transformations);
+    }
 
     @Override
     public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
@@ -85,23 +90,23 @@ public class SerialCell extends Cell {
         //System.out.println("SerialCell::getOrderPossibilities: ");
 
         orders.stream().filter((o) -> (o instanceof MachiningOrder)).map((o) -> (MachiningOrder) o).forEach((order) -> {
-            order.possibleSequences().stream().filter((seq) -> (seq.machineSet == Machine.Type.Set.AB)).forEach((seq) -> {
+            order.possibleSequences(Machine.Type.Set.AB).stream().forEach((seq) -> {
                 
                 // >>>>> TODO: Calculate entersImmediately using arrivalDelayEstimate
-                boolean entersImmediately = !firstConveyorsBlocked &&
-                                            !blocksIncoming
+                boolean entersImmediately = true;//!firstConveyorsBlocked &&
+                                            /*!blocksIncoming
                                                     .stream()
                                                     .filter(b -> b.transformations.containsMachineType(Machine.Type.A))
                                                     .findFirst()
                                                     .isPresent() && 
-                                            /*!blocksInside
+                                            !blocksInside
                                                     .stream()
-                                                    .filter(b -> b.path.contains(t3))
-                                                    .findFirst()
-                                                    .isPresent() && // tested: makes opimization worse */ 
-                                            blocksIncoming.size() + blocksInside.size() <= 3;
+                                                    .filter(b -> b.timeTravel(arrivalDelayEstimate).contains(t3) /*b.getNextTransformationOnMachine(Machine.Type.A) != null*/ //)
+                                            /*        .findFirst()
+                                                    .isPresent() &&
+                                            blocksIncoming.size() + blocksInside.size() <= 3;*/
                 
-                /*true;
+                //true;
 
                 Set<Block> blocksOnCellEstimate = new HashSet<>(blocksInside);
 
@@ -113,19 +118,19 @@ public class SerialCell extends Cell {
                     blocksOnCellEstimate.add(nb);
                 }
                 
-                System.out.println("\torder:");
+                //System.out.println("\torder:");
 
                 for (Block b : blocksOnCellEstimate) {
-                    System.out.println("\t" + b);
-                    System.out.println("\t\t \\> " + b.timeTravel(arrivalDelayEstimate));
+                    //System.out.println("\t" + b);
+                    //System.out.println("\t\t \\> " + b.timeTravel(arrivalDelayEstimate));
 
-                    if (b.timeTravel(arrivalDelayEstimate).contains(t3)) {
+                    if (b.timeTravel(arrivalDelayEstimate*1.5).contains(t3)) {
                         entersImmediately = false;
                         //break;
                     }
                 }
 
-                System.out.println("\tentersImmediately: " + entersImmediately);*/
+                //System.out.println("\tentersImmediately: " + entersImmediately);*/
 
                 // >>>>> Calculate totalDuration
                 double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();

@@ -105,7 +105,7 @@ public class ParallelCell extends Cell {
         List<OrderPossibility> ret = new ArrayList<>();
 
         orders.stream().filter((o) -> (o instanceof MachiningOrder)).map((o) -> (MachiningOrder) o).forEach((order) -> {
-            order.possibleSequences().stream().filter((seq) -> (seq.machineSet == Machine.Type.Set.BC)).forEach((seq) -> {
+            order.possibleSequences(Machine.Type.Set.BC).stream().forEach((seq) -> {
 
                 // >>>>> TODO: Calculate entersImmediately using arrivalDelayEstimate
                 boolean entersImmediately = blockRotationForTransformationSequence(seq).compatibleWith(currentBlockRotation) &&
@@ -133,6 +133,11 @@ public class ParallelCell extends Cell {
         });
 
         return ret;
+    }
+    
+    @Override
+    protected Path pathForIncomingBlock(Block b) {
+        return blockPathForTransformationSequence(b.transformations);
     }
 
     @Override
