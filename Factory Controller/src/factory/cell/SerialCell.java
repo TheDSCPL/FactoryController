@@ -11,6 +11,8 @@ import transformation.*;
 
 public class SerialCell extends Cell {
 
+    private static final int MAX_BLOCKS_IN_CELL = 2;
+
     private final Mover t1;
     private final Rotator t2;
     private final Machine t3;
@@ -86,51 +88,23 @@ public class SerialCell extends Cell {
     @Override
     public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
         List<OrderPossibility> ret = new ArrayList<>();
-
-        //System.out.println("SerialCell::getOrderPossibilities: ");
-
+        
         orders.stream().filter((o) -> (o instanceof MachiningOrder)).map((o) -> (MachiningOrder) o).forEach((order) -> {
             order.possibleSequences(Machine.Type.Set.AB).stream().forEach((seq) -> {
                 
-                // >>>>> TODO: Calculate entersImmediately using arrivalDelayEstimate
+                // >>>>> Calculate entersImmediately TODO: using arrivalDelayEstimate
                 boolean entersImmediately = !firstConveyorsBlocked &&
                                             !blocksIncoming
                                                     .stream()
                                                     .filter(b -> b.transformations.containsMachineType(Machine.Type.A))
                                                     .findFirst()
                                                     .isPresent() && 
-                                            /*!blocksInside
-                                                    .stream()
-                                                    .filter(b -> b.timeTravel(arrivalDelayEstimate).contains(t3) /*b.getNextTransformationOnMachine(Machine.Type.A) != null*/ //)
-                                            /*        .findFirst()
-                                                    .isPresent() && */
-                                            blocksIncoming.size() + blocksInside.size() <= 3;
-                
-                //true;
-
-                /*Set<Block> blocksOnCellEstimate = new HashSet<>(blocksInside);
-
-                for (Block b : blocksIncoming) {
-                    Block nb = new Block(b.type);
-                    nb.path = b.path.copy();
-                    nb.path.append(blockPathForTransformationSequence(b.transformations)); // TODO: wrong because blocks may be blocked on entrance
-                    nb.transformations = b.transformations;
-                    blocksOnCellEstimate.add(nb);
-                }
-                
-                //System.out.println("\torder:");
-
-                for (Block b : blocksOnCellEstimate) {
-                    //System.out.println("\t" + b);
-                    //System.out.println("\t\t \\> " + b.timeTravel(arrivalDelayEstimate));
-
-                    if (b.timeTravel(arrivalDelayEstimate*1.5).contains(t3)) {
-                        entersImmediately = false;
-                        //break;
-                    }
-                }*/
-
-                //System.out.println("\tentersImmediately: " + entersImmediately);*/
+                                            !blocksInside
+                                                    .stream() // TODO: OPTIMIZATION: TO TRY  \|/
+                                                    .filter(b -> b.timeTravel(arrivalDelayEstimate).contains(t3) /*b.getNextTransformationOnMachine(Machine.Type.A) != null*/ )
+                                                    .findFirst()
+                                                    .isPresent() && 
+                                            blocksIncoming.size() + blocksInside.size() <= MAX_BLOCKS_IN_CELL;
 
                 // >>>>> Calculate totalDuration
                 double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();
@@ -150,7 +124,7 @@ public class SerialCell extends Cell {
 
                 // >>>>> Calculate possibleExecutionCount
                 // If sequence only contains machine B, three blocks can enter at once
-                int possibleExecutionCount = seq.containsMachineType(Machine.Type.A) ? 1 : 3;
+                int possibleExecutionCount = seq.containsMachineType(Machine.Type.A) ? 1 : MAX_BLOCKS_IN_CELL;
 
                 // >>>>> Add possibility
                 ret.add(new OrderPossibility(

@@ -9,9 +9,9 @@ import main.Optimizer.OrderPossibility;
 import transformation.*;
 
 public class ParallelCell extends Cell {
-    
+
     private static final int MAX_BLOCKS_IN_CELL = 2;
-    
+
     private final Mover t1;
     private final Rotator t2;
     private final Mover t3;
@@ -22,22 +22,6 @@ public class ParallelCell extends Cell {
     private final Mover t8;
     private final Rotator t9;
     private final Mover t10;
-
-    //private BlockRotation currentBlockRotation = BlockRotation.Undefined;
-    @Override
-    public Conveyor getEntryConveyor() {
-        return t2;
-    }
-
-    @Override
-    public Conveyor getExitConveyor() {
-        return t9;
-    }
-
-    @Override
-    protected Cell processBlockOut(Block block) {
-        return Main.factory.warehouse;
-    }
 
     public ParallelCell(String id) {
         super(id);
@@ -168,17 +152,27 @@ public class ParallelCell extends Cell {
         orders.stream().filter((o) -> (o instanceof MachiningOrder)).map((o) -> (MachiningOrder) o).forEach((order) -> {
             order.possibleSequences(Machine.Type.Set.BC).stream().forEach((seq) -> {
 
-                // >>>>> TODO: Calculate entersImmediately using arrivalDelayEstimate
+                // >>>>> Calculate entersImmediately TODO: using arrivalDelayEstimate
                 boolean entersImmediately = blocksIncoming.size() + blocksInside.size() + 1 <= MAX_BLOCKS_IN_CELL;
 
-                // >>>>> TODO: Calculate priority
-                int priority = 1;
+                // >>>>> Calculate priority
+                int priority = 0;
+                
+                Block b = blocksInside.stream().findFirst().orElse(blocksIncoming.stream().findFirst().orElse(null));
 
-                // >>>>> TODO: Calculate possibleExecutionCount
-                int possibleExecutionCount = MAX_BLOCKS_IN_CELL - blocksIncoming.size() - blocksInside.size();
-                //if (possibleExecutionCount < 1) {
-                //    possibleExecutionCount = 1; // TODO: needed?
-                //}
+                if (b != null) {
+                    if (b.hasNextTransformation()) {
+                        if (b.getNextTransformation().machine == seq.getFirstTransformation().machine) {
+                            priority = -1;
+                        }
+                        else {
+                            priority = 1;
+                        }
+                    }
+                }
+
+                // >>>>> Calculate possibleExecutionCount
+                int possibleExecutionCount = 1; // MAX_BLOCKS_IN_CELL - blocksIncoming.size() - blocksInside.size();
 
                 // >>>>> Calculate totalDuration
                 double totalDuration = seq.totalDuration();// + blockPathForTransformationSequence(seq).timeEstimate(); TODO: finish
@@ -247,6 +241,11 @@ public class ParallelCell extends Cell {
     }
 
     @Override
+    protected Cell processBlockOut(Block block) {
+        return Main.factory.warehouse;
+    }
+
+    @Override
     public Conveyor getCornerConveyor(int position) {
         switch (position) {
             case 0: return t1;
@@ -256,6 +255,16 @@ public class ParallelCell extends Cell {
             default:
                 throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
         }
+    }
+
+    @Override
+    public Conveyor getEntryConveyor() {
+        return t2;
+    }
+
+    @Override
+    public Conveyor getExitConveyor() {
+        return t9;
     }
 
     @Override

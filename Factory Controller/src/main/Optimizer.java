@@ -13,7 +13,6 @@ public class Optimizer {
 
             OrderPossibility best = Main.factory.cells.stream()
                     .filter(c -> !(c instanceof Warehouse)) // cellEntryPathFromWarehouse does not work on warehouses
-                    //.filter(c -> !(c instanceof ParallelCell))
                     .map(c -> c.getOrderPossibilities(orders, Main.factory.cellEntryPathFromWarehouse(c).timeEstimate() + Main.factory.warehouse.reactionTime)) // Get all order possibilities from each cell
                     .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll).stream() // Collapse List<List<X>> into List<X>
                     .map(v -> (OrderPossibility) v) // Cast from Object to OrderPossibility
@@ -63,14 +62,14 @@ public class Optimizer {
                     }
                     break;
                 case 1: // For different orders, give priority to those received before
-                    if (op1.order != op2.order) {
+                    /*if (op1.order != op2.order) {
                         if (op1.order.receivedBefore(op2.order)) {
                             value = 1;
                         }
                         else {
                             value = -1;
                         }
-                    }
+                    }*/
                     break;
                 case 2:
                     if (op1.cell == op2.cell) { // For same cell, respect order priority
