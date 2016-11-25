@@ -93,22 +93,22 @@ public class SerialCell extends Cell {
             order.possibleSequences(Machine.Type.Set.AB).stream().forEach((seq) -> {
                 
                 // >>>>> TODO: Calculate entersImmediately using arrivalDelayEstimate
-                boolean entersImmediately = true;//!firstConveyorsBlocked &&
-                                            /*!blocksIncoming
+                boolean entersImmediately = !firstConveyorsBlocked &&
+                                            !blocksIncoming
                                                     .stream()
                                                     .filter(b -> b.transformations.containsMachineType(Machine.Type.A))
                                                     .findFirst()
                                                     .isPresent() && 
-                                            !blocksInside
+                                            /*!blocksInside
                                                     .stream()
                                                     .filter(b -> b.timeTravel(arrivalDelayEstimate).contains(t3) /*b.getNextTransformationOnMachine(Machine.Type.A) != null*/ //)
                                             /*        .findFirst()
-                                                    .isPresent() &&
-                                            blocksIncoming.size() + blocksInside.size() <= 3;*/
+                                                    .isPresent() && */
+                                            blocksIncoming.size() + blocksInside.size() <= 3;
                 
                 //true;
 
-                Set<Block> blocksOnCellEstimate = new HashSet<>(blocksInside);
+                /*Set<Block> blocksOnCellEstimate = new HashSet<>(blocksInside);
 
                 for (Block b : blocksIncoming) {
                     Block nb = new Block(b.type);
@@ -128,7 +128,7 @@ public class SerialCell extends Cell {
                         entersImmediately = false;
                         //break;
                     }
-                }
+                }*/
 
                 //System.out.println("\tentersImmediately: " + entersImmediately);*/
 

@@ -171,7 +171,8 @@ public abstract class Cell {
             }
         }
         
-        for (Block b : blocksIncoming) {
+        // TODO: Experimental
+        /*for (Block b : blocksIncoming) {
             
             Path p = b.path.copy();
             p.append(pathForIncomingBlock(b));
@@ -194,7 +195,7 @@ public abstract class Cell {
                     closestBlockToBeProcessed = b;
                 }
             }
-        }
+        }*/
 
         // Get next transformation that block will have on that machine, and pre-select the apropriate tool
         if (closestBlockToBeProcessed != null) {

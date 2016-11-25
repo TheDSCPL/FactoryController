@@ -93,6 +93,10 @@ public final class Path {
     public boolean contains(Conveyor c) {
         return path.contains(c);
     }
+    
+    public boolean contains(Conveyor... conveyors) {        
+        return Collections.indexOfSubList(path, Arrays.asList(conveyors)) != -1;
+    }
 
     /**
      * @return A new, independent Path object that contains the same Conveyor
