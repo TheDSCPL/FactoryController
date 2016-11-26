@@ -3,7 +3,7 @@ package coms;
 import java.net.*;
 import java.util.*;
 
-public class SocketInput {
+public class SocketInput extends Thread {
 
     public final int packetSize;
     public final int port;
@@ -12,36 +12,23 @@ public class SocketInput {
     public SocketInput(int port, int packetSize) {
         this.port = port;
         this.packetSize = packetSize;
+        setDaemon(true);
+    }
+    
+    public synchronized List<byte[]> getNewPackets() {
+        List<byte[]> copy = new ArrayList(packets);
+        packets.clear();
+        return copy;
     }
 
-    public void start() {
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                threadMethod();
-            }
-        };
-
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    public List<byte[]> getNewPackets() {
-        synchronized (packets) {
-            List<byte[]> copy = new ArrayList(packets);
-            packets.clear();
-            return copy;
-        }
-    }
-
-    private void threadMethod() {
+    @Override
+    public void run() {
         try {
             try (DatagramSocket socket = new DatagramSocket(port)) {
                 byte[] buffer = new byte[packetSize];
                 DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
 
                 //System.out.println("Listening to UDP packages on " + port);
-
                 while (true) {
                     socket.receive(incoming);
                     addPacket(incoming.getData());
@@ -53,9 +40,7 @@ public class SocketInput {
         }
     }
 
-    private void addPacket(byte[] packet) {
-        synchronized (packets) {
-            packets.add(packet);
-        }
+    private synchronized void addPacket(byte[] packet) {
+        packets.add(packet);
     }
 }
