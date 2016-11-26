@@ -40,7 +40,7 @@ public class SocketInput {
                 byte[] buffer = new byte[packetSize];
                 DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
 
-                System.out.println("Listening to UDP packages on " + port);
+                //System.out.println("Listening to UDP packages on " + port);
 
                 while (true) {
                     socket.receive(incoming);

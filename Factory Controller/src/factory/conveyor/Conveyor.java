@@ -314,13 +314,13 @@ public abstract class Conveyor extends Container {
                || conveyorState == State.Receiving;
     }
 
-    // TODO: experimental
+    // TODO: A: experimental
     public double transferTimeEstimate(Conveyor from, Conveyor to) {
         if (!isConnectedToConveyor(from) || !isConnectedToConveyor(to)) {
             throw new Error("Not connected to given conveyors");
         }
 
-        // TODO: not finished on subclasses
+        // TODO: A: not finished on subclasses
         return length * (double) Main.config.getI("conveyor.sizeUnit") / Main.config.getD("timing.conveyor.speed") * 1000; // *1000 to convert to milliseconds
     }
 

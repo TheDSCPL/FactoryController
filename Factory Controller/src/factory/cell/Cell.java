@@ -143,22 +143,37 @@ public abstract class Cell {
     }
 
     private void processToolPreSelection(Machine machine) {
-        
+
         // Get next block to go to that machine and be processed there
         Block closestBlockToBeProcessed = null;
         int minStepCount = Integer.MAX_VALUE;
 
-        for (Block b : blocksInside) {
+        // Get all blocks
+        Set<Block> allBlocks = new HashSet(blocksInside);
+        allBlocks.addAll(blocksIncoming);
+        
+        for (Block b : allBlocks) {
+
+            Path path;
+
+            // Get path for block
+            if (blocksInside.contains(b)) {
+                path = b.path;
+            }
+            else {
+                path = b.path.copy();
+                path.append(pathEstimateForIncomingBlock(b));
+            }
 
             // Block has to go to that machine in the future and be processed there
-            if (b.path.contains(machine) && b.getNextTransformationOnMachine(machine.type) != null) {
+            if (path.contains(machine) && b.getNextTransformationOnMachine(machine.type) != null) {
 
                 // Calculate number of steps to machine for this block
                 int count = 0;
-                for (int i = 0; i < b.path.length(); i++) {
+                for (int i = 0; i < path.length(); i++) {
                     count++;
 
-                    if (b.path.get(i) == machine) {
+                    if (path.get(i) == machine) {
                         break;
                     }
                 }
@@ -170,41 +185,14 @@ public abstract class Cell {
                 }
             }
         }
-        
-        // TODO: OPTIMIZATION: TO TRY  \|/
-        // TODO: Experimental
-        /*for (Block b : blocksIncoming) {
-            
-            Path p = b.path.copy();
-            p.append(pathForIncomingBlock(b));
-
-            // Block has to go to that machine in the future and be processed there
-            if (p.contains(machine) && b.getNextTransformationOnMachine(machine.type) != null) {
-
-                // Calculate number of steps to machine for this block
-                int count = 0;
-                for (int i = 0; i < p.length(); i++) {
-                    count++;
-
-                    if (p.get(i) == machine) {
-                        break;
-                    }
-                }
-                
-                if (count < minStepCount) {
-                    minStepCount = count;
-                    closestBlockToBeProcessed = b;
-                }
-            }
-        }*/
 
         // Get next transformation that block will have on that machine, and pre-select the apropriate tool
         if (closestBlockToBeProcessed != null) {
-            machine.preSelectTool(closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool); // TODO: preselection for incomingBlocks too
+            machine.preSelectTool(closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool);
         }
     }
     
-    protected Path pathForIncomingBlock(Block b) {
+    protected Path pathEstimateForIncomingBlock(Block b) {
         return new Path();
     }
 

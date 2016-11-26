@@ -108,7 +108,7 @@ public final class Path {
         return p;
     }
 
-    // TODO: experimental
+    // TODO: A: experimental
     public double timeEstimate() {
         if (length() < 2) {
             return 0;

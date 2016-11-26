@@ -83,7 +83,6 @@ public class ParallelCell extends Cell {
                     }
                 }
                 else {
-                    int x = 0;
                     if (hasBlockRotatingCW()) {
                         b.path.push(t4, t6, t7, t9);
                     }
@@ -112,7 +111,6 @@ public class ParallelCell extends Cell {
                     }
                 }
                 else {
-                    int x = 0;
                     if (hasBlockRotatingCCW()) {
                         b.path.push(t4, t5, t7, t9);
                     }
@@ -152,12 +150,12 @@ public class ParallelCell extends Cell {
         orders.stream().filter((o) -> (o instanceof MachiningOrder)).map((o) -> (MachiningOrder) o).forEach((order) -> {
             order.possibleSequences(Machine.Type.Set.BC).stream().forEach((seq) -> {
 
-                // >>>>> Calculate entersImmediately TODO: using arrivalDelayEstimate
+                // >>>>> Calculate entersImmediately TODO: A: using arrivalDelayEstimate
                 boolean entersImmediately = blocksIncoming.size() + blocksInside.size() + 1 <= MAX_BLOCKS_IN_CELL;
 
                 // >>>>> Calculate priority
                 int priority = 0;
-                
+
                 Block b = blocksInside.stream().findFirst().orElse(blocksIncoming.stream().findFirst().orElse(null));
 
                 if (b != null) {
@@ -172,10 +170,10 @@ public class ParallelCell extends Cell {
                 }
 
                 // >>>>> Calculate possibleExecutionCount
-                int possibleExecutionCount = 1; // MAX_BLOCKS_IN_CELL - blocksIncoming.size() - blocksInside.size();
+                int possibleExecutionCount = 1;
 
                 // >>>>> Calculate totalDuration
-                double totalDuration = seq.totalDuration();// + blockPathForTransformationSequence(seq).timeEstimate(); TODO: finish
+                double totalDuration = seq.totalDuration();// + blockPathEstimateForTransformationSequence(seq).timeEstimate(); // TODO: A: this makes times worse?
 
                 // >>>>> Add possibility
                 ret.add(new OrderPossibility(
@@ -187,6 +185,48 @@ public class ParallelCell extends Cell {
 
         return ret;
     }
+
+    private Path blockPathEstimateForTransformationSequence(TransformationSequence seq) {
+        Path path = new Path();
+
+        Conveyor current;
+
+        if (seq.getFirstTransformation().machine == Machine.Type.B) {
+            path.push(t4, t5);
+            current = t5;
+        }
+        else {
+            path.push(t4, t6);
+            current = t6;
+        }
+
+        for (Transformation t : seq.sequence) {
+            switch (t.machine) {
+                case C:
+                    if (current == t5) {
+                        path.push(t7, t6);
+                    }
+                    current = t6;
+                    break;
+                case B:
+                    if (current == t6) {
+                        path.push(t4, t5);
+                    }
+                    current = t5;
+                    break;
+                default:
+                    throw new Error("Invalid machine on sequence of a block");
+            }
+        }
+
+        path.push(t7, t9);
+        return path;
+    }
+
+    /*@Override
+    protected Path pathEstimateForIncomingBlock(Block b) {
+        return blockPathEstimateForTransformationSequence(b.transformations); // TODO: A: this makes times worse?
+    }*/
 
     @Override
     protected boolean processBlockIn(Block block) {
@@ -217,24 +257,26 @@ public class ParallelCell extends Cell {
             }
 
         }
-        else if (firstMachine == Machine.Type.C) {
+        else {
+            if (firstMachine == Machine.Type.C) {
 
-            boolean hasOtherBlockGoingUnderCCW = false;
+                boolean hasOtherBlockGoingUnderCCW = false;
 
-            for (Block b : blocksInside) {
-                if (b.path.contains(t5, t7) || b.path.contains(t7, t6)) {
-                    hasOtherBlockGoingUnderCCW = true;
-                    break;
+                for (Block b : blocksInside) {
+                    if (b.path.contains(t5, t7) || b.path.contains(t7, t6)) {
+                        hasOtherBlockGoingUnderCCW = true;
+                        break;
+                    }
                 }
-            }
 
-            if (hasOtherBlockGoingUnderCCW) {
-                block.path.push(t4, t5, t7, t6);
-            }
-            else {
-                block.path.push(t4, t6);
-            }
+                if (hasOtherBlockGoingUnderCCW) {
+                    block.path.push(t4, t5, t7, t6);
+                }
+                else {
+                    block.path.push(t4, t6);
+                }
 
+            }
         }
 
         return true;

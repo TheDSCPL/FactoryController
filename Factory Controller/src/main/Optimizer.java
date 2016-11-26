@@ -61,7 +61,7 @@ public class Optimizer {
                         value = 1;
                     }
                     break;
-                case 1: // For different orders, give priority to those received before
+                case 1: // TODO: A: Dont' forget to turn this on || For different orders, give priority to those received before
                     /*if (op1.order != op2.order) {
                         if (op1.order.receivedBefore(op2.order)) {
                             value = 1;
@@ -75,7 +75,7 @@ public class Optimizer {
                     if (op1.cell == op2.cell) { // For same cell, respect order priority
                         value = op1.priority - op2.priority;
                     }
-                    else { // For different cells, prefer to send blocks to cells close by first
+                    else { // For different cells, prefer to send blocks to cells closer to the warehouse first
                         value = Main.factory.indexForCell(op2.cell) - Main.factory.indexForCell(op1.cell);
                     }
                     break;

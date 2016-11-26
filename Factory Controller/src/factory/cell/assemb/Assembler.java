@@ -245,7 +245,7 @@ public final class Assembler extends Cell {
         }
     }
     
-    //TODO: add Transfer field to Block
+    //TODO: L: add Transfer field to Block
     public final class Transfer {
 
         private Coordinates from, to;

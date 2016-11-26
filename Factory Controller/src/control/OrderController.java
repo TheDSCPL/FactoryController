@@ -107,10 +107,10 @@ public class OrderController {
                 .stream()
                 .sorted((o1, o2) -> o1.receivedBefore(o2) ? -1 : 1)
                 .forEach((order) -> {
-                    sb.append("O")
-                            .append(order.id).append(" ")
+                    sb.append(" ").append(order.getSmallStateString()).append(" ")
+                            .append("O").append(order.id).append(" ")
                             .append(order.orderTypeString()).append(" ")
-                            .append(order.getStateString()).append("\n");
+                            .append("\n");
                 });
 
         return sb.toString();

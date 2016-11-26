@@ -82,7 +82,7 @@ public abstract class Order {
         sb.append(" - ").append("Date finished: ").append(dateFinished == null ? "not yet finished" : df.format(dateFinished)).append("\n");
         sb.append(" - ").append("Blocks pending: ").append(getPendingCount()).append("\n");
         sb.append(" - ").append("Blocks processing: ").append(placedCount).append("\n");
-        
+
         for (Block b : blocks) {
             sb.append("\t").append(b.type).append(": ").append(b.path).append("\n");
         }
@@ -100,6 +100,16 @@ public abstract class Order {
             return "Received";
         }
         return "Processing";
+    }
+
+    public String getSmallStateString() {
+        if (completedCount == count) {
+            return "[X]";
+        }
+        if (placedCount + completedCount == 0) {
+            return "[ ]";
+        }
+        return "[.]";
     }
 
     public abstract String orderDescription();

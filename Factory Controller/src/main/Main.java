@@ -15,6 +15,7 @@ Major TODO list:
 Luis:
   [X]  Gantry (Class: Gantry)
   [.]  Assembler cell processing and optimization (Class: Assembler)
+  [ ]  "TODO L:" in code (Class: N/A)
 
 Alex:
   [X]  Serial cell processing and optimization (Class: SerialCell)
@@ -28,13 +29,12 @@ Alex:
   [X]  Tool pre-selection on Parallel cell (Class: ParallelCell)
   [X]  Statistics module + thread safety! (Class: Main, Statistics)
   [X]  "Select called on tool when tool is not on Idle state" tool pre-selection algorithm bug (Class: Machine)
-  [.]  Order processing algorithm and distribution by the various cells (Class: Optimizer)
- ([ ]  Parallel cell opimization: entry of blocks on cell is not prioritized over block being transfer-rotated already on cell)
- ([ ]  Parallel cell opimization: path.length > 3, not 2)
+  [X]  Rework parallel cell processing algorithm: currently it is not taking advantage of parallelism as much as it should
+  [X]  Order processing algorithm and distribution by the various cells (Class: Optimizer)
+  [ ]  "TODO A:" in code (Class: N/A)
 
 Unassigned:
-  [ ]  Rework parallel cell processing algorithm: currently it is not taking advantage of parallelism as much as it should
-  [ ]  TODO's in code (Class: N/A)
+   -
 
 Legend:
    X   Done
@@ -61,6 +61,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException {
+        System.out.println("Factory controller ready");
         console.setDaemon(true);
         console.start();
         controlLoop();

@@ -59,7 +59,7 @@ public class Block {
     }
 
     /**
-     * For blocks used in MachiningOrder TODO: Refactor?
+     * For blocks used in MachiningOrder TODO: A: Refactor?
      */
     public TransformationSequence transformations;
 
@@ -92,7 +92,7 @@ public class Block {
         type = getNextTransformation().end;
     }
 
-    // TODO: experimental
+    // TODO: A: experimental
     public Path timeTravel(double advance) {
         Path newPath = path.copy();
         double timePosition = 0;
