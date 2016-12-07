@@ -123,6 +123,8 @@ public abstract class Cell {
                     Main.stats.inc(id, Statistics.Type.BlocksSent, b.type);
                     b.path.append(Main.factory.blockTransportPath(this, destination));
                     blocksInside.remove(b);
+                    if(b.isStacked() && b.otherAssemblyBlock != null)
+                        blocksInside.remove(b.otherAssemblyBlock);
                 }
             }
         }

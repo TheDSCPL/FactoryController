@@ -1,6 +1,7 @@
 package factory;
 
 import control.Block;
+import java.util.stream.IntStream;
 
 public class Container {
 
@@ -60,6 +61,11 @@ public class Container {
         return false;
     }
 
+    public Block getBlock(int i)
+    {
+        return blocks[i];
+    }
+    
     /**
      * Removes a block object from the conveyor
      *
@@ -72,4 +78,9 @@ public class Container {
         return ret;
     }
 
+    public void removeAllBlocks()
+    {
+        IntStream.range(0, blocks.length).forEach(i -> removeBlock(i));
+    }
+    
 }

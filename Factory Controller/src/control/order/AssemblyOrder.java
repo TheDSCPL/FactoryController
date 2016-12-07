@@ -13,11 +13,16 @@ public class AssemblyOrder extends Order {
         this.bottomType = bottomType;
         this.topType = topType;
     }
-    
+
     @Override
     public List<Block> execute(Object info) {
-        // Vê o código da MachiningOrder antes de escreveres isto
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if(!canBeExecuted())
+            return new ArrayList<>();
+        
+        Block[] blocksToAdd = new Block[] {new Block(bottomType, this),new Block(topType, this)};
+        
+        addBlocksPlaced(Arrays.asList(blocksToAdd));
+        return Arrays.asList(blocksToAdd);
     }
 
     @Override
