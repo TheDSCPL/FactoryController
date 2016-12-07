@@ -1,5 +1,7 @@
 package factory.cell.assemb;
 
+import control.*;
+import control.order.*;
 import factory.other.*;
 import main.*;
 
@@ -12,7 +14,7 @@ public class Gantry {
     public final Sensor upZ, downZ;
     public final Sensor[] Xsensors, Ysensors;
 
-    private final long initializationTimeoutMillis = 1500; // TODO: this should be a property in the config file
+    private final long initializationTimeoutMillis = 2300; // TODO: this should be a property in the config file
     private final long maxInitTries = 2;
 
     public final String id;
@@ -43,6 +45,41 @@ public class Gantry {
     int initYTries = 0;
     //initialize z
     private boolean Zready = false;
+    
+    private Block block;
+    
+    public Block getBlock()
+    {
+        return this.block;
+    }
+    
+    /**
+     * Checks if a block is to be assembled
+     * @param block the block to be tested
+     * @return true if the block is to be assembled
+     */
+    public static boolean blockToAssembler(Block block)
+    {
+        boolean ret = (block == null) ? false : (block.order instanceof AssemblyOrder);
+        return ret;
+    }
+    
+    void setBlock(Block block)
+    {
+        if(block == null)
+            this.block = null;
+        else if(blockToAssembler(block))    //the gantry can only contain blocks that are supposed to be handled by it
+            this.block = block;
+        else
+        {
+            String tempString;
+            if(block.order == null)
+                tempString = "null";
+            else
+                tempString = block.order.getClass().getName();
+            throw new Error("Gantry tried to grab a block that isn't supposed to be assembled. Order type: " + tempString);
+        }
+    }
 
     Gantry(String id) {
         this.id = id;
@@ -258,7 +295,8 @@ public class Gantry {
     }
 
     public boolean hasBlock() {
-        return presenceSensor.on();
+        return block != null;
+        //return presenceSensor.on();
     }
 
     /**

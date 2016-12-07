@@ -14,32 +14,15 @@ public class AssemblyOrder extends Order {
         this.topType = topType;
     }
 
-    /*public Block[] execute(Path blockPath) {
-        if (!canBeExecuted()) {
-            return new ArrayList<>();
-        }
-
-        Block b1 = new Block(bottomType);
-        b1.path = blockPath;
-        b1.order = this;
-
-        Block b2 = new Block(topType);
-        b2.path = blockPath;
-        b2.order = this;
-
-        b1.isBottomBlock = true;
-        b1.otherAssemblyBlock = b2;
-
-        b2.isBottomBlock = false;
-        b2.otherAssemblyBlock = b1;
-
-        incrementPlacement();
-        return new Block[]{b1, b2};
-    }*/
-    
     @Override
     public List<Block> execute(Object info) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if(!canBeExecuted())
+            return new ArrayList<>();
+        
+        Block[] blocksToAdd = new Block[] {new Block(bottomType, this),new Block(topType, this)};
+        
+        incrementPlacement();
+        return Arrays.asList(blocksToAdd);
     }
 
     @Override

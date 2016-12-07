@@ -11,20 +11,21 @@ import transformation.*;
 public class Block {
 
     public Block(Block.Type type) {
+        this(type,(Order) null);
+    }
+    
+    public Block(Block.Type type, Order order) {
         this.type = type;
+        this.order = order;
     }
     public enum Type {
         P1(1), P2(2), P3(3), P4(4), P5(5),
         P6(6), P7(7), P8(8), P9(9),
         /**
-         * For blocks that have two pieces one on top of the other
-         */
-        Stacked(-1),
-        /**
          * For blocks whose piece type is unknown, for example, when a block is
          * manually placed on the simulator by some person
          */
-        Unknown(-2);
+        Unknown(-1);
 
         public final int id;
 
@@ -65,9 +66,11 @@ public class Block {
     public boolean hasNextTransformation() {
         return type != transformations.end;
     }
+    
     public Transformation getNextTransformation() {
         return transformations.getNextTransformation(type);
     }
+    
     public Transformation getNextTransformationOnMachine(Machine.Type machineType) {
         List<Transformation> nextTransformations = new ArrayList<>(transformations.sequence);
 
@@ -84,13 +87,41 @@ public class Block {
 
         return nextTransformations.stream().filter(s -> s.machine == machineType).findFirst().orElse(null);
     }
+    
     public void applyNextTransformation() {
         type = getNextTransformation().end;
     }
 
-    /**
-     * For blocks used in AssemblyOrder
-     */
+    //Methods and fields for blocks meant to be assembled
     public Block otherAssemblyBlock;
-    public boolean isBottomBlock;
+    public boolean isBottomBlock = false;
+
+    public boolean canBeBottomBlock()
+    {
+        if(!(order instanceof AssemblyOrder))
+            return false;
+        AssemblyOrder order = (AssemblyOrder) this.order;
+        return order.bottomType == type;
+    }
+    
+    public boolean isStacked()
+    {
+        return otherAssemblyBlock != null;
+    }
+    
+    /**
+     * Places a block on top of this block if there was none already on top of it
+     * @param b block to place on top of this one
+     * @return wethwer this block was altered or not
+     */
+    public boolean placeOnTop(Block b)
+    {
+        if(b == null || this.isStacked())
+            return false;
+        this.isBottomBlock = true;
+        this.otherAssemblyBlock = b;
+        b.isBottomBlock = false;
+        b.otherAssemblyBlock = this;
+        return true;
+    }
 }

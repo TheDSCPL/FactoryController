@@ -5,6 +5,9 @@ import config.Configuration;
 import control.*;
 import factory.*;
 import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import transformation.*;
 
 // PULL -> WORK -> ADD -> COMMIT -> PULL -> PUSH
@@ -89,6 +92,8 @@ public class Main {
         }
     }
 
+    private static boolean alreadyTriedToOpen = false;
+    
     private static void controlLoop() {
         try {
             modbus.connect();
@@ -101,6 +106,23 @@ public class Main {
 
                 processCommand();
                 Thread.sleep(controlLoopDelay);
+            }
+        }
+        catch(java.net.ConnectException ex)
+        {
+            if(alreadyTriedToOpen)
+            {
+                System.err.println("Couldn't open SFS! Halting.");
+                return;
+            }
+            alreadyTriedToOpen = true;
+            System.out.println("SFS not running. Attempting to run it...");
+            Runtime rt = Runtime.getRuntime();
+            try {
+                Process pr = rt.exec("java -jar SFS.jar");
+                controlLoop();
+            } catch (Exception ex1) {
+                System.err.println("Couldn't open SFS! Halting.");
             }
         }
         catch (Throwable ex) {

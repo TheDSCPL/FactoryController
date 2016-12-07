@@ -63,13 +63,16 @@ public class Factory {
                     .map(v -> (OrderPossibility) v) // Cast from Object to OrderPossibility
                     .reduce(null, this::compareOrderPossibilities); // Get best OrderPossibility
 
-            System.out.println("Executing possibility: " + bestOP);
-            for (int i = 0; i < bestOP.possibleExecutionCount; i++) {
-                List<Block> bl = bestOP.order.execute(bestOP.executionInfo);
+            if(bestOP != null)
+            {
+                System.out.println("Executing possibility: " + bestOP);
+                for (int i = 0; i < bestOP.possibleExecutionCount; i++) {
+                    List<Block> bl = bestOP.order.execute(bestOP.executionInfo);
 
-                bl.stream().forEach((b) -> b.path = cellEntryPathFromWarehouse(bestOP.cell));
-                warehouse.addBlocksOut(bl);
-                bestOP.cell.addIncomingBlocks(bl);
+                    bl.stream().forEach((b) -> b.path = cellEntryPathFromWarehouse(bestOP.cell));
+                    warehouse.addBlocksOut(bl);
+                    bestOP.cell.addIncomingBlocks(bl);
+                }
             }
         }
     }
