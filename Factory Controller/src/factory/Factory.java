@@ -47,7 +47,7 @@ public class Factory {
     }
 
     public void update() {
-        cells.stream().forEach(Cell::update);
+        cells.stream()/*.filter(c -> !(c instanceof Assembler))*/.forEach(Cell::update);
     }
 
     public int indexForCell(Cell c) {
