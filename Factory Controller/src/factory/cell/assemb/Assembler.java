@@ -60,6 +60,31 @@ public final class Assembler extends Cell {
 
         pendingTransfers = new ArrayList<>();
         
+        final AssemblyOrder testOrder = new AssemblyOrder(1,2,Block.Type.P1,Block.Type.P2);
+        
+        Block block1 = new Block(Block.Type.P1, testOrder);
+        t1.placeBlock(block1, 0);
+        blocksInside.add(block1);
+        
+        Block block2 = new Block(Block.Type.P2, testOrder);
+        t4.placeBlock(block2, 0);
+        blocksInside.add(block2);
+        
+        Thread test_thread1 = new Thread(){
+            @Override
+            public void run()
+            {
+                try
+                {
+                    Thread.sleep(1000*50);
+                }
+                catch(Throwable ignored)
+                {
+                    return;
+                }
+            }
+        };
+        
         /*Transfer _transfer = transferBlock(t1, table2);
         Block _test_block = new Block(Block.Type.P1);
         _test_block.order = new AssemblyOrder(0, 1, Block.Type.P1, Block.Type.P1);
@@ -102,7 +127,7 @@ public final class Assembler extends Cell {
         _t.setDaemon(true);
         _t.start();*/
         
-        Block b1 = new Block(Block.Type.P1), b2 = new Block(Block.Type.P2);
+        /*Block b1 = new Block(Block.Type.P1), b2 = new Block(Block.Type.P2);
         
         b1.order = b2.order = new AssemblyOrder(0, 1, Block.Type.P1, Block.Type.P1);
         
@@ -111,7 +136,7 @@ public final class Assembler extends Cell {
         
         transferBlock(t1, table1);
         transferBlock(t2, table1);
-        transferBlock(table1, t2);
+        transferBlock(table1, t2);*/
     }
 
     @Override
@@ -129,7 +154,7 @@ public final class Assembler extends Cell {
     private Table existsIncompleteOrderInTables(Order o)
     {
         for(Table t : tables)
-            if(t.getOneBlock().order == o && !t.getOneBlock().isStacked())
+            if(t.getOneBlock() != null && t.getOneBlock().order == o && !t.getOneBlock().isStacked())
                 return t;
         return null;
     }
@@ -137,7 +162,7 @@ public final class Assembler extends Cell {
     private Table getAssembledTable()
     {
         for(Table t : tables)
-            if(t.getOneBlock().isStacked())
+            if(t.getOneBlock() != null && t.getOneBlock().isStacked())
                 return t;
         return null;
     }
@@ -155,8 +180,27 @@ public final class Assembler extends Cell {
      */
     private void gantryController()
     {
-        if(pendingTransfers.size() > 0)
+        if(!pendingTransfers.isEmpty() || blocksInside.isEmpty())
             return;
+        
+        System.err.println("Conveyors.length: " + conveyors.length);
+        
+        for(int i = 0; i< conveyors.length ; i++)
+        {
+            Conveyor c = conveyors[i];
+            if(!c.hasBlock())
+            {
+                //System.out.println("t" + (i+1) + " contains no blocks. (" + c.getOneBlock() + ")");
+                continue;
+            }
+            String type2;
+            if(c.getOneBlock().otherAssemblyBlock != null)
+                type2 = c.getOneBlock().otherAssemblyBlock.type.name();
+            else
+                type2 = null;
+            System.out.println("t" + (i+1) + "-> typeBottom=" + c.getOneBlock().type.name() + " typeTop=" + type2);
+        }
+        
         Table couldHaveGoneToExit = null;  //contains a Table that could have been the source of a transfer to the exit conveyor but was skipped because it wasn't the most efficient move at the beginning of the algorithm. if null, no Tables could have gone to the exit.
         Table t = getAssembledTable();
         if(t != null)
@@ -173,7 +217,7 @@ public final class Assembler extends Cell {
             }
         }
         
-        for(int i=3 ; i>0 ; i++)
+        for(int i=3 ; i>=0 ; i--)
         {
             Block block = conveyors[i].getOneBlock();
             if(block == null)
@@ -182,7 +226,7 @@ public final class Assembler extends Cell {
             if(tableTo == null) //no table contains a block waiting to be assembled with this order
             {
                 tableTo = getAnEmptyTable();
-                if(tableTo == null) //there are no empty tables for this block to go to
+                if(tableTo == null || !block.canBeBottomBlock()) //there are no empty tables for this block to go to
                     continue;
                 transferBlock(conveyors[i], tableTo);
                 return;
@@ -303,6 +347,8 @@ public final class Assembler extends Cell {
 
     @Override
     protected Cell processBlockOut(Block block) {
+        System.err.println("processBlockOut " + block.type.name());
+        block.path = new Path().push(t2);
         return Main.factory.loadUnloadCell;
     }
 
@@ -644,21 +690,8 @@ public final class Assembler extends Cell {
                         
                         Block _block;
                         Container bc = from.getBlockContainer();
-                        if(bc instanceof Table)
-                        {
-                            Table _table = (Table)bc;
-                            _block = _table.getOneBlock();
-                            _table.removeAllBlocks();
-                        }
-                        else if(bc instanceof Conveyor)
-                        {
-                            Conveyor _conveyor = (Conveyor)bc;
-                            _block = _conveyor.getOneBlock();
-                            System.out.println("_block from conveyor: " + _block);
-                            _conveyor.removeBlock(0);
-                        }
-                        else
-                            throw new Error("Origin Block Container has unknow type!");
+                        _block = bc.getOneBlock();
+                        bc.removeAllBlocks();
                         gantry.setBlock(_block);
                         status = TRANSFER_STATE.MOVING_TO_DESTINATION;
                     }
