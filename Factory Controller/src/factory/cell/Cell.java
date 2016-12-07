@@ -125,6 +125,7 @@ public abstract class Cell {
                     blocksInside.remove(b);
                     if(b.isStacked() && b.otherAssemblyBlock != null)
                         blocksInside.remove(b.otherAssemblyBlock);
+                    System.err.println("out block path: " + b.path);
                 }
             }
         }

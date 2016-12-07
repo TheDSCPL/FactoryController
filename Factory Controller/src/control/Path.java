@@ -13,9 +13,9 @@ public final class Path {
      *
      * @param c conveyor to be added to the queue
      */
-    public void push(Conveyor c) {
+    public Path push(Conveyor c) {
         if (c == null) {
-            return;
+            return this;
         }
 
         // Adds only if the last conveyor in the path is connected to the conveyor that we are trying to add
@@ -27,6 +27,7 @@ public final class Path {
 
         path.add(c);
 
+        return this;
     }
 
     public void push(Conveyor... list) {
@@ -40,9 +41,9 @@ public final class Path {
      *
      * @param newPath the path to add to the end
      */
-    public void append(Path newPath) {
+    public Path append(Path newPath) {
         if (path == null) {
-            return;
+            return this;
         }
 
         if (!path.isEmpty() && !newPath.path.isEmpty()) {
@@ -58,6 +59,7 @@ public final class Path {
         }
 
         path.addAll(newPath.path);
+        return this;
     }
 
     public Conveyor getCurrent() {
