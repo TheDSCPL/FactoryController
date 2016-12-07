@@ -77,6 +77,7 @@ public class Main {
                 modbus.refreshInputs();
                 factory.update();
                 orderc.update();
+                optimizer.distributeNextOrder();
                 modbus.refreshOutputs();
 
                 processCommand();
