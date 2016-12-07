@@ -69,9 +69,9 @@ public class Factory {
 
         // Transport block left to right, meaning using top conveyors
         if (indexForCell(from) < indexForCell(to)) {
-            path.push(from.getTopTransferConveyor());
+            path.push(from.getTopTransferOutConveyor());
 
-            while (path.getLast() != to.getTopTransferConveyor()) {
+            while (path.getLast() != to.getTopTransferInConveyor()) {
                 Conveyor c;
 
                 // Get conveyor on the right

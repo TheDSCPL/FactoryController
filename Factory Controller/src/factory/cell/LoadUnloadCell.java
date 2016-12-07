@@ -143,7 +143,12 @@ public class LoadUnloadCell extends Cell {
     }
 
     @Override
-    public Rotator getTopTransferConveyor() {
+    public Rotator getTopTransferInConveyor() {
+        return t2;
+    }
+    
+    @Override
+    public Rotator getTopTransferOutConveyor() {
         return t2;
     }
 

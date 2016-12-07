@@ -109,7 +109,12 @@ public class Warehouse extends Cell {
     }
 
     @Override
-    public Conveyor getTopTransferConveyor() {
+    public Conveyor getTopTransferInConveyor() {
+        return out;
+    }
+    
+    @Override
+    public Conveyor getTopTransferOutConveyor() {
         return out;
     }
 

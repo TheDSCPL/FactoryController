@@ -9,7 +9,7 @@ import factory.other.*;
 import java.util.*;
 import java.util.logging.*;
 import main.*;
-import main.Optimizer.*;
+import main.Optimizer.OrderPossibility;
 
 public final class Assembler extends Cell {
 
@@ -228,8 +228,13 @@ public final class Assembler extends Cell {
     }
 
     @Override
-    public Conveyor getTopTransferConveyor() {
+    public Conveyor getTopTransferInConveyor() {
         return t1;
+    }
+    
+    @Override
+    public Conveyor getTopTransferOutConveyor() {
+        return t2;
     }
     
     @Override

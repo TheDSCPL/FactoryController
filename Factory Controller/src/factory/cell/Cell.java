@@ -42,7 +42,12 @@ public abstract class Cell {
     /**
      * @return The rotator on the top
      */
-    public abstract Conveyor getTopTransferConveyor();
+    public abstract Conveyor getTopTransferInConveyor();
+    
+    /**
+     * @return The rotator on the top
+     */
+    public abstract Conveyor getTopTransferOutConveyor();
 
     /**
      * @return The rotator on the bottom
