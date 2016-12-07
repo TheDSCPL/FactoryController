@@ -7,10 +7,10 @@ package factory.cell;
 
 import control.*;
 import control.order.Order;
-import factory.OrderPossibility;
 import factory.conveyor.*;
 import java.util.*;
 import main.*;
+import main.Optimizer.OrderPossibility;
 
 /**
  *

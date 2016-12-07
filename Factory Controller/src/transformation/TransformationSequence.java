@@ -3,6 +3,7 @@ package transformation;
 import control.*;
 import factory.conveyor.*;
 import java.util.*;
+import static java.util.stream.Collectors.toList;
 
 public class TransformationSequence {
 
@@ -28,6 +29,10 @@ public class TransformationSequence {
     
     public boolean containsMachineType(Machine.Type type) {
         return sequence.stream().filter(s -> s.machine == type).findFirst().isPresent();
+    }
+    
+    public boolean containsMachineSequence(Machine.Type... types) {
+        return Collections.indexOfSubList(sequence.stream().map((t) -> t.machine).collect(toList()), Arrays.asList(types)) != -1;
     }
 
     public double totalDuration() {

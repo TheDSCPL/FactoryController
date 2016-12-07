@@ -2,13 +2,15 @@ package factory.cell;
 
 import control.*;
 import control.order.*;
-import factory.*;
 import factory.conveyor.*;
 import java.util.*;
-import main.Main;
+import main.*;
+import main.Optimizer.OrderPossibility;
 import transformation.*;
 
 public class ParallelCell extends Cell {
+
+    private static final int MAX_BLOCKS_IN_CELL = 2;
 
     private final Mover t1;
     private final Rotator t2;
@@ -20,31 +22,6 @@ public class ParallelCell extends Cell {
     private final Mover t8;
     private final Rotator t9;
     private final Mover t10;
-
-    private BlockRotation currentBlockRotation = BlockRotation.Undefined;
-
-    @Override
-    public Conveyor getEntryConveyor() {
-        return t2;
-    }
-
-    @Override
-    public Conveyor getExitConveyor() {
-        return t9;
-    }
-
-    @Override
-    protected Cell processBlockOut(Block block) {
-        return Main.factory.warehouse;
-    }
-
-    private enum BlockRotation {
-        Clockwise, CounterClockwise, Undefined;
-
-        public boolean compatibleWith(BlockRotation other) {
-            return this == Undefined || other == Undefined || this == other;
-        }
-    }
 
     public ParallelCell(String id) {
         super(id);
@@ -82,104 +59,144 @@ public class ParallelCell extends Cell {
     public void update() {
         super.update();
 
-        refreshBlockRotation();
+        refreshBlockPaths();
     }
 
-    private void refreshBlockRotation() {
-        boolean free = true;
+    private void refreshBlockPaths() {
 
-        for (Block block : blocksInside) {
-            if (block.path.length() > 2) { // TODO: optimize and do > 3
-                free = false;
-                break;
+        // Machine B, conveyor t5
+        if (!t5.isSending() && !t5.isReceiving() && t5.hasBlock()) {
+
+            Block b = t5.getOneBlock();
+
+            if (!b.path.hasNext()) {
+                Transformation t = b.getNextTransformation();
+
+                if (t != null) {
+                    if (t.machine == Machine.Type.C) {
+                        if (hasBlockRotatingCW()) { // Go using top conveyor
+                            b.path.push(t4, t6);
+                        }
+                        else { // Go using bottom conveyor
+                            b.path.push(t7, t6);
+                        }
+                    }
+                }
+                else {
+                    if (hasBlockRotatingCW()) {
+                        b.path.push(t4, t6, t7, t9);
+                    }
+                    else {
+                        b.path.push(t7, t9);
+                    }
+                }
             }
         }
 
-        if (free) {
-            currentBlockRotation = BlockRotation.Undefined;
+        // Machine C, conveyor t6
+        if (!t6.isSending() && !t6.isReceiving() && t6.hasBlock()) {
+            Block b = t6.getOneBlock();
+
+            if (!b.path.hasNext()) {
+                Transformation t = b.getNextTransformation();
+
+                if (t != null) {
+                    if (t.machine == Machine.Type.B) {
+                        if (hasBlockRotatingCW()) { // Go using bottom conveyor
+                            b.path.push(t7, t5);
+                        }
+                        else { // Go using top conveyor
+                            b.path.push(t4, t5);
+                        }
+                    }
+                }
+                else {
+                    if (hasBlockRotatingCCW()) {
+                        b.path.push(t4, t5, t7, t9);
+                    }
+                    else {
+                        b.path.push(t7, t9);
+                    }
+                }
+            }
         }
+
+    }
+
+    private boolean hasBlockRotatingCW() {
+        for (Block block : blocksInside) {
+            if (block.path.contains(t5, t4) || block.path.contains(t6, t7) || block.path.contains(t4, t6) || block.path.contains(t7, t5)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean hasBlockRotatingCCW() {
+        for (Block block : blocksInside) {
+            if (block.path.contains(t6, t4) || block.path.contains(t4, t5) || block.path.contains(t5, t7) || block.path.contains(t7, t6)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
     public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
         List<OrderPossibility> ret = new ArrayList<>();
 
-        for (Order o : orders) {
-            if (o instanceof MachiningOrder) {
-                MachiningOrder order = (MachiningOrder) o;
+        orders.stream().filter((o) -> (o instanceof MachiningOrder)).map((o) -> (MachiningOrder) o).forEach((order) -> {
+            order.possibleSequences(Machine.Type.Set.BC).stream().forEach((seq) -> {
 
-                for (TransformationSequence seq : order.possibleSequences()) {
-                    if (seq.machineSet == Machine.Type.Set.BC) {
+                // >>>>> Calculate entersImmediately TO|DO: A: using arrivalDelayEstimate
+                boolean entersImmediately = blocksIncoming.size() + blocksInside.size() + 1 <= MAX_BLOCKS_IN_CELL;
 
-                        int priority = 1; // TODO: x
+                // >>>>> Calculate priority
+                int priority = 0;
 
-                        int possibleExecutionCount = 3 - blocksIncoming.size() - blocksInside.size();
-                        if (possibleExecutionCount < 1) {
-                            possibleExecutionCount = 1;
+                Block b = blocksInside.stream().findFirst().orElse(blocksIncoming.stream().findFirst().orElse(null));
+
+                if (b != null) {
+                    if (b.hasNextTransformation()) {
+                        if (b.getNextTransformation().machine == seq.getFirstTransformation().machine) {
+                            priority = -1;
                         }
-
-                        boolean entersImmediately = blocksIncoming.size() + blocksInside.size() < 3
-                                                    && blockRotationForTransformationSequence(seq).compatibleWith(currentBlockRotation)
-                                                    && !t4.hasBlock();
-
-                        double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();
-
-                        ret.add(new OrderPossibility(
-                                this, order, possibleExecutionCount, seq,
-                                totalDuration, entersImmediately, priority
-                        ));
+                        else {
+                            priority = 1;
+                        }
                     }
                 }
-            }
-        }
+
+                // >>>>> Calculate possibleExecutionCount
+                int possibleExecutionCount = 1;
+
+                // >>>>> Calculate totalDuration
+                double totalDuration = seq.totalDuration();// + blockPathEstimateForTransformationSequence(seq).timeEstimate(); // TO|DO: A: this makes times worse?
+
+                // >>>>> Add possibility
+                ret.add(new OrderPossibility(
+                        this, order, possibleExecutionCount, seq,
+                        totalDuration, entersImmediately, priority
+                ));
+            });
+        });
 
         return ret;
     }
 
-    @Override
-    protected boolean processBlockIn(Block block) {
-        BlockRotation rotation = blockRotationForTransformationSequence(block.transformations);
-
-        // Cannot have more than three blocks at once on the cell
-        if (blocksInside.size() >= 3) {
-            return false;
-        }
-
-        // Cannot have two blocks with opposite rotations
-        if (!currentBlockRotation.compatibleWith(rotation)) {
-            return false;
-        }
-
-        currentBlockRotation = rotation;
-        block.path.append(blockPathForTransformationSequence(block.transformations));
-        //t7.highestPriorityConnection = rotation == BlockRotation.Clockwise ? 1 : 0;
-
-        //System.out.println("processBlockIn: currentBlockRotation = " + currentBlockRotation);
-        return true;
-    }
-
-    private BlockRotation blockRotationForTransformationSequence(TransformationSequence seq) {
-        if (seq.getFirstTransformation().machine == Machine.Type.B) {
-            return BlockRotation.CounterClockwise;
-        }
-        else {
-            return BlockRotation.Clockwise;
-        }
-    }
-
-    private Path blockPathForTransformationSequence(TransformationSequence seq) {
-        BlockRotation rotation = blockRotationForTransformationSequence(seq);
+    private Path blockPathEstimateForTransformationSequence(TransformationSequence seq) {
         Path path = new Path();
 
-        path.push(t4);
-        Conveyor current, next;
+        Conveyor current;
 
         if (seq.getFirstTransformation().machine == Machine.Type.B) {
-            path.push(t5);
+            path.push(t4, t5);
             current = t5;
         }
         else {
-            path.push(t6);
+            path.push(t4, t6);
             current = t6;
         }
 
@@ -187,30 +204,14 @@ public class ParallelCell extends Cell {
             switch (t.machine) {
                 case C:
                     if (current == t5) {
-                        if (rotation == BlockRotation.CounterClockwise) {
-                            next = t7;
-                        }
-                        else {
-                            next = t4;
-                        }
-
-                        path.push(next, t6);
+                        path.push(t7, t6);
                     }
-
                     current = t6;
                     break;
                 case B:
                     if (current == t6) {
-                        if (rotation == BlockRotation.CounterClockwise) {
-                            next = t4;
-                        }
-                        else {
-                            next = t7;
-                        }
-
-                        path.push(next, t5);
+                        path.push(t4, t5);
                     }
-
                     current = t5;
                     break;
                 default:
@@ -218,15 +219,72 @@ public class ParallelCell extends Cell {
             }
         }
 
-        if (current == t5 && rotation == BlockRotation.Clockwise) {
-            path.push(t4, t6);
-        }
-        else if (current == t6 && rotation == BlockRotation.CounterClockwise) {
-            path.push(t4, t5);
-        }
-
         path.push(t7, t9);
         return path;
+    }
+
+    /*@Override
+    protected Path pathEstimateForIncomingBlock(Block b) {
+        return blockPathEstimateForTransformationSequence(b.transformations); // TO|DO: A: this makes times worse?
+    }*/
+
+    @Override
+    protected boolean processBlockIn(Block block) {
+
+        // Cannot have more than two blocks at once on the cell
+        if (blocksInside.size() >= MAX_BLOCKS_IN_CELL) {
+            return false;
+        }
+
+        Machine.Type firstMachine = block.transformations.getFirstTransformation().machine;
+
+        if (firstMachine == Machine.Type.B) {
+
+            boolean hasOtherBlockGoingUnderCW = false;
+
+            for (Block b : blocksInside) {
+                if (b.path.contains(t6, t7) || b.path.contains(t7, t5)) {
+                    hasOtherBlockGoingUnderCW = true;
+                    break;
+                }
+            }
+
+            if (hasOtherBlockGoingUnderCW) {
+                block.path.push(t4, t6, t7, t5);
+            }
+            else {
+                block.path.push(t4, t5);
+            }
+
+        }
+        else {
+            if (firstMachine == Machine.Type.C) {
+
+                boolean hasOtherBlockGoingUnderCCW = false;
+
+                for (Block b : blocksInside) {
+                    if (b.path.contains(t5, t7) || b.path.contains(t7, t6)) {
+                        hasOtherBlockGoingUnderCCW = true;
+                        break;
+                    }
+                }
+
+                if (hasOtherBlockGoingUnderCCW) {
+                    block.path.push(t4, t5, t7, t6);
+                }
+                else {
+                    block.path.push(t4, t6);
+                }
+
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    protected Cell processBlockOut(Block block) {
+        return Main.factory.warehouse;
     }
 
     @Override
@@ -239,6 +297,16 @@ public class ParallelCell extends Cell {
             default:
                 throw new IndexOutOfBoundsException("Cell " + id + " doesn't have position " + position);
         }
+    }
+
+    @Override
+    public Conveyor getEntryConveyor() {
+        return t2;
+    }
+
+    @Override
+    public Conveyor getExitConveyor() {
+        return t9;
     }
 
     @Override

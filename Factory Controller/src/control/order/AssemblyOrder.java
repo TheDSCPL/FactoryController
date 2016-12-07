@@ -21,7 +21,7 @@ public class AssemblyOrder extends Order {
         
         Block[] blocksToAdd = new Block[] {new Block(bottomType, this),new Block(topType, this)};
         
-        incrementPlacement();
+        addBlocksPlaced(Arrays.asList(blocksToAdd));
         return Arrays.asList(blocksToAdd);
     }
 

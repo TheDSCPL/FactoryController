@@ -1,12 +1,12 @@
 package factory.conveyor;
 
 import control.*;
-import factory.*;
+import factory.Container;
 import factory.other.*;
 import java.util.*;
 import main.*;
 
-public abstract class Conveyor extends BlockContainer {
+public abstract class Conveyor extends Container {
 
     /**
      * Contains a conveyor that is to transfer a block to this conveyor when
@@ -15,11 +15,9 @@ public abstract class Conveyor extends BlockContainer {
     Conveyor transferPartner;
     private Sensor receivingFinishedSensor;
 
-    private final Block[] blocks;
     private State conveyorState;
     private final Motor transferMotor;
     private final Sensor[] presenceSensors;
-    private final int length;
     private final Double[] queueWeights;
     private boolean sendingFrozen;
 
@@ -41,10 +39,9 @@ public abstract class Conveyor extends BlockContainer {
      * conveyors this conveyor has
      */
     public Conveyor(String id, int length, int connectionCount) {
+        super(length);
         this.id = id;
 
-        this.length = length;
-        blocks = new Block[length];
         presenceSensors = new Sensor[length];
         connections = new Conveyor[connectionCount];
         queueWeights = new Double[connectionCount];
@@ -80,9 +77,11 @@ public abstract class Conveyor extends BlockContainer {
                         }
                     }
                 }
-                else if (transferPartner != null) {
-                    blockTransferPrepare();
-                    conveyorState = State.PrepareToReceive;
+                else {
+                    if (transferPartner != null) {
+                        blockTransferPrepare();
+                        conveyorState = State.PrepareToReceive;
+                    }
                 }
                 break;
             case PrepareToReceive:
@@ -139,8 +138,10 @@ public abstract class Conveyor extends BlockContainer {
         if (isSending()) {
             conveyorState = State.Sending;
         }
-        else if (isReceiving()) {
-            conveyorState = State.Receiving;
+        else {
+            if (isReceiving()) {
+                conveyorState = State.Receiving;
+            }
         }
     }
 
@@ -161,12 +162,14 @@ public abstract class Conveyor extends BlockContainer {
 
             Main.stats.inc(id, Statistics.Type.BlocksSent, b.type);
         }
-        else if (isReceiving()) {
-            shiftOneBlock(transferMotorDirection(transferPartner, isSending()), newBlock);
-            newBlock.path.advance();
-            blockTransferFinished();
+        else {
+            if (isReceiving()) {
+                shiftOneBlock(transferMotorDirection(transferPartner, isSending()), newBlock);
+                newBlock.path.advance();
+                blockTransferFinished();
 
-            Main.stats.inc(id, Statistics.Type.BlocksReceived, newBlock.type);
+                Main.stats.inc(id, Statistics.Type.BlocksReceived, newBlock.type);
+            }
         }
 
         transferPartner = null;
@@ -182,7 +185,7 @@ public abstract class Conveyor extends BlockContainer {
             ret = blocks[0];
 
             System.arraycopy(blocks, 1, blocks, 0, blocks.length - 1);
-            // Equivalent to: TODO: verify
+            // Equivalent to:
             //for (int i = blocks.length - 1; i > 0; i--) {
             //    blocks[i - 1] = blocks[i];
             //}
@@ -193,7 +196,7 @@ public abstract class Conveyor extends BlockContainer {
             ret = blocks[blocks.length - 1];
 
             System.arraycopy(blocks, 0, blocks, 1, blocks.length - 1);
-            // Equivalent to: TODO: verify
+            // Equivalent to:
             //for (int i = 0; i < blocks.length - 1; i++) {
             //    blocks[i + 1] = blocks[i];
             //}
@@ -268,68 +271,6 @@ public abstract class Conveyor extends BlockContainer {
     }
 
     /**
-     * Checks if there are blocks in the conveyor
-     *
-     * @return <i>true</i> if there is at least one block. <i>false</i>
-     * otherwise
-     */
-    public boolean hasBlock() {
-        for (Block b : blocks) {
-            if (b != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Returns one block on the conveyor or null if no blocks are present
-     *
-     * @return
-     */
-    public Block getOneBlock() {
-        for (Block b : blocks) {
-            if (b != null) {
-                return b;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Places a block object on the conveyor
-     *
-     * @param b the block to place
-     * @param position the index (from 0 to length-1) of where to place
-     * @return <i>true</i> if there was no other block on that position and the
-     * block was placed. <i>false</i> otherwise
-     */
-    public boolean placeBlock(Block b, int position) {
-        if (position >= length) {
-            throw new IndexOutOfBoundsException("Invalid block position " + position);
-        }
-        if (blocks[position] == null) {
-            blocks[position] = b;
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Removes a block object from the conveyor
-     *
-     * @param position the position where to remove the block
-     * @return the block that was removed, or null if no block was there
-     */
-    public Block removeBlock(int position) {
-        Block ret = blocks[position];
-        blocks[position] = null;
-        return ret;
-    }
-
-    /**
      * Loops for all the conveyors connected to this conveyor and returns true
      * if the given conveyor is on that list
      *
@@ -378,30 +319,31 @@ public abstract class Conveyor extends BlockContainer {
         return conveyorState == State.PrepareToReceive
                || conveyorState == State.Receiving;
     }
-
-    public double transferTimeEstimate(Conveyor from, Conveyor to) {
-        if (!isConnectedToConveyor(from) || !isConnectedToConveyor(to)) {
-            throw new Error("XXX"); // TODO: error message
+    
+    public static double transferTimeEstimate(Conveyor from, Conveyor to) {
+        if (!to.isConnectedToConveyor(from) || !from.isConnectedToConveyor(to)) {
+            throw new Error("Not connected to given conveyors " + from.id + " " + to.id);
         }
 
-        // TODO: not finished on subclasses
-        return length * (double) Main.config.getI("conveyor.sizeUnit") / Main.config.getD("timing.conveyor.speed") * 1000; // *1000 to convert to milliseconds
+        return from.transferTimeEstimate() + to.transferTimeEstimate();
+    }
+
+    protected double transferTimeEstimate() {
+        return length / 2.0 * Main.config.getD("conveyor.sizeUnit") / Main.config.getD("timing.conveyor.speed") * 1000; // *1000 to convert to milliseconds
     }
 
     public void setSendingFrozen(boolean sendingFrozen) {
         this.sendingFrozen = sendingFrozen;
     }
-    
-    public boolean isSendingFrozen()
-    {
+
+    public boolean isSendingFrozen() {
         return sendingFrozen;
     }
 
-    public int getLength()
-    {
+    public int getLength() {
         return length;
     }
-    
+
     protected abstract boolean transferMotorDirection(Conveyor partner, boolean sending);
 
     protected abstract void blockTransferFinished();

@@ -88,11 +88,11 @@ public class Rail extends Conveyor {
         return transferPartner == connections[0] || transferPartner == connections[3];
     }
 
-    /*public long transferTimeEstimate(Conveyor from, Conveyor to) {
-        long added = 0;
-        
-        if (fro)
-        
-        return super.transferTimeEstimate(from, to) + added;
-    }*/
+    protected double transferTimeEstimate() {
+        // 4 -> rail size
+        // x/2 -> average time
+        // *1000 -> convert to milliseconds
+        double t = 4D / Main.config.getD("timing.conveyor.speed") / 2D * 1000D;
+        return super.transferTimeEstimate() + t;
+    }
 }

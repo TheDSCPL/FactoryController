@@ -1,6 +1,7 @@
 package control.order;
 
 import control.*;
+import factory.conveyor.Machine;
 import java.util.*;
 import main.*;
 import transformation.*;
@@ -16,11 +17,10 @@ public class MachiningOrder extends Order {
         this.endType = endType;
     }
 
-    public List<TransformationSequence> possibleSequences() {
-        return Main.transfm.getTransformationSequences(startType, endType, null);
+    public List<TransformationSequence> possibleSequences(Machine.Type.Set mts) {
+        return Main.transfm.getTransformationSequences(startType, endType, mts);
     }
 
-    @Override
     public List<Block> execute(Object info) {
         if (!(info instanceof TransformationSequence)) {
             throw new Error("Invalid info type passed to Order::execute");
@@ -34,8 +34,9 @@ public class MachiningOrder extends Order {
         b.order = this;
         b.transformations = (TransformationSequence) info;
 
-        incrementPlacement();
-        return Arrays.asList(b);
+        List<Block> l = Arrays.asList(b);
+        addBlocksPlaced(l);
+        return l;
     }
 
     @Override

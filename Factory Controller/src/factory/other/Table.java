@@ -1,14 +1,12 @@
 package factory.other;
 
-import control.*;
 import factory.*;
 
-public class Table extends BlockContainer
-{
-    public Block block;
+public class Table extends Container {
     private final Sensor sensor;
     
     public Table(int sensorId) {
+        super(1);
         sensor = new Sensor(sensorId);
     }
     

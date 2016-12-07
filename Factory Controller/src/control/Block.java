@@ -53,9 +53,31 @@ public class Block {
         }
     }
 
+    public Path timeTravel(double advance) {
+        Path newPath = path.copy();
+        double timePosition = 0;
+        Type currentBlockType = type;
+
+        while (timePosition < advance && newPath.hasNext()) {
+
+            if (newPath.getCurrent() instanceof Machine) {
+                Transformation t = transformations.getNextTransformation(currentBlockType);
+                if (t != null) {
+                    currentBlockType = t.end;
+                    timePosition += t.duration;
+                }
+            }
+
+            timePosition += Conveyor.transferTimeEstimate(newPath.getCurrent(), newPath.getNext());
+            newPath.advance();
+        }
+
+        return newPath;
+    }
+    
     @Override
     public String toString() {
-        return super.toString() + "/" + type;
+        return super.toString() + "[" + type + "]: " + path;
     }
     
 

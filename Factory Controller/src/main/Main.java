@@ -1,13 +1,10 @@
 package main;
 
 import coms.*;
-import config.Configuration;
+import config.*;
 import control.*;
 import factory.*;
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.*;
 import transformation.*;
 
 // PULL -> WORK -> ADD -> COMMIT -> PULL -> PUSH
@@ -18,6 +15,7 @@ Major TODO list:
 Luis:
   [X]  Gantry (Class: Gantry)
   [.]  Assembler cell processing and optimization (Class: Assembler)
+  [ ]  "TODO L:" in code (Class: N/A)
 
 Alex:
   [X]  Serial cell processing and optimization (Class: SerialCell)
@@ -30,13 +28,13 @@ Alex:
   [X]  Parallel cell processing and optimization (Class: ParalleCell)
   [X]  Tool pre-selection on Parallel cell (Class: ParallelCell)
   [X]  Statistics module + thread safety! (Class: Main, Statistics)
-  [ ]  Parallel cell opimization: entry of blocks on cell is not prioritized over block being transfer-rotated already on cell
-  [ ]  Parallel cell opimization: path.length > 3, not 2
-  [.]  Order processing algorithm and distribution by the various cells (Class: Factory)
-  [.]  "Select called on tool when tool is not on Idle state" tool pre-selection algorithm bug (Class: Cell)
+  [X]  "Select called on tool when tool is not on Idle state" tool pre-selection algorithm bug (Class: Machine)
+  [X]  Rework parallel cell processing algorithm: currently it is not taking advantage of parallelism as much as it should
+  [X]  Order processing algorithm and distribution by the various cells (Class: Optimizer)
+  [X]  "TODO A:" in code (Class: N/A)
 
 Unassigned:
-  [ ]  TODO's in code (Class: N/A)
+   -
 
 Legend:
    X   Done
@@ -50,8 +48,9 @@ public class Main {
     public static final Factory factory = new Factory();
     public static final TransformationManager transfm = new TransformationManager();
     public static final OrderController orderc = new OrderController();
+    public static final Optimizer optimizer = new Optimizer();
     public static final Statistics stats = new Statistics();
-    private static final Console console = new Console();
+    public static final Console console = new Console();
     public static final long controlLoopDelay = (long) config.getI("controlLoopDelay");
 
     /**
@@ -60,36 +59,12 @@ public class Main {
     public static long time() {
         return System.nanoTime() / (long) 1_000_000;
     }
-    
+
     public static void main(String[] args) throws IOException {
+        System.out.println("Factory controller ready");
         console.setDaemon(true);
         console.start();
         controlLoop();
-    }
-
-    private static void processCommand() {
-        String input = console.getInput();
-        String output;
-
-        if (input != null) {
-            switch (input) {
-                case "factory":
-                    output = factory.toString();
-                    break;
-                case "orders":
-                    output = orderc.toString();
-                    break;
-                default:
-                    if (input.startsWith("O")) {
-                        output = orderc.orderInfo(input.replaceFirst("^O", ""));
-                    }
-                    else {
-                        output = stats.processCmd(input);
-                    }
-            }
-
-            console.setOutput(output != null ? output : "Invalid command " + input);
-        }
     }
 
     private static boolean alreadyTriedToOpen = false;
@@ -127,6 +102,31 @@ public class Main {
         }
         catch (Throwable ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private static void processCommand() {
+        String input = console.getInput();
+        String output;
+
+        if (input != null) {
+            switch (input) {
+                case "factory":
+                    output = factory.toString();
+                    break;
+                case "orders":
+                    output = orderc.toString();
+                    break;
+                default:
+                    if (input.startsWith("O")) {
+                        output = orderc.orderInfo(input.replaceFirst("^O", ""));
+                    }
+                    else {
+                        output = stats.processCmd(input);
+                    }
+            }
+
+            console.setOutput(output != null ? output : "Invalid command " + input);
         }
     }
 }

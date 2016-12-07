@@ -2,10 +2,10 @@ package factory.cell;
 
 import control.*;
 import control.order.*;
-import factory.*;
 import factory.conveyor.*;
 import java.util.*;
 import main.*;
+import main.Optimizer.OrderPossibility;
 
 public abstract class Cell {
 
@@ -123,6 +123,8 @@ public abstract class Cell {
                     Main.stats.inc(id, Statistics.Type.BlocksSent, b.type);
                     b.path.append(Main.factory.blockTransportPath(this, destination));
                     blocksInside.remove(b);
+                    if(b.isStacked() && b.otherAssemblyBlock != null)
+                        blocksInside.remove(b.otherAssemblyBlock);
                 }
             }
         }
@@ -144,62 +146,56 @@ public abstract class Cell {
 
     private void processToolPreSelection(Machine machine) {
 
-        if (machine.id.equals("PaT6")) {
-            //System.out.format("[cell %s] processToolPreSelection machine = %s%n", id, machine.id);
-        }
-
         // Get next block to go to that machine and be processed there
         Block closestBlockToBeProcessed = null;
         int minStepCount = Integer.MAX_VALUE;
 
-        for (Block b : blocksInside) {
+        // Get all blocks
+        Set<Block> allBlocks = new HashSet(blocksInside);
+        allBlocks.addAll(blocksIncoming);
+        
+        for (Block b : allBlocks) {
+
+            Path path;
+
+            // Get path for block
+            if (blocksInside.contains(b)) {
+                path = b.path;
+            }
+            else {
+                path = b.path.copy();
+                path.append(pathEstimateForIncomingBlock(b));
+            }
 
             // Block has to go to that machine in the future and be processed there
-            if (b.path.contains(machine) && b.getNextTransformationOnMachine(machine.type) != null) {
+            if (path.contains(machine) && b.getNextTransformationOnMachine(machine.type) != null) {
 
                 // Calculate number of steps to machine for this block
                 int count = 0;
-                for (int i = 0; i < b.path.length(); i++) {
+                for (int i = 0; i < path.length(); i++) {
                     count++;
 
-                    if (b.path.get(i) == machine) {
-                        if ((i == 0 && b.getNextTransformation().machine == machine.type) || i != 0) {
-                            break;
-                        }
-
-                    }
-
-                    // If this block is closest, save that information
-                    if (machine.id.equals("PaT6")) {
-                        //System.out.format("[cell %s] processToolPreSelection loop: block = %s; steps = %d; path = %s%n", id, b, count, b.path);
-                    }
-
-                    if (count < minStepCount) {
-                        if (machine.id.equals("PaT6")) {
-                            //System.out.format("[cell %s] count < minStepCount: set closestBlockToBeProcessed = %s%n", id, b);
-                        }
-
-                        minStepCount = count;
-                        closestBlockToBeProcessed = b;
+                    if (path.get(i) == machine) {
+                        break;
                     }
                 }
 
+                // If this block is closest, save that information
+                if (count < minStepCount) {
+                    minStepCount = count;
+                    closestBlockToBeProcessed = b;
+                }
             }
         }
 
         // Get next transformation that block will have on that machine, and pre-select the apropriate tool
-        if (closestBlockToBeProcessed
-            != null) {
-            if (machine.id.equals("PaT6")) {
-                /*System.out.format("[cell %s] machine %s preSelectTool %s for block %s%n",
-                                  id,
-                                  machine.id,
-                                  closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool,
-                                  closestBlockToBeProcessed);*/
-            }
-
+        if (closestBlockToBeProcessed != null) {
             machine.preSelectTool(closestBlockToBeProcessed.getNextTransformationOnMachine(machine.type).tool);
         }
+    }
+    
+    protected Path pathEstimateForIncomingBlock(Block b) {
+        return new Path();
     }
 
     @Override

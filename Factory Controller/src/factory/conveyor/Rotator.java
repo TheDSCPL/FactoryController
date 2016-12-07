@@ -88,4 +88,11 @@ public class Rotator extends Conveyor {
         return transferPartner == connections[0] || transferPartner == connections[2];
     }
 
+    protected double transferTimeEstimate() {
+        // 90 -> 90 degrees
+        // x/2 -> average time
+        // *1000 -> convert to milliseconds
+        double t = 90D / Main.config.getD("timing.conveyor.rotationSpeed") / 2D * 1000;
+        return super.transferTimeEstimate() + t;
+    }
 }
