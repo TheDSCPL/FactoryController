@@ -31,7 +31,8 @@ public final class Assembler extends Cell {
     public final Gantry gantry;
 
     private final List<Transfer> pendingTransfers;  //add at the end. get from the front
-    private final List<Container> allContainers;
+    private final List<Container> allContainers;    //all block containers that are used by the assembler (all except t5 and t6)
+    private final List<Conveyor> conveyorsQueue;    //conveyors that can contain blocks that are waiting to be assembled
 
     public Assembler(String id) {
         super(id);
@@ -51,6 +52,8 @@ public final class Assembler extends Cell {
         t4.connections = new Conveyor[]{t3, t5};
         t5.connections = new Conveyor[]{t6, t4, null, null};
         t6.connections = new Conveyor[]{null, t5};
+        
+        conveyorsQueue = Arrays.asList(new Conveyor[] {t1,t3,t4});
 
         table1 = new Table(Main.config.getBaseInput(id + "M") + 0);
         table2 = new Table(Main.config.getBaseInput(id + "M") + 1);
@@ -60,6 +63,8 @@ public final class Assembler extends Cell {
         allContainers = new ArrayList<>();
         allContainers.addAll(Arrays.asList(conveyors));
         allContainers.addAll(Arrays.asList(tables));
+        allContainers.remove(t5);
+        allContainers.remove(t6);
 
         gantry = new Gantry(id);
 
@@ -236,13 +241,8 @@ public final class Assembler extends Cell {
         return null;
     }
 
-    private final boolean isFull() {
-        for (Container c : allContainers) {
-            if (!c.hasBlock()) {
-                return false;
-            }
-        }
-        return true;
+    private boolean isFull() {
+        return allContainers.stream().allMatch(t -> t.hasBlock());
     }
 
     /**
@@ -341,6 +341,8 @@ public final class Assembler extends Cell {
             return;
         }
 
+        System.out.println("cycle");
+        
         gantryController();
 
         if (!pendingTransfers.isEmpty()) {
@@ -394,8 +396,17 @@ public final class Assembler extends Cell {
 
     private static final double TIME_TO_GET_TO_ASSEMBLER = Main.config.getD("timing.assembly.timeToArriveAssembler");
 
-    private static final int SPACE_OCCUPIED_PER_ASSEMBLY = 3; // Tuning parameter
+    private static final int SPACE_OCCUPIED_PER_ASSEMBLY = 2; // Tuning parameter
 
+    private int getFreeSpace()
+    {
+        int ret = (int)conveyorsQueue.stream().filter(o -> !o.hasBlock()).count();
+        Block exitBlock = getExitConveyor().getOneBlock();
+        if(exitBlock != null)
+            ret -= (exitBlock.order instanceof AssemblyOrder && !exitBlock.isStacked()) ? 1 : 0;
+        return ret;
+    }
+    
     @Override
     public List<OrderPossibility> getOrderPossibilities(Set<Order> orders, double arrivalDelayEstimate) {
         List<OrderPossibility> ret = new ArrayList<>();
@@ -406,9 +417,10 @@ public final class Assembler extends Cell {
 
                 int priority = 1;
 
-                int possibleExecutionCount = space / SPACE_OCCUPIED_PER_ASSEMBLY;
-
-                boolean entersImmediately = true;
+                int possibleExecutionCount = 1;
+                
+                //if the free space inside the assembler is greater or equal to the number of incoming blocks plus the number of blocks that this order will add, then do it immediately
+                boolean entersImmediately = blocksIncoming.size() + possibleExecutionCount*2 <= getFreeSpace();
 
                 double totalDuration = AVERAGE_ASSEMBLE_DURATION + TIME_TO_GET_TO_ASSEMBLER;
 
@@ -439,7 +451,7 @@ public final class Assembler extends Cell {
 
     @Override
     protected Cell processBlockOut(Block block) {
-        System.err.println("ProcessOut. Path: " + block.path);
+        //System.err.println("ProcessOut. Path: " + block.path);
         //block.path = new Path().push(t2);
         Main.factory.loadUnloadCell.addIncomingBlocks(Arrays.asList(new Block[]{block}));
         return Main.factory.loadUnloadCell;
@@ -957,7 +969,6 @@ public final class Assembler extends Cell {
     }
 
     public Transfer transferBlock(Container from, Container to) {
-        System.out.println("Registered a transfer");
         return transferBlock(new Coordinates(from), new Coordinates(to));
     }
 

@@ -130,7 +130,7 @@ public abstract class Cell {
                 if (!b.path.hasNext() && blocksInside.contains(b)) {
                     if (!(this instanceof Assembler) || b.isStacked()) {    //so only stacked blocks leave the Assembler
 
-                        System.err.println("I'm in!!!");
+                        //System.err.println("I'm in!!!");
                         Cell destination = processBlockOut(b);
                         Main.stats.inc(id, Statistics.Type.BlocksSent, b.type);
                         b.path.append(Main.factory.blockTransportPath(this, destination));
@@ -138,7 +138,7 @@ public abstract class Cell {
                         if (b.isStacked() && b.otherAssemblyBlock != null) {
                             blocksInside.remove(b.otherAssemblyBlock);
                         }
-                        System.err.println("out block path: " + b.path);
+                        //System.err.println("out block path: " + b.path);
                     }
                 }
             }
