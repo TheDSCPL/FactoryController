@@ -245,6 +245,18 @@ public final class Assembler extends Cell {
         return allContainers.stream().allMatch(t -> t.hasBlock());
     }
 
+    private Conveyor getNextConveyor(Conveyor _c) {
+        if (_c == null) {
+            return null;
+        }
+        for (int i = 0; i < conveyors.length - 1; i++) {
+            if (conveyors[i] == _c) {
+                return conveyors[i + 1];
+            }
+        }
+        return null;
+    }
+    
     /**
      * Tells the Gantry what movements to make by adding Transfer objects to the
      * pendingTransfers list
@@ -301,10 +313,15 @@ public final class Assembler extends Cell {
         }
 
         for (int i = 3; i >= 0; i--) {
-            Block block = conveyors[i].getOneBlock();
+            Conveyor fromConveyor = conveyors[i];
+            Block block = fromConveyor.getOneBlock();
             if (block == null || block.isStacked()) {
                 continue;
             }
+            
+            if(fromConveyor.isSending())
+                fromConveyor = getNextConveyor(fromConveyor);
+            
             Table tableTo = existsIncompleteAndCompatibleOrderInTables(block.order);
             if (tableTo == null) //no table contains a block waiting to be assembled with this order
             {
@@ -313,12 +330,12 @@ public final class Assembler extends Cell {
                 {
                     continue;
                 }
-                transferBlock(conveyors[i], tableTo);
+                transferBlock(fromConveyor, tableTo);
                 return;
             }
             else if (block.type == ((AssemblyOrder) block.order).topType) //there is a table that has a block waiting with this order
             {
-                transferBlock(conveyors[i], tableTo);
+                transferBlock(fromConveyor, tableTo);
                 return;
             }
         }
