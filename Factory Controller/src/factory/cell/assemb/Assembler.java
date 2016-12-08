@@ -711,7 +711,6 @@ public final class Assembler extends Cell {
             boolean Yready;
             switch (status) {
                 case WAITING_FOR_START:
-                    //either the origin is a table or it's a conveyor and is ready
                     status = TRANSFER_STATE.MOVING_TO_ORIGIN;
                     if (from.getBlockContainer() instanceof Conveyor) {
                         Conveyor _c = (Conveyor) from.getBlockContainer();

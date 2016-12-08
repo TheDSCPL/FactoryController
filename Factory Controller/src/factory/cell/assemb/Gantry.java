@@ -156,63 +156,91 @@ public class Gantry {
         return isInitializingX() || isInitializingY() || isInitializingZ();
     }
     
+    private boolean foundXSensor = false;
+    
     private void initializeX()
     {
         if(!isInitializingX())
             return;
+        int activeSensor = getActiveXSensor();
+        if(activeSensor != -1)
+        {
+            foundXSensor = true;
+        }
+        if(foundXSensor) //found a sensor. now move to sensor 0
+        {
+            initXTimer = -1;
+            if(activeSensor == 0)
+            {
+                XMotor.turnOff();
+                initXTries = -1;    //finished initializing Y
+            }
+            else
+            {
+                XMotor.turnOnMinus();
+            }
+            return;
+        }
         if(initXTimer == -1)    //new attempt
             initXTimer = Main.time();
         if(Main.time() - initXTimer >= initializationTimeoutMillis)  //the current attempt timed out
         {
+            XMotor.turnOff();
             if(initXTries < maxInitTries)   //switch between attemps and change motor direction (by incrementing the number of tries)
             {
                 initXTries++;
                 initXTimer = -1;
-                XMotor.turnOff();
                 return;
             }
             else    //all attempts done and failed
             {
-                XMotor.turnOff();
-                throw new Error("Gantry initialization timed out");
+                throw new Error("Gantry X initialization timed out");
             }
-        }
-        if(getActiveXSensor() != -1)    //found sensor. done initializing X
-        {
-            XMotor.turnOff();
-            initXTimer = -1;
-            initXTries = -1;
         }
         else    //if still initializing
             XMotor.turnOn( initXTries%2 == 1);  //plus in odd tries and minus in even tries
     }
     
+    private boolean foundYSensor = false;
+    
     private void initializeY()
     {
         if(!isInitializingY())
             return;
+        int activeSensor = getActiveYSensor();
+        if(activeSensor != -1)
+        {
+            foundYSensor = true;
+        }
+        if(foundYSensor) //found a sensor. now move to sensor 0
+        {
+            initYTimer = -1;
+            if(activeSensor == 0)
+            {
+                YMotor.turnOff();
+                initYTries = -1;    //finished initializing Y
+            }
+            else
+            {
+                YMotor.turnOnMinus();
+            }
+            return;
+        }
         if(initYTimer == -1)    //new attempt
             initYTimer = Main.time();
         if(Main.time() - initYTimer >= initializationTimeoutMillis)  //the current attempt timed out
         {
+            YMotor.turnOff();
             if(initYTries < maxInitTries)   //switch between attemps and change motor direction (by incrementing the number of tries)
             {
                 initYTries++;
                 initYTimer = -1;
-                YMotor.turnOff();
                 return;
             }
             else    //all attempts done and failed
             {
-                YMotor.turnOff();
-                throw new Error("Gantry initialization timed out");
+                throw new Error("Gantry Y initialization timed out");
             }
-        }
-        if(getActiveYSensor() != -1)    //found sensor. done initializing Y
-        {
-            YMotor.turnOff();
-            initYTimer = -1;
-            initYTries = -1;
         }
         else    //if still initializing
             YMotor.turnOn( initYTries%2 == 1);  //plus in odd tries and minus in even tries
