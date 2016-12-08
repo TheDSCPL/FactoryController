@@ -88,14 +88,18 @@ public class Pusher extends Conveyor {
             Block block = getOneBlock();
 
             // Block has stopped here, has an Unload order and roller has space
-            if (!block.path.hasNext() && (block.order instanceof UnloadOrder || block.isStacked())) {
+            if (!block.path.hasNext() && (block.order instanceof UnloadOrder)) {
                 if (roller.isFull()) {
                     pusherState = State.WaitingForSpace;
                 }
                 else {
                     startPushing();
                 }
-
+            }
+            // Block has stopped here, is a stacked block and roller has space
+            // Do not go to waiting for space if block is stacked, because block might go to another conveyor
+            else if (!block.path.hasNext() && block.isStacked() && !roller.isFull()) {
+                startPushing();
             }
         }
     }
