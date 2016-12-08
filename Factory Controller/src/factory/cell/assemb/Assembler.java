@@ -213,7 +213,7 @@ public final class Assembler extends Cell {
         }
     }
 
-    private Table existsIncompleteAndCompatibleOrderInTables(Order o) {
+    private Table getIncompleteTableWithCompatibleOrder(Order o) {
         for (Table t : tables) {
             final Block b = t.getOneBlock();
             if (b != null && b.order == o && !b.isStacked() && b.type == ((AssemblyOrder) b.order).bottomType) {
@@ -319,10 +319,10 @@ public final class Assembler extends Cell {
                 continue;
             }
             
-            if(fromConveyor.isSending())
+            if(fromConveyor.isSending() && getNextConveyor(fromConveyor).isReceiving())
                 fromConveyor = getNextConveyor(fromConveyor);
             
-            Table tableTo = existsIncompleteAndCompatibleOrderInTables(block.order);
+            Table tableTo = getIncompleteTableWithCompatibleOrder(block.order);
             if (tableTo == null) //no table contains a block waiting to be assembled with this order
             {
                 tableTo = getAnEmptyTable();
@@ -333,7 +333,7 @@ public final class Assembler extends Cell {
                 transferBlock(fromConveyor, tableTo);
                 return;
             }
-            else if (block.type == ((AssemblyOrder) block.order).topType) //there is a table that has a block waiting with this order
+            else if (block.canBeTopBlock()) //there is a table that has a bottom block waiting with this order and this is a top block
             {
                 transferBlock(fromConveyor, tableTo);
                 return;
@@ -358,8 +358,6 @@ public final class Assembler extends Cell {
             return;
         }
 
-        System.out.println("cycle");
-        
         gantryController();
 
         if (!pendingTransfers.isEmpty()) {
@@ -946,12 +944,11 @@ public final class Assembler extends Cell {
                     gantry.ZMotor.turnOff();
                     if (to.getBlockContainer() instanceof Conveyor) {
                         Conveyor _c = getPreviousConveyor((Conveyor) to.getBlockContainer());
-                        if (_c == null) {
-                            throw new Error("Tried to transfer block to a conveyor that either is the Entry-Conveyor of this Assembler or is not in this Cell at all");
+                        if (_c != null) {
+                            _c.setSendingFrozen(false);
                         }
-                        _c.setSendingFrozen(false);
                     }
-                    unfreezeAssembler();
+                    //unfreezeAssembler();
                     return true;
                 default:
                     throw new IllegalStateException("Illegal state reached at the Transfer FSM");
