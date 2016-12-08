@@ -7,11 +7,11 @@ import java.util.*;
 public abstract class Order {
 
     public final int id;
-    public final int count;
-    private Set<Block> blocks = new HashSet<>();
+    public final int totalOrdersCount;
+    private final Set<Block> blocks = new HashSet<>();
 
-    private int placedCount = 0;
-    private int completedCount = 0;
+    private int placedOrdersCount = 0;
+    private int completedOrdersCount = 0;
 
     private final Date dateReceived;
     private Date dateStarted;
@@ -19,16 +19,16 @@ public abstract class Order {
 
     public Order(int id, int count) {
         this.id = id;
-        this.count = count;
+        this.totalOrdersCount = count;
         dateReceived = new Date();
     }
 
     public final boolean canBeExecuted() {
-        return placedCount + completedCount < count;
+        return placedOrdersCount + completedOrdersCount < totalOrdersCount;
     }
 
     public final int getPendingCount() {
-        return count - placedCount - completedCount;
+        return totalOrdersCount - placedOrdersCount - completedOrdersCount;
     }
 
     public boolean receivedBefore(Order o) {
@@ -50,20 +50,20 @@ public abstract class Order {
             return;
         }
 
-        if (placedCount == 0) {
+        if (placedOrdersCount == 0) {
             dateStarted = new Date();
         }
 
-        placedCount += list.size();
+        placedOrdersCount++; // TODO: A: doesn't work with assemblyorders
         blocks.addAll(list);
     }
 
     public final void complete(Block block) {
         blocks.remove(block);
 
-        placedCount--;
-        completedCount++;
-        if (completedCount == count) {
+        placedOrdersCount--;
+        completedOrdersCount++;
+        if (completedOrdersCount == totalOrdersCount) {
             dateFinished = new Date();
         }
     }
@@ -75,38 +75,38 @@ public abstract class Order {
 
         sb.append(" - ").append("ID: ").append(id).append("\n");
         sb.append(" - ").append("Type: ").append(orderTypeString()).append("\n");
-        sb.append(" - ").append("Count: ").append(count).append("\n");
+        sb.append(" - ").append("Instances count: ").append(totalOrdersCount).append("\n");
         sb.append(" - ").append("State: ").append(getStateString()).append("\n");
         sb.append(" - ").append("Date received: ").append(df.format(dateReceived)).append("\n");
         sb.append(" - ").append("Date started: ").append(dateStarted == null ? "not yet started" : df.format(dateStarted)).append("\n");
         sb.append(" - ").append("Date finished: ").append(dateFinished == null ? "not yet finished" : df.format(dateFinished)).append("\n");
-        sb.append(" - ").append("Blocks pending: ").append(getPendingCount()).append("\n");
-        sb.append(" - ").append("Blocks processing: ").append(placedCount).append("\n");
+        sb.append(" - ").append("Order instances pending: ").append(getPendingCount()).append("\n");
+        sb.append(" - ").append("Order instances processing: ").append(placedOrdersCount).append("\n");
 
         for (Block b : blocks) {
             sb.append("\t").append(b.type).append(": ").append(b.path).append("\n");
         }
 
-        sb.append(" - ").append("Blocks completed: ").append(completedCount).append("\n");
+        sb.append(" - ").append("Order instances completed: ").append(completedOrdersCount).append("\n");
 
         return sb.toString();
     }
 
     public String getStateString() {
-        if (completedCount == count) {
+        if (completedOrdersCount == totalOrdersCount) {
             return "Completed";
         }
-        if (placedCount + completedCount == 0) {
+        if (placedOrdersCount + completedOrdersCount == 0) {
             return "Received";
         }
         return "Processing";
     }
 
     public String getSmallStateString() {
-        if (completedCount == count) {
+        if (completedOrdersCount == totalOrdersCount) {
             return "[X]";
         }
-        if (placedCount + completedCount == 0) {
+        if (placedOrdersCount + completedOrdersCount == 0) {
             return "[ ]";
         }
         return "[.]";
@@ -119,6 +119,6 @@ public abstract class Order {
     }
 
     public boolean isCompleted() {
-        return completedCount == count;
+        return completedOrdersCount == totalOrdersCount;
     }
 }

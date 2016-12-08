@@ -16,11 +16,12 @@ public class AssemblyOrder extends Order {
 
     @Override
     public List<Block> execute(Object info) {
-        if(!canBeExecuted())
+        if (!canBeExecuted()) {
             return new ArrayList<>();
-        
-        Block[] blocksToAdd = new Block[] {new Block(bottomType, this),new Block(topType, this)};
-        
+        }
+
+        Block[] blocksToAdd = new Block[]{new Block(bottomType, this), new Block(topType, this)};
+
         addBlocksPlaced(Arrays.asList(blocksToAdd));
         return Arrays.asList(blocksToAdd);
     }

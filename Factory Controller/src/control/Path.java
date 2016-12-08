@@ -12,6 +12,7 @@ public final class Path {
      * Pushes the conveyor to the end of the FIFO queue
      *
      * @param c conveyor to be added to the queue
+     * @return 
      */
     public Path push(Conveyor c) {
         if (c == null) {
@@ -40,6 +41,7 @@ public final class Path {
      * Appends newPath to the end of this path
      *
      * @param newPath the path to add to the end
+     * @return 
      */
     public Path append(Path newPath) {
         if (path == null) {

@@ -72,16 +72,34 @@ public class LoadUnloadCell extends Cell {
             // Add block to cell
             blocksInside.add(block);
         }
+
+        // All stacked blocks enter cell and go to pusher t4
+        // If pusher is full but contains one such block, divert block
+        // to next pusher, t5.
+        if (t4.isIdle() && t4.hasBlock() && t4.roller.isFull()) {
+            Block block = t4.getOneBlock();
+            if (!block.path.hasNext() && block.isStacked()) {
+                block.path.push(t5);
+            }
+        }
+
+        if (t4.isIdle() && t4.hasBlock() && !t4.roller.isFull()) {
+            Block block = t4.getOneBlock();
+            if (block.path.hasNext() && block.isStacked()) {
+                // Make the block stay on the t4 pusher, in order to be pushed, since the pusher t4 is empty
+                block.path = new Path().push(t4);
+            }
+        }
     }
 
     @Override
     protected boolean processBlockIn(Block block) {
         block.path.push(t4);
-        
-        if (block.isStacked()) { // TODO: L: write here contidition to know if block is a stacked block
-            if (t4.roller.isFull()) {
+
+        if (block.isStacked()) {
+            /*if (t4.roller.isFull()) {
                 block.path.push(t5);
-            }
+            }*/
         }
         else {
             UnloadOrder order = (UnloadOrder) block.order;
@@ -146,7 +164,7 @@ public class LoadUnloadCell extends Cell {
     public Rotator getTopTransferInConveyor() {
         return t2;
     }
-    
+
     @Override
     public Rotator getTopTransferOutConveyor() {
         return t2;
