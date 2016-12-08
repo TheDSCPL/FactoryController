@@ -122,8 +122,16 @@ public class Block {
     {
         if(!(order instanceof AssemblyOrder))
             return false;
-        AssemblyOrder order = (AssemblyOrder) this.order;
-        return order.bottomType == type;
+        AssemblyOrder o = (AssemblyOrder) this.order;
+        return o.bottomType == type;
+    }
+    
+    public boolean canBeTopBlock()
+    {
+        if(!(order instanceof AssemblyOrder))
+            return false;
+        AssemblyOrder o = (AssemblyOrder) this.order;
+        return o.topType == type;
     }
     
     public boolean isStacked()
