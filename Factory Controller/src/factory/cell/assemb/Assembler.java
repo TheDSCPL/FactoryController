@@ -31,7 +31,7 @@ public final class Assembler extends Cell {
     public final Gantry gantry;
 
     private final List<Transfer> pendingTransfers;  //add at the end. get from the front
-
+    private final List<Container> allContainers;
     public Assembler(String id) {
         super(id);
 
@@ -56,34 +56,93 @@ public final class Assembler extends Cell {
         table3 = new Table(Main.config.getBaseInput(id + "M") + 2);
         tables = new Table[]{table1, table2, table3};
 
+        allContainers = new ArrayList<>();
+        allContainers.addAll(Arrays.asList(conveyors));
+        allContainers.addAll(Arrays.asList(tables));
+        
         gantry = new Gantry(id);
 
         pendingTransfers = new ArrayList<>();
         
-        final AssemblyOrder testOrder = new AssemblyOrder(1,2,Block.Type.P1,Block.Type.P2);
+        /*Thread testThread2 = new Thread(() -> {
+            try {
+                Thread.sleep(15*1000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Assembler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            final AssemblyOrder testOrder = new AssemblyOrder(1,2,Block.Type.P1,Block.Type.P2);
+
+            Block block1 = new Block(Block.Type.P2, testOrder);
+            t1.placeBlock(block1, 0);
+            blocksInside.add(block1);
+
+            Block block2 = new Block(Block.Type.P3, testOrder);
+            t2.placeBlock(block2, 0);
+            blocksInside.add(block2);
+
+            Block block3 = new Block(Block.Type.P4, testOrder);
+            t3.placeBlock(block3, 0);
+            blocksInside.add(block3);
+
+            Block block4 = new Block(Block.Type.P5, testOrder);
+            t4.placeBlock(block4, 0);
+            blocksInside.add(block4);
+
+            Block block5 = new Block(Block.Type.P6, testOrder);
+            t5.placeBlock(block5, 0);
+            blocksInside.add(block5);
+
+            Block block6 = new Block(Block.Type.P7, testOrder);
+            t6.placeBlock(block6, 0);
+            blocksInside.add(block6);
+
+            Block block7 = new Block(Block.Type.P8, testOrder);
+            table1.placeBlock(block7, 0);
+            blocksInside.add(block7);
+
+            Block block8 = new Block(Block.Type.P9, testOrder);
+            table2.placeBlock(block8, 0);
+            blocksInside.add(block8);
+
+            Block block9 = new Block(Block.Type.P9, testOrder);
+            table3.placeBlock(block9, 0);
+            blocksInside.add(block9);
+        });
+        testThread2.setDaemon(true);
+        testThread2.start();*/
         
-        Block block1 = new Block(Block.Type.P1, testOrder);
+        /*final AssemblyOrder testOrder = new AssemblyOrder(1, 2, Block.Type.P1, Block.Type.P2);
+
+        Block block1 = new Block(Block.Type.P2, testOrder);
         t1.placeBlock(block1, 0);
         blocksInside.add(block1);
         
-        Block block2 = new Block(Block.Type.P2, testOrder);
-        t4.placeBlock(block2, 0);
-        blocksInside.add(block2);
-        
-        Thread test_thread1 = new Thread(){
+        Thread test_thread = new Thread(){
             @Override
-            public void run()
-            {
-                try
-                {
-                    Thread.sleep(1000*50);
+            public void run() {
+                try {
+                    Thread.sleep(10 * 1000);
+                    
+                    AssemblyOrder testStackedOrder = new AssemblyOrder(1,2,Block.Type.P4,Block.Type.P5);
+                    
+                    Block testBottomBlock = new Block(Block.Type.P4,testStackedOrder);
+                    Block testTopBlock = new Block(Block.Type.P5,testStackedOrder);
+                    testBottomBlock.placeOnTop(testTopBlock);
+                    table2.placeBlock(testBottomBlock, 0);
+                    blocksInside.add(testBottomBlock);
+                    
+                    Block block3 = new Block(Block.Type.P1, testOrder);
+                    t2.placeBlock(block3, 0);
+                    blocksInside.add(block3);
+                    System.err.println("Added valid block!");
                 }
-                catch(Throwable ignored)
-                {
-                    return;
-                }
+                catch(Throwable ignored) {return;}
             }
         };
+        
+        test_thread.setDaemon(true);
+        test_thread.start();*/
         
         /*Transfer _transfer = transferBlock(t1, table2);
         Block _test_block = new Block(Block.Type.P1);
@@ -151,11 +210,14 @@ public final class Assembler extends Cell {
         }
     }
     
-    private Table existsIncompleteOrderInTables(Order o)
+    private Table existsIncompleteAndCompatibleOrderInTables(Order o)
     {
         for(Table t : tables)
-            if(t.getOneBlock() != null && t.getOneBlock().order == o && !t.getOneBlock().isStacked())
+        {
+            final Block b = t.getOneBlock();
+            if(b != null && b.order == o && !b.isStacked() && b.type == ((AssemblyOrder)b.order).bottomType)
                 return t;
+        }
         return null;
     }
     
@@ -175,6 +237,14 @@ public final class Assembler extends Cell {
         return null;
     }
     
+    private final boolean isFull()
+    {
+        for(Container c : allContainers)
+            if(!c.hasBlock())
+                return false;
+        return true;
+    }
+    
     /**
      * Tells the Gantry what movements to make by adding Transfer objects to the pendingTransfers list
      */
@@ -183,8 +253,8 @@ public final class Assembler extends Cell {
         if(!pendingTransfers.isEmpty() || blocksInside.isEmpty())
             return;
         
-        System.err.println("Conveyors.length: " + conveyors.length);
-        
+        /*
+        //Print all containers that have blocks and their types
         for(int i = 0; i< conveyors.length ; i++)
         {
             Conveyor c = conveyors[i];
@@ -200,6 +270,21 @@ public final class Assembler extends Cell {
                 type2 = null;
             System.out.println("t" + (i+1) + "-> typeBottom=" + c.getOneBlock().type.name() + " typeTop=" + type2);
         }
+        for(int i = 0 ; i<tables.length ; i++)
+        {
+            Table t = tables[i];
+            if(!t.hasBlock())
+            {
+                //System.out.println("t" + (i+1) + " contains no blocks. (" + c.getOneBlock() + ")");
+                continue;
+            }
+            String type2;
+            if(t.getOneBlock().otherAssemblyBlock != null)
+                type2 = t.getOneBlock().otherAssemblyBlock.type.name();
+            else
+                type2 = null;
+            System.out.println("table" + (i+1) + "-> typeBottom=" + t.getOneBlock().type.name() + " typeTop=" + type2);
+        }*/
         
         Table couldHaveGoneToExit = null;  //contains a Table that could have been the source of a transfer to the exit conveyor but was skipped because it wasn't the most efficient move at the beginning of the algorithm. if null, no Tables could have gone to the exit.
         Table t = getAssembledTable();
@@ -220,9 +305,9 @@ public final class Assembler extends Cell {
         for(int i=3 ; i>=0 ; i--)
         {
             Block block = conveyors[i].getOneBlock();
-            if(block == null)
+            if(block == null || block.isStacked())
                 continue;
-            Table tableTo = existsIncompleteOrderInTables(block.order);
+            Table tableTo = existsIncompleteAndCompatibleOrderInTables(block.order);
             if(tableTo == null) //no table contains a block waiting to be assembled with this order
             {
                 tableTo = getAnEmptyTable();
@@ -238,9 +323,16 @@ public final class Assembler extends Cell {
             }
         }
         
-        if(couldHaveGoneToExit == null)
-            throw new Error("Deadlock in Assembler");
-        transferBlock(couldHaveGoneToExit, getExitConveyor());
+        
+        
+        if (isFull())
+        {
+            if (couldHaveGoneToExit != null) {  //gantry has nothing to do until a block leaves so it will just grab an assembled block, take it to the exit and wait for it to be empty
+                transferBlock(couldHaveGoneToExit, getExitConveyor());
+            }
+            else //couldn't find a move and is full -> deadlock
+                throw new Error("Deadlock in Assembler");
+        }
     }
     
     @Override
@@ -347,8 +439,9 @@ public final class Assembler extends Cell {
 
     @Override
     protected Cell processBlockOut(Block block) {
-        System.err.println("processBlockOut " + block.type.name());
-        block.path = new Path().push(t2);
+        System.err.println("ProcessOut. Path: " + block.path);
+        //block.path = new Path().push(t2);
+        Main.factory.loadUnloadCell.addIncomingBlocks(Arrays.asList(new Block[] {block}));
         return Main.factory.loadUnloadCell;
     }
 
@@ -762,7 +855,7 @@ public final class Assembler extends Cell {
                     break;
                 case DROP_DESTINATION:
                     gantry.openGrab();
-                    if (Main.time() - grabTimer >= 1500) {
+                    if (Main.time() - grabTimer >= 200) {
                         status = TRANSFER_STATE.GO_UP_DESTINATION;
                     }
                     break;
@@ -798,6 +891,7 @@ public final class Assembler extends Cell {
                             if(_conveyor.hasBlock())
                                 throw new Error("The gantry has just tried to transfer a block to a conveyor that already had a block in it");
                             _conveyor.placeBlock(gantryBlock, 0);
+                            _conveyor.getOneBlock().path = new Path().push(_conveyor);
                         }
                         gantry.setBlock(null);  //remove the block from the gantry
                         gantry.ZMotor.turnOff();

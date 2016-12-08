@@ -2,6 +2,7 @@ package factory.cell;
 
 import control.*;
 import control.order.*;
+import factory.cell.assemb.Assembler;
 import factory.conveyor.*;
 import java.util.*;
 import main.*;
@@ -119,18 +120,26 @@ public abstract class Cell {
         // Process blocks going out
         Conveyor exit = getExitConveyor();
         if (exit != null) {
+            //System.err.println("aqui!! isIdle: " + exit.isIdle() + " hasBlock: " + exit.hasBlock() + " isSending: " + exit.isSending());
             if (exit.isIdle() && exit.hasBlock()) {
                 Block b = exit.getOneBlock();
 
+                //System.err.println("aqui. constains: " + blocksInside.contains(b) + " hasNext: " + b.path.hasNext());
+                
                 // If block came from this cell and is not just passing by
                 if (!b.path.hasNext() && blocksInside.contains(b)) {
-                    Cell destination = processBlockOut(b);
-                    Main.stats.inc(id, Statistics.Type.BlocksSent, b.type);
-                    b.path.append(Main.factory.blockTransportPath(this, destination));
-                    blocksInside.remove(b);
-                    if(b.isStacked() && b.otherAssemblyBlock != null)
-                        blocksInside.remove(b.otherAssemblyBlock);
-                    System.err.println("out block path: " + b.path);
+                    if (!(this instanceof Assembler) || b.isStacked()) {    //so only stacked blocks leave the Assembler
+
+                        System.err.println("I'm in!!!");
+                        Cell destination = processBlockOut(b);
+                        Main.stats.inc(id, Statistics.Type.BlocksSent, b.type);
+                        b.path.append(Main.factory.blockTransportPath(this, destination));
+                        blocksInside.remove(b);
+                        if (b.isStacked() && b.otherAssemblyBlock != null) {
+                            blocksInside.remove(b.otherAssemblyBlock);
+                        }
+                        System.err.println("out block path: " + b.path);
+                    }
                 }
             }
         }

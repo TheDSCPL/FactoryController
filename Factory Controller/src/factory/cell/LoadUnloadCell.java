@@ -78,7 +78,7 @@ public class LoadUnloadCell extends Cell {
     protected boolean processBlockIn(Block block) {
         block.path.push(t4);
         
-        if (/*Block is stacked*/false) { // TODO: L: write here contidition to know if block is a stacked block
+        if (block.isStacked()) { // TODO: L: write here contidition to know if block is a stacked block
             if (t4.roller.isFull()) {
                 block.path.push(t5);
             }
