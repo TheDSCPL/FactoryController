@@ -82,13 +82,9 @@ public class LoadUnloadCell extends Cell {
                 // If pusher is full but contains one such block,
                 // divert block to next pusher (t5)
                 if (t4.roller.isFull() && !block.path.hasNext()) {
-                    block.path.push(t5);
-                }
-                
-                // Make the block stay on the t4 pusher, in order to be
-                // pushed, since the pusher t4 is empty
-                else if (!t4.roller.isFull() && block.path.hasNext()) {
-                    block.path = new Path().push(t4);
+                    if (t5.isIdle() && !t5.hasBlock()) {
+                        block.path.push(t5);
+                    }
                 }
             }
 

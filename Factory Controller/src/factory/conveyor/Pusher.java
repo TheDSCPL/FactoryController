@@ -51,6 +51,16 @@ public class Pusher extends Conveyor {
                     Main.stats.inc(id, Statistics.Type.BlocksPushed, block.type);
                 }
                 break;
+            case Idle:
+                // Pusher activation for stacked blocks must be in update() method
+                if (isIdle() && hasBlock()) {
+                    Block block = getOneBlock();
+
+                    if (!block.path.hasNext() && block.isStacked() && !roller.isFull()) {
+                        startPushing();
+                    }
+                }
+                break;
         }
     }
 
@@ -95,11 +105,6 @@ public class Pusher extends Conveyor {
                 else {
                     startPushing();
                 }
-            }
-            // Block has stopped here, is a stacked block and roller has space
-            // Do not go to waiting for space if block is stacked, because block might go to another conveyor
-            else if (!block.path.hasNext() && block.isStacked() && !roller.isFull()) {
-                startPushing();
             }
         }
     }
