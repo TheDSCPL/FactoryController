@@ -48,6 +48,7 @@ public class Pusher extends Conveyor {
                     stopPusher();
                     Block block = removeBlock(0);
                     block.completeOrder();
+                    Main.factory.loadUnloadCell.blockPushed(block);
                     Main.stats.inc(id, Statistics.Type.BlocksPushed, block.type);
                 }
                 break;

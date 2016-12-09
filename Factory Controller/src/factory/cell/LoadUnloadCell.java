@@ -90,6 +90,10 @@ public class LoadUnloadCell extends Cell {
 
         }
     }
+    
+    public void blockPushed(Block block) {
+        blocksInside.remove(block);
+    }
 
     @Override
     protected boolean processBlockIn(Block block) {
