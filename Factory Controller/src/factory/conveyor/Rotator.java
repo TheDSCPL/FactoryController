@@ -29,11 +29,11 @@ public class Rotator extends Conveyor {
         super.update();
 
         if (prefersHorizontalOrientation) {
-            if (isIdle()) {
-                if (rotateSensorPlus.on()) {
+            if (getState() == State.Standby) {
+                if (rotateSensorPlus.on() || (rotateMotor.on() && !beingUsedByGantry)) {
                     rotateMotor.turnOff();
                 }
-                else if (Main.time() - timeSinceIdle > Main.controlLoopDelay * 50) {
+                else if (Main.time() - timeSinceIdle > Main.controlLoopDelay * 50 && (!rotateMotor.on() && !beingUsedByGantry)) {
                     // Some delay ("*50") to allow for neighboring containers to register themselves as transferPartners
                     rotateMotor.turnOnPlus();
                 }
@@ -44,6 +44,12 @@ public class Rotator extends Conveyor {
         }
     }
 
+    @Override
+    public boolean isIdle()
+    {
+        return super.isIdle() && !rotateMotor.on();
+    }
+    
     @Override
     protected boolean transferMotorDirection(Conveyor partner, boolean sending) {
         boolean leftOrTop = partner == connections[0] || partner == connections[1];
@@ -88,6 +94,7 @@ public class Rotator extends Conveyor {
         return transferPartner == connections[0] || transferPartner == connections[2];
     }
 
+    @Override
     protected double transferTimeEstimate() {
         // 90 -> 90 degrees
         // x/2 -> average time

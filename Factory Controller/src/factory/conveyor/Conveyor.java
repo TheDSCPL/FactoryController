@@ -297,6 +297,11 @@ public abstract class Conveyor extends Container {
         return presenceSensors[position].on();
     }
 
+    protected Conveyor.State getState()
+    {
+        return conveyorState;
+    }
+    
     /**
      * Indicates if the conveyor is not doing anything and is ok with an
      * external class changing the variable `blocks`. Should be overridden by
