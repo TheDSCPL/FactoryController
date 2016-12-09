@@ -90,7 +90,7 @@ public class LoadUnloadCell extends Cell {
 
         }
     }
-    
+
     public void blockPushed(Block block) {
         blocksInside.remove(block);
     }
@@ -124,7 +124,9 @@ public class LoadUnloadCell extends Cell {
                 .map((o) -> (UnloadOrder) o)
                 .map((order) -> new OrderPossibility(
                         this, order, getPusherForPosition(order.position).roller.isFull() ? 1 : 2, null, 0,
-                        blocksIncoming.size() + blocksInside.size() + (t4.roller.isFull() ? 2 : 0) + (t5.roller.isFull() ? 2 : 0) < 6,
+                        order.position == 1
+                        ? (blocksIncoming.size() + blocksInside.size() + (t4.roller.isFull() ? 2 : 1) < 3)
+                        : (blocksIncoming.size() + blocksInside.size() + (t5.roller.isFull() ? 2 : 1) < 3),
                         order.position
                 ))
                 .collect(toList());
