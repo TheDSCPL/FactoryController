@@ -68,7 +68,7 @@ public class Main {
     }
 
     private static boolean alreadyTriedToOpen = false;
-    
+
     private static void controlLoop() {
         try {
             modbus.connect();
@@ -84,10 +84,8 @@ public class Main {
                 Thread.sleep(controlLoopDelay);
             }
         }
-        catch(java.net.ConnectException ex)
-        {
-            if(alreadyTriedToOpen)
-            {
+        catch (java.net.ConnectException ex) {
+            if (alreadyTriedToOpen) {
                 System.err.println("Couldn't open SFS! Halting.");
                 return;
             }
@@ -97,7 +95,8 @@ public class Main {
             try {
                 Process pr = rt.exec("java -jar SFS.jar");
                 controlLoop();
-            } catch (Exception ex1) {
+            }
+            catch (Exception ex1) {
                 System.err.println("Couldn't open SFS! Halting.");
             }
         }

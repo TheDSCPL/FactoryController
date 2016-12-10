@@ -60,6 +60,9 @@ public abstract class Order {
 
     public final void complete(Block block) {
         blocks.remove(block);
+        if (block.isStacked()) {
+            blocks.remove(block.otherAssemblyBlock);
+        }
 
         placedOrdersCount--;
         completedOrdersCount++;
@@ -83,9 +86,9 @@ public abstract class Order {
         sb.append(" - ").append("Order instances pending: ").append(getPendingCount()).append("\n");
         sb.append(" - ").append("Order instances processing: ").append(placedOrdersCount).append("\n");
 
-        for (Block b : blocks) {
+        blocks.stream()/*.filter((b) -> (!b.isBottomBlock))*/.forEach((b) -> {
             sb.append("\t").append(b.type).append(": ").append(b.path).append("\n");
-        }
+        });
 
         sb.append(" - ").append("Order instances completed: ").append(completedOrdersCount).append("\n");
 
