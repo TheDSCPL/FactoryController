@@ -719,10 +719,14 @@ public final class Assembler extends Cell {
                     if (to.getBlockContainer() instanceof Conveyor) {
                         Conveyor _c = getPreviousConveyor((Conveyor) to.getBlockContainer());
                         if (_c == null) {
-                            throw new Error("Tried to transfer block to a conveyor that either is the Entry-Conveyor of this Assembler or is not in this Cell at all");
+                            status = TRANSFER_STATE.CANCELED;
+                            break;
+                            //throw new Error("Tried to transfer block to a conveyor that either is the Entry-Conveyor of this Assembler or is not in this Cell at all");
                         }
                         _c.setSendingFrozen(true);
                     }
+                    from.getBlockContainer().beingUsedByGantry = true;
+                    to.getBlockContainer().beingUsedByGantry = true;
                     break;
                 case MOVING_TO_ORIGIN:
                     gantry.openGrab();
@@ -768,6 +772,10 @@ public final class Assembler extends Cell {
                             status = TRANSFER_STATE.GO_DOWN_ORIGIN;
                         }
                     }
+                    else if(from.getBlockContainer() instanceof Table)
+                    {
+                        status = TRANSFER_STATE.GO_DOWN_ORIGIN;
+                    }
                     else {
                         throw new IllegalStateException(status.name() + " should only be reached by Conveyor-originated transfers");
                     }
@@ -812,6 +820,8 @@ public final class Assembler extends Cell {
                         if (gantry.hasBlock()) {
                             throw new Error("Tried to get block from a Block Container but the Gantry was already occupied!");
                         }
+                        
+                        from.getBlockContainer().beingUsedByGantry = false;
 
                         Block _block;
                         Container bc = from.getBlockContainer();
@@ -947,7 +957,8 @@ public final class Assembler extends Cell {
                             _c.setSendingFrozen(false);
                         }
                     }
-                    //unfreezeAssembler();
+                    to.getBlockContainer().beingUsedByGantry = false;
+                    unfreezeAssembler();
                     return true;
                 default:
                     throw new IllegalStateException("Illegal state reached at the Transfer FSM");

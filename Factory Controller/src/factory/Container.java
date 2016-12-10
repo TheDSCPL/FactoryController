@@ -12,6 +12,8 @@ public class Container {
         this.length = length;
         blocks = new Block[length];
     }
+        
+    public boolean beingUsedByGantry = false;
     
     /**
      * Checks if there are blocks in the conveyor

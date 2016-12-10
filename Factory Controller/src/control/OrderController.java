@@ -75,6 +75,7 @@ public class OrderController {
         catch (NumberFormatException ex) {
             //System.out.println("Invalid order string: '" + orderString + "'");
         }
+        //System.out.println("Valid order received: '" + orderString + "'");
     }
 
     public Order getOrderWithID(int id) {
