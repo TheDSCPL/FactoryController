@@ -54,7 +54,7 @@ public abstract class Order {
             dateStarted = new Date();
         }
 
-        placedOrdersCount++; // TODO: A: doesn't work with assemblyorders
+        placedOrdersCount++;
         blocks.addAll(list);
     }
 

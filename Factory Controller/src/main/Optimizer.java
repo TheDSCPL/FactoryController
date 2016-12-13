@@ -61,15 +61,15 @@ public class Optimizer {
                         value = 1;
                     }
                     break;
-                case 1: // TODO: A: Dont' forget to turn this on || For different orders, give priority to those received before
-                    /*if (op1.order != op2.order) {
+                case 1:
+                    if (op1.order != op2.order) {
                         if (op1.order.receivedBefore(op2.order)) {
                             value = 1;
                         }
                         else {
                             value = -1;
                         }
-                    }*/
+                    }
                     break;
                 case 2:
                     if (op1.cell == op2.cell) { // For same cell, respect order priority
