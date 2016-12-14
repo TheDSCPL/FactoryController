@@ -3,6 +3,7 @@ package factory.cell;
 import control.*;
 import control.order.*;
 import factory.conveyor.*;
+import static java.lang.Integer.min;
 import java.util.*;
 import main.Main;
 import main.Optimizer.OrderPossibility;
@@ -10,7 +11,7 @@ import transformation.*;
 
 public class SerialCell extends Cell {
 
-    private static final int MAX_BLOCKS_IN_CELL = 2; // TO|DO: A: decide on which optimization options to choose (Apparently, three blocks makes times worse)
+    private static final int MAX_BLOCKS_IN_CELL = 3;
 
     private final Mover t1;
     private final Rotator t2;
@@ -92,19 +93,20 @@ public class SerialCell extends Cell {
             order.possibleSequences(Machine.Type.Set.AB).stream().forEach((seq) -> {
 
                 // >>>>> Calculate entersImmediately
-                boolean entersImmediately = !firstConveyorsBlocked // TO|DO: A: decide on which optimization options to choose
-                                            && !blocksIncoming
+                boolean entersImmediately
+                        = !firstConveyorsBlocked
+                          && !blocksIncoming
                         .stream()
                         .filter(b -> b.transformations.containsMachineType(Machine.Type.A))
                         .findFirst()
                         .isPresent()
-                                            && !blocksInside
+                          && !blocksInside
                         .stream()
-                        .filter(b -> b.timeTravel(arrivalDelayEstimate).contains(t3))
+                        .filter(b -> b.path/*timeTravel(arrivalDelayEstimate)*/.contains(t3))
                         .findFirst()
                         .isPresent()
-                                            && blocksIncoming.size() + blocksInside.size() <= MAX_BLOCKS_IN_CELL;
-                
+                          && blocksIncoming.size() + blocksInside.size() < MAX_BLOCKS_IN_CELL;
+
                 // >>>>> Calculate totalDuration
                 double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();
 
@@ -123,12 +125,12 @@ public class SerialCell extends Cell {
                     priority = 0;
                 }
 
-                // >>>>> Calculate possibleExecutionCount TO|DO: A: decide on which optimization options to choose
-                // If sequence only contains machine B, three blocks can enter at once TO|DO: A: might send more blocks than can fit in the cell
-                int possibleExecutionCount = //min(
-                        seq.containsMachineType(Machine.Type.A) ? 1 : MAX_BLOCKS_IN_CELL;
-                //        MAX_BLOCKS_IN_CELL - blocksIncoming.size() + blocksInside.size()
-                //);
+                // >>>>> Calculate possibleExecutionCount
+                // If sequence only contains machine B, three blocks can enter at once
+                int possibleExecutionCount = min(
+                        seq.containsMachineType(Machine.Type.A) ? 1 : MAX_BLOCKS_IN_CELL,
+                        MAX_BLOCKS_IN_CELL - (blocksIncoming.size() + blocksInside.size())
+                );
 
                 // >>>>> Add possibility
                 ret.add(new OrderPossibility(
@@ -213,7 +215,7 @@ public class SerialCell extends Cell {
     public Rotator getTopTransferInConveyor() {
         return t2;
     }
-    
+
     @Override
     public Rotator getTopTransferOutConveyor() {
         return t2;

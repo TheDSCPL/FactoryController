@@ -150,14 +150,16 @@ public class ParallelCell extends Cell {
         orders.stream().filter((o) -> (o instanceof MachiningOrder)).map((o) -> (MachiningOrder) o).forEach((order) -> {
             order.possibleSequences(Machine.Type.Set.BC).stream().forEach((seq) -> {
 
-                // >>>>> Calculate entersImmediately TO|DO: A: using arrivalDelayEstimate
+                // >>>>> Calculate entersImmediately (better would be to use arrivalDelayEstimate)
                 boolean entersImmediately = blocksIncoming.size() + blocksInside.size() + 1 <= MAX_BLOCKS_IN_CELL;
 
                 // >>>>> Calculate priority
                 int priority = 0;
 
+                // Get any block (incoming or already here)
                 Block b = blocksInside.stream().findFirst().orElse(blocksIncoming.stream().findFirst().orElse(null));
 
+                // If block will be transformed on the same machine as the block that will be arriving, that's bad
                 if (b != null) {
                     if (b.hasNextTransformation()) {
                         if (b.getNextTransformation().machine == seq.getFirstTransformation().machine) {
@@ -173,7 +175,7 @@ public class ParallelCell extends Cell {
                 int possibleExecutionCount = 1;
 
                 // >>>>> Calculate totalDuration
-                double totalDuration = seq.totalDuration();// + blockPathEstimateForTransformationSequence(seq).timeEstimate(); // TO|DO: A: this makes times worse?
+                double totalDuration = seq.totalDuration() + blockPathEstimateForTransformationSequence(seq).timeEstimate();
 
                 // >>>>> Add possibility
                 ret.add(new OrderPossibility(

@@ -54,10 +54,10 @@ public class Optimizer {
         for (int i = 0; i <= 4; i++) {
             switch (i) {
                 case 0: // Leave for last possibilities that cannot be processed immediately
-                    if (!op1.entersCellImmediately) {
+                    if (!op1.entersCellImmediately || op1.possibleExecutionCount == 0) {
                         value = -1;
                     }
-                    if (!op2.entersCellImmediately) {
+                    if (!op2.entersCellImmediately || op2.possibleExecutionCount == 0) {
                         value = 1;
                     }
                     break;
@@ -75,14 +75,18 @@ public class Optimizer {
                     if (op1.cell == op2.cell) { // For same cell, respect order priority
                         value = op1.priority - op2.priority;
                     }
-                    else { // For different cells, prefer to send blocks to cells closer to the warehouse first
-                        value = Main.factory.indexForCell(op2.cell) - Main.factory.indexForCell(op1.cell);
-                    }
                     break;
-                case 3: // For the same order, prefer cells that are quicker
+                case 3: // Prefer cell & order combination that have are quicker from exiting the warehouse to entering it again
+                    double travel1 = Main.factory.cellEntryPathFromWarehouse(op1.cell).timeEstimate() * 2;
+                    double travel2 = Main.factory.cellEntryPathFromWarehouse(op2.cell).timeEstimate() * 2;
+                    
                     if (op1.order == op2.order) {
-                        value = (int) (op2.processingTime - op1.processingTime);
+                        value = (int) ((op2.processingTime + travel2) - (op1.processingTime + travel1));
                     }
+                    else { // This else is not really needed given condition 1 (different orders)
+                        value = (int) (travel2 - travel1);
+                    }
+
                     break;
                 case 4: // Prefer possibilities that get more done at once
                     value = op1.possibleExecutionCount - op2.possibleExecutionCount;
