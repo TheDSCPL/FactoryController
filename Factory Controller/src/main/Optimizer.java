@@ -20,7 +20,7 @@ public class Optimizer {
 
             if (best != null) {
                 if (best.entersCellImmediately) {
-                    System.out.println("Executing possibility: " + best);
+                    System.out.print("\b\bExecuting possibility: " + best + System.lineSeparator() + "> ");
 
                     for (int i = 0; i < best.possibleExecutionCount; i++) {
                         List<Block> bl = best.order.execute(best.executionInfo);
@@ -125,7 +125,7 @@ public class Optimizer {
 
         @Override
         public String toString() {
-            return cell.id + " " + order.id + " " + possibleExecutionCount + " " + executionInfo + " " + processingTime + " " + entersCellImmediately + " " + priority;
+            return "Cell: " + cell.id + " | Order: " + order.id + " | Exec count: " + possibleExecutionCount + " | Exec info: " + executionInfo + " | Estimate processing time: " + processingTime + " | Per-cell priority: " + priority;
         }
 
     }
