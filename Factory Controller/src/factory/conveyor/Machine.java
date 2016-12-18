@@ -152,6 +152,11 @@ public class Machine extends Conveyor {
         return super.isIdle() && tool.isIdle();
     }
 
+    public boolean isMachining()
+    {
+        return tool.isMachining();
+    }
+    
     public static class Tool {
 
         public String machineID;
@@ -164,7 +169,7 @@ public class Machine extends Conveyor {
             Idle, Selecting, Machining;
         }
 
-        private static final long toolSelectionTime = ((360 / 3) / (long) Main.config.getI("timing.tool.rotationSpeed")) * 1000;
+        private static final long toolSelectionTime = ((360 / Type.values().length) / (long) Main.config.getI("timing.tool.rotationSpeed")) * 1000;
 
         private final Sensor toolPresentSensor;
         private final Motor toolSelectMotor;
@@ -314,6 +319,11 @@ public class Machine extends Conveyor {
 
         public boolean isIdle() {
             return state == State.Idle;
+        }
+        
+        public boolean isMachining()
+        {
+            return state == State.Machining;
         }
 
     }

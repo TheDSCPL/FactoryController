@@ -11,7 +11,7 @@ import transformation.*;
 
 public class SerialCell extends Cell {
 
-    private static final int MAX_BLOCKS_IN_CELL = 3;
+    private static final int MAX_BLOCKS_IN_CELL = 3; // TO|DO: A: decide on which optimization options to choose (Apparently, three blocks makes times worse)
 
     private final Mover t1;
     private final Rotator t2;
@@ -100,13 +100,23 @@ public class SerialCell extends Cell {
                         .filter(b -> b.transformations.containsMachineType(Machine.Type.A))
                         .findFirst()
                         .isPresent()
-                          && !blocksInside
+                        /*                    && !blocksInside
                         .stream()
-                        .filter(b -> b.path/*timeTravel(arrivalDelayEstimate)*/.contains(t3))
+                        .filter(b -> b.path/*timeTravel(arrivalDelayEstimate).contains(t3))
                         .findFirst()
-                        .isPresent()
-                          && blocksIncoming.size() + blocksInside.size() < MAX_BLOCKS_IN_CELL;
-
+                        .isPresent()*/
+                                            //&& blocksIncoming.size() + blocksInside.size() <= MAX_BLOCKS_IN_CELL
+                                            && !t3.isMachining()
+                                            && blocksIncoming.size() + blocksInside.size() < MAX_BLOCKS_IN_CELL;
+                
+                if(t3.hasBlock() && t3.getOneBlock().getNextTransformation()!=null && !t3.isMachining())
+                {
+                    entersImmediately &= t3.getOneBlock().getNextTransformation().machine != t3.type;
+                }
+                
+                /*if(entersImmediately)
+                    System.out.println(id + " enters immediatelly");*/
+                
                 // >>>>> Calculate totalDuration
                 double totalDuration = seq.totalDuration() + blockPathForTransformationSequence(seq).timeEstimate();
 
@@ -125,12 +135,13 @@ public class SerialCell extends Cell {
                     priority = 0;
                 }
 
-                // >>>>> Calculate possibleExecutionCount
-                // If sequence only contains machine B, three blocks can enter at once
-                int possibleExecutionCount = min(
-                        seq.containsMachineType(Machine.Type.A) ? 1 : MAX_BLOCKS_IN_CELL,
-                        MAX_BLOCKS_IN_CELL - (blocksIncoming.size() + blocksInside.size())
-                );
+                // >>>>> Calculate possibleExecutionCount TO|DO: A: decide on which optimization options to choose
+                // If sequence only contains machine B, three blocks can enter at once TO|DO: A: might send more blocks than can fit in the cell
+                int possibleExecutionCount = //min(
+                        //seq.containsMachineType(Machine.Type.A) ? 1 : MAX_BLOCKS_IN_CELL;
+                        1;
+                //        MAX_BLOCKS_IN_CELL - blocksIncoming.size() + blocksInside.size()
+                //);
 
                 // >>>>> Add possibility
                 ret.add(new OrderPossibility(
